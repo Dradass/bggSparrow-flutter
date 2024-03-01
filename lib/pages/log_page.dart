@@ -4,10 +4,10 @@ import 'dart:isolate';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_application_1/models/game_thing.dart';
-import 'package:image/image.dart';
+import 'package:image/image.dart' as imageDart;
 import 'package:flutter_application_1/main.dart';
 import 'package:camera/camera.dart';
-import 'package:image_compare/image_compare.dart';
+//import 'package:image_compare/image_compare.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import '../db/database_helper.dart';
@@ -21,6 +21,7 @@ import '../bggApi/bggApi.dart';
 import 'package:collection/collection.dart';
 import 'dart:math';
 import 'package:requests/requests.dart';
+import 'package:flutter_pixelmatching/flutter_pixelmatching.dart';
 
 class LogScaffold extends StatefulWidget {
   const LogScaffold({super.key});
@@ -59,23 +60,13 @@ class _LogScaffoldState extends State<LogScaffold> {
     //GameThingSQL.dropTable();
     //GameThingSQL.createTable();
 
-    print('http check');
-    var response = await http
-        .get(Uri.parse('https://boardgamegeek.com//xmlapi2/things?id=14'));
+    // print('http check');
+    // var response = await http
+    //     .get(Uri.parse('https://boardgamegeek.com//xmlapi2/things?id=14'));
 
-    var gameItem = GameThing.fromXml(response.body);
-    print(gameItem.name);
-
-    //--
-    //ImportGameCollectionFromBGG();
-    // final allGames = await GameThingSQL.getAllGames();
-    // if (allGames != null) {
-    //   for (var game in allGames) {
-    //     game.CreateBinaryThumb();
-    //   }
-    // }
-
-    //--
+    // var gameItem = GameThing.fromXml(response.body);
+    // print(gameItem.name);
+    var result = 0;
 
     print("---------------Got photo");
     try {
@@ -89,55 +80,65 @@ class _LogScaffoldState extends State<LogScaffold> {
 
       var bytes = await capturedImage.readAsBytes();
       final getGamesWithThumb = await GameThingSQL.getAllGames();
+
       if (getGamesWithThumb == null) return 0;
       print("recognizedImage = $recognizedImage");
       Map<int, double> compareResults = {};
-      var matchedGameID = await Isolate.run(() async {
-        return getBestComparedImage(bytes, getGamesWithThumb);
-      });
-      print("matchedGameID = $matchedGameID");
-      recognizedImage = matchedGameID.toString();
-      return matchedGameID;
-      // final getGamesWithThumb = GameThingSQL.getAllGames();
-      // getGamesWithThumb.then((gamesWithThumb) {
-      //   print("getGamesWithThumb");
-      //   if (gamesWithThumb != null) {
-      //     var thumbBinList = List.from(
-      //         gamesWithThumb.map((e) => base64Decode(e.thumbBinary!)));
-      //     final res = listCompare(target: bytes, list: thumbBinList);
-      //     res.then((comparingRes) {
-      //       print(comparingRes);
-      //       var minValue = comparingRes.reduce(min);
-      //       var index = comparingRes.indexOf(minValue);
-      //       print(minValue);
-      //       var finalMin = gamesWithThumb[index];
-      //       print("finalMin = ");
-      //       print(finalMin.name);
-      //       recognizedImage = finalMin.name;
-      //     });
-      //     print("if (gamesWithThumb != null)");
-      //     for (var game in gamesWithThumb) {
-      //       Future matchResult = compareImages(
-      //           src1: bytes, src2: base64Decode(game.thumbBinary!));
-      //       matchResult.then((value) {
-      //         compareResults[game.id] = value;
-      //       });
-      //     }
-      //     print(compareResults);
-      //   }
-      //   // final gamesCount = gamesWithThumb?.length;
-      //   // print("-----games count = $gamesCount");
-      //   // var imageList1 =
-      //   //     gamesWithThumb?.map((e) => base64Decode(e.thumbBinary!)).toList();
-
-      //   // var results = listCompare(target: bytes, list: imageList1!);
-      //   // results.then((value) =>
-      //   //     {value.forEach((e) => print('Difference: ${e * 100}%'))});
+      // var matchedGameID = await Isolate.run(() async {
+      //   return getBestComparedImage(bytes, getGamesWithThumb);
       // });
+      //var matchedGameID = await getBestComparedImage(bytes, getGamesWithThumb);
+
+      // final image1 = Uri.parse(
+      //     "https://cf.geekdo-images.com/2HKX0QANk_DY7CIVK5O5fQ__thumb/img/zcjkqn_HYDIIyVAZaAxJIkurQRg=/fit-in/200x150/filters:strip_icc()/pic2869710.jpg");
+
+      http.Response response = await http.get(Uri.parse(
+          "https://eng.cardplace.ru/uploads/cardplace/04048aec/631d59cd32f06c078a78fcbb792e2847.jpg"));
+      var imageBytes = response.bodyBytes; //Uint8List
+      print("image bytes = ${imageBytes}");
+
+      int? bestGameID = 0;
+      //final bestGame = getSimilarGameID(imageBytes, getGamesWithThumb);
+      bestGameID = await getSimilarGameID(imageBytes, getGamesWithThumb);
+      print(bestGameID);
+      //bestGame.then((value) => bestGameID = value!);
+
+      // final matching = PixelMatching();
+      // await matching.initialize(image: imageBytes);
+
+      // var bestSimilarity = 0.0;
+      // var bestSimilarGameID = 0;
+      // if (matching.isInitialized) {
+      //   for (var gameImage in getGamesWithThumb) {
+      //     if (gameImage.thumbBinary == null) break;
+      //     final binaryImage = base64Decode(gameImage.thumbBinary!);
+
+      //     var similarity = matching.similarity(binaryImage);
+      //     similarity.then((value) {
+      //       print("game = ${gameImage.name}, similarity = ${value}");
+      //       if (value > bestSimilarity) {
+      //         bestSimilarGameID = gameImage.id;
+      //         bestSimilarity = value;
+      //       }
+      //       ;
+      //     });
+
+      //     // final result = matching.
+      //     //     imageDart.Image.fromBytes(200, 200, bytes),
+      //     //     imageDart.Image.fromBytes(200, 200, binaryImage));
+      //   }
+      // }
+      result = bestGameID!;
+      // print("matchedGameID = $matchedGameID");
+      // recognizedImage = matchedGameID.toString();
+      // result = matchedGameID!;
+      return result;
     } catch (e) {
       // If an error occurs, log the error to the console.
       print(e);
+      return 0;
     }
+    return -1;
   }
 
   @override
@@ -188,6 +189,9 @@ class _LogScaffoldState extends State<LogScaffold> {
                     onPressed: GameThingSQL.createTable,
                     icon: Icon(Icons.add_circle)),
                 IconButton(
+                    onPressed: GameThingSQL.dropTable,
+                    icon: Icon(Icons.delete)),
+                IconButton(
                     onPressed: () async {
                       final getGames = await GameThingSQL.getAllGames();
                       setState(() {
@@ -214,9 +218,18 @@ class _LogScaffoldState extends State<LogScaffold> {
                                 ),
                                 ElevatedButton(
                                     onPressed: () async {
+                                      setState(() {
+                                        recognizedImage = "Getting image from";
+                                      });
                                       Navigator.of(context, rootNavigator: true)
                                           .pop();
+                                      setState(() {
+                                        recognizedImage = "AfterPop";
+                                      });
                                       final gameId = await TakePhoto();
+                                      setState(() {
+                                        recognizedImage = "Taken Photo";
+                                      });
 
                                       setState(() {
                                         recognizedImage = gameId.toString();
@@ -282,27 +295,57 @@ class TakePictureScreenState extends State<TakePictureScreen> {
   }
 }
 
-Future<int?> getBestComparedImage(
+Future<int?> getSimilarGameID(
     Uint8List bytes, List<GameThing> getGamesWithThumb) async {
-  int result = 0;
-  if (getGamesWithThumb != null) {
-    var thumbBinList =
-        List.from(getGamesWithThumb.map((e) => base64Decode(e.thumbBinary!)));
-    final res = await listCompare(target: bytes, list: thumbBinList);
-    if (res != null) {
-      var minValue = res.reduce(min);
-      var index = res.indexOf(minValue);
-      var finalMin = getGamesWithThumb[index];
-      print("finalMin = ");
-      print(finalMin.name);
-      result = finalMin.id;
-      print("result = $result");
+  final matching = PixelMatching();
+  await matching.initialize(image: bytes);
+
+  var bestSimilarity = 0.0;
+  var bestSimilarGameID = 0;
+  if (matching.isInitialized) {
+    for (var gameImage in getGamesWithThumb) {
+      if (gameImage.thumbBinary == null) continue;
+      final binaryImage = base64Decode(gameImage.thumbBinary!);
+
+      var similarity = await matching.similarity(binaryImage);
+      // similarity.then((value) {
+      //   print("game = ${gameImage.name}, similarity = ${value}");
+      //   if (value > bestSimilarity) {
+      //     bestSimilarGameID = gameImage.id;
+      //     bestSimilarity = value;
+      //   }
+      //   ;
+      // });
+      print(
+          "game = ${gameImage.name}, id = ${gameImage.id}, similarity = ${similarity}");
+      if (similarity > bestSimilarity) {
+        bestSimilarGameID = gameImage.id;
+        bestSimilarity = similarity;
+      }
     }
+    print("bestSimilarGameID = $bestSimilarGameID");
+    return bestSimilarGameID;
   }
-  ;
-  print(result.toString());
-  return result;
 }
+
+// Future<int?> getBestComparedImage(
+//     Uint8List bytes, List<GameThing> getGamesWithThumb) async {
+//   int result = 0;
+//   if (getGamesWithThumb != null) {
+//     final thumbBinList =
+//         List.from(getGamesWithThumb.map((e) => base64Decode(e.thumbBinary!)));
+//     final res = await listCompare(target: bytes, list: thumbBinList);
+//     if (res != null) {
+//       final minValue = res.reduce(min);
+//       final index = res.indexOf(minValue);
+//       final finalMin = getGamesWithThumb[index];
+//       result = finalMin.id;
+//     }
+//   }
+//   ;
+//   print(result.toString());
+//   return result;
+// }
 
 Future<int?> testIsolate(Uint8List bytes) async {
   int result = 0;
@@ -401,3 +444,90 @@ Future<int> sendLogRequest() async {
 
   return 1;
 }
+
+
+//------------------------------------------------------------------------------
+
+// import 'package:flutter/foundation.dart';
+// import 'package:flutter/material.dart';
+// import '../matching_view.dart';
+
+// // ignore: depend_on_referenced_packages
+// import 'package:image_picker/image_picker.dart';
+
+// void main() {
+//   runApp(const MaterialApp(home: MyApp()));
+// }
+
+// class MyApp extends StatefulWidget {
+//   const MyApp({super.key});
+
+//   @override
+//   State<MyApp> createState() => _MyAppState();
+// }
+
+// class _MyAppState extends State<MyApp> {
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       appBar: AppBar(
+//         title: const Text('PixelMatching Sample'),
+//       ),
+//       body: Center(
+//         child: Column(
+//           mainAxisAlignment: MainAxisAlignment.center,
+//           children: [
+//             buildFromGallery(),
+//             buildFromCamera(),
+//           ],
+//         ),
+//       ),
+//     );
+//   }
+
+//   /// Build a button to fetch from the gallery, and set `image1` on image selection.
+//   buildFromGallery() {
+//     return TextButton.icon(
+//       icon: const Icon(Icons.photo),
+//       label: const Text("From Gallery"),
+//       onPressed: () async {
+//         ImagePicker().pickImage(source: ImageSource.gallery).then(
+//           (value) async {
+//             final Uint8List? target = await value?.readAsBytes();
+//             if (target != null) {
+//               openMatchingView(target);
+//             }
+//           },
+//         );
+//       },
+//     );
+//   }
+
+//   /// Build a button to fetch from the camera, and set `image1` on image selection.
+//   buildFromCamera() {
+//     return TextButton.icon(
+//       label: const Text("From Camera"),
+//       icon: const Icon(Icons.camera),
+//       onPressed: () async {
+//         ImagePicker().pickImage(source: ImageSource.camera).then(
+//           (value) async {
+//             final Uint8List? target = await value?.readAsBytes();
+//             if (target != null) {
+//               openMatchingView(target);
+//             }
+//           },
+//         );
+//       },
+//     );
+//   }
+
+//   openMatchingView(Uint8List target) {
+//     Navigator.of(context).push(
+//       MaterialPageRoute(
+//         builder: (context) {
+//           return MatchingView(target: target);
+//         },
+//       ),
+//     );
+//   }
+// }

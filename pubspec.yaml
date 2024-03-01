@@ -40,9 +40,10 @@ dependencies:
   camera: ^0.10.5+9
   path_provider: ^2.1.2
   path: ^1.8.3
-  image_compare: ^1.1.2
+  #image_compare: ^1.1.2
   sqflite: ^2.3.2
   http: ^0.13.4
+  flutter_pixelmatching: ^1.0.0
 
 dev_dependencies:
   flutter_test:
