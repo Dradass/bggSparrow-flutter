@@ -1,3 +1,5 @@
+// TODO - Random game chooser
+
 import 'dart:io';
 import 'dart:isolate';
 
@@ -33,6 +35,8 @@ class LogScaffold extends StatefulWidget {
 class _LogScaffoldState extends State<LogScaffold> {
   late CameraController _controller;
   var recognizedImage = "No image";
+  Uint8List imageTest = Uint8List.fromList(new List.empty());
+  //Uint8List imageFounded = Uint8List.fromList(new List.empty());
 
   Future<int?> TakePhoto() async {
     // print("select test");
@@ -71,19 +75,48 @@ class _LogScaffoldState extends State<LogScaffold> {
     print("---------------Got photo");
     try {
       // Ensure that the camera is initialized.
-      await _controller.initialize();
+      //await _controller.initialize();
 
       // Attempt to take a picture and then get the location
       // where the image file is saved.
       print('get image');
-      var capturedImage = await _controller.takePicture();
 
+      // ByteData bytesData = await rootBundle.load('assets/colt3.jpg');
+      // var bytes = Uint8List.sublistView(bytesData);
+
+      // var random = Random().nextInt(2);
+      // print(random);
+
+      // var url1 = "https://studiobombyx.com/assets/SSAP_3dbox_right-2.png";
+      // var url2 = "https://media.lavkaigr.ru/catalog/2017/12/colt-express.jpg";
+
+      // var finalUrl = random == 1 ? url1 : url2;
+      // print(finalUrl);
+
+      //---
+      // http.Response response = await http.get(Uri.parse(finalUrl));
+      // var bytes = response.bodyBytes; //Uint8List
+      // print("image bytes = ${bytes}");
+      //---
+
+      var capturedImage = await _controller.takePicture();
       var bytes = await capturedImage.readAsBytes();
-      final getGamesWithThumb = await GameThingSQL.getAllGames();
+
+      imageDart.Image? img = imageDart.decodeImage(bytes);
+      imageDart.Image resizedImg =
+          imageDart.copyResize(img!, width: 200, height: 300);
+      var imgBytes = imageDart.encodeJpg(resizedImg);
+
+      var getGamesWithThumb = await GameThingSQL.getAllGames();
+
+      setState(() {
+        imageTest = imgBytes;
+      });
 
       if (getGamesWithThumb == null) return 0;
       print("recognizedImage = $recognizedImage");
       Map<int, double> compareResults = {};
+
       // var matchedGameID = await Isolate.run(() async {
       //   return getBestComparedImage(bytes, getGamesWithThumb);
       // });
@@ -92,14 +125,9 @@ class _LogScaffoldState extends State<LogScaffold> {
       // final image1 = Uri.parse(
       //     "https://cf.geekdo-images.com/2HKX0QANk_DY7CIVK5O5fQ__thumb/img/zcjkqn_HYDIIyVAZaAxJIkurQRg=/fit-in/200x150/filters:strip_icc()/pic2869710.jpg");
 
-      http.Response response = await http.get(Uri.parse(
-          "https://eng.cardplace.ru/uploads/cardplace/04048aec/631d59cd32f06c078a78fcbb792e2847.jpg"));
-      var imageBytes = response.bodyBytes; //Uint8List
-      print("image bytes = ${imageBytes}");
-
       int? bestGameID = 0;
       //final bestGame = getSimilarGameID(imageBytes, getGamesWithThumb);
-      bestGameID = await getSimilarGameID(imageBytes, getGamesWithThumb);
+      bestGameID = await getSimilarGameID(imgBytes, getGamesWithThumb);
       print(bestGameID);
       //bestGame.then((value) => bestGameID = value!);
 
@@ -138,14 +166,34 @@ class _LogScaffoldState extends State<LogScaffold> {
       print(e);
       return 0;
     }
-    return -1;
   }
+
+  // /// Setup Camera
+  // ///
+  // initializeCamera() async {
+  //   final cameras = await availableCameras();
+  //   final camera = cameras[0];
+  //   _controller =
+  //       CameraController(camera, ResolutionPreset.high, enableAudio: false);
+  //   await _controller.initialize();
+  //   //_controller?.startImageStream(cameraStream);
+  //   setState(() {});
+  // }
 
   @override
   void initState() {
+    print("INIT LOG");
     // TODO: implement initState
     super.initState();
+    //_controller.initialize();
     ImportGameCollectionFromBGG();
+
+    var imageTest = rootBundle
+        .load("assets/not_bad.png")
+        .then((value) => value.buffer.asUint8List());
+
+    imageTest.then((value) => null);
+
     _controller = CameraController(cameras.first, ResolutionPreset.max);
     _controller.initialize().then((_) {
       if (!mounted) {
@@ -183,6 +231,7 @@ class _LogScaffoldState extends State<LogScaffold> {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 Text(recognizedImage),
+                Image.memory(imageTest),
                 IconButton(
                     onPressed: sendLogRequest, icon: Icon(Icons.network_wifi)),
                 IconButton(
@@ -193,7 +242,7 @@ class _LogScaffoldState extends State<LogScaffold> {
                     icon: Icon(Icons.delete)),
                 IconButton(
                     onPressed: () async {
-                      final getGames = await GameThingSQL.getAllGames();
+                      var getGames = await GameThingSQL.getAllGames();
                       setState(() {
                         if (getGames != null) {
                           recognizedImage = getGames.length.toString();
@@ -205,6 +254,7 @@ class _LogScaffoldState extends State<LogScaffold> {
                     icon: Icon(Icons.abc)),
                 IconButton(
                     onPressed: () {
+                      //_controller.initialize();
                       showDialog(
                           context: context,
                           builder: (BuildContext) {
@@ -226,13 +276,25 @@ class _LogScaffoldState extends State<LogScaffold> {
                                       setState(() {
                                         recognizedImage = "AfterPop";
                                       });
-                                      final gameId = await TakePhoto();
+                                      var gameId = await TakePhoto();
                                       setState(() {
                                         recognizedImage = "Taken Photo";
                                       });
 
+                                      var recognizedGameName =
+                                          "Cant response game";
+
+                                      if (gameId != null) {
+                                        var recognizedGame =
+                                            await GameThingSQL.selectGameByID(
+                                                gameId);
+                                        if (recognizedGame != null)
+                                          recognizedGameName =
+                                              recognizedGame.name;
+                                      }
+
                                       setState(() {
-                                        recognizedImage = gameId.toString();
+                                        recognizedImage = recognizedGameName;
                                       });
                                     },
                                     child: Text('Press me'))
@@ -261,43 +323,43 @@ class TakePictureScreen extends StatefulWidget {
   TakePictureScreenState createState() => TakePictureScreenState();
 }
 
-class TakePictureScreenState extends State<TakePictureScreen> {
-  late CameraController _controller;
-  late Future<void> _initializeControllerFuture;
+// class TakePictureScreenState extends State<TakePictureScreen> {
+//   late CameraController _controller;
+//   late Future<void> _initializeControllerFuture;
 
-  @override
-  void initState() {
-    super.initState();
-    // To display the current output from the Camera,
-    // create a CameraController.
-    _controller = CameraController(
-      // Get a specific camera from the list of available cameras.
-      widget.camera,
-      // Define the resolution to use.
-      ResolutionPreset.medium,
-    );
+//   @override
+//   void initState() {
+//     super.initState();
+//     // To display the current output from the Camera,
+//     // create a CameraController.
+//     _controller = CameraController(
+//       // Get a specific camera from the list of available cameras.
+//       widget.camera,
+//       // Define the resolution to use.
+//       ResolutionPreset.medium,
+//     );
 
-    // Next, initialize the controller. This returns a Future.
-    _initializeControllerFuture = _controller.initialize();
-  }
+//     // Next, initialize the controller. This returns a Future.
+//     _initializeControllerFuture = _controller.initialize();
+//   }
 
-  @override
-  void dispose() {
-    // Dispose of the controller when the widget is disposed.
-    _controller.dispose();
-    super.dispose();
-  }
+//   @override
+//   void dispose() {
+//     // Dispose of the controller when the widget is disposed.
+//     _controller.dispose();
+//     super.dispose();
+//   }
 
-  @override
-  Widget build(BuildContext context) {
-    // Fill this out in the next steps.
-    return Container();
-  }
-}
+//   @override
+//   Widget build(BuildContext context) {
+//     // Fill this out in the next steps.
+//     return Container();
+//   }
+// }
 
 Future<int?> getSimilarGameID(
     Uint8List bytes, List<GameThing> getGamesWithThumb) async {
-  final matching = PixelMatching();
+  var matching = PixelMatching();
   await matching.initialize(image: bytes);
 
   var bestSimilarity = 0.0;
@@ -305,9 +367,15 @@ Future<int?> getSimilarGameID(
   if (matching.isInitialized) {
     for (var gameImage in getGamesWithThumb) {
       if (gameImage.thumbBinary == null) continue;
-      final binaryImage = base64Decode(gameImage.thumbBinary!);
+      var binaryImage = base64Decode(gameImage.thumbBinary!);
+      imageDart.Image? img = imageDart.decodeImage(binaryImage);
+      imageDart.Image resizedImg =
+          imageDart.copyResize(img!, width: 200, height: 200);
+      var imgBytes = imageDart.encodeJpg(resizedImg);
 
-      var similarity = await matching.similarity(binaryImage);
+      //TODO resize bgg game image to camera game resolution
+
+      var similarity = await matching.similarity(imgBytes);
       // similarity.then((value) {
       //   print("game = ${gameImage.name}, similarity = ${value}");
       //   if (value > bestSimilarity) {
@@ -323,7 +391,9 @@ Future<int?> getSimilarGameID(
         bestSimilarity = similarity;
       }
     }
+    //bestSimilarity = 0;
     print("bestSimilarGameID = $bestSimilarGameID");
+    matching.dispose();
     return bestSimilarGameID;
   }
 }
@@ -445,7 +515,6 @@ Future<int> sendLogRequest() async {
   return 1;
 }
 
-
 //------------------------------------------------------------------------------
 
 // import 'package:flutter/foundation.dart';
@@ -456,17 +525,17 @@ Future<int> sendLogRequest() async {
 // import 'package:image_picker/image_picker.dart';
 
 // void main() {
-//   runApp(const MaterialApp(home: MyApp()));
+//   runApp(const MaterialApp(home: LogScaffold()));
 // }
 
-// class MyApp extends StatefulWidget {
-//   const MyApp({super.key});
+// class LogScaffold extends StatefulWidget {
+//   const LogScaffold({super.key});
 
 //   @override
-//   State<MyApp> createState() => _MyAppState();
+//   State<LogScaffold> createState() => _LogScaffoldState();
 // }
 
-// class _MyAppState extends State<MyApp> {
+// class _LogScaffoldState extends State<LogScaffold> {
 //   @override
 //   Widget build(BuildContext context) {
 //     return Scaffold(

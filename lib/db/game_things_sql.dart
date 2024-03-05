@@ -46,6 +46,15 @@ class GameThingSQL {
     return await db.delete("Games", where: 'id = ?', whereArgs: [gameThing.id]);
   }
 
+  static Future<GameThing?> selectGameByID(int gameId) async {
+    final db = await _getDB();
+    //return await db.("Games", where: 'id = ?', whereArgs: [gameThing.id]);
+    List<Map<String, dynamic>> result =
+        await db.rawQuery('SELECT * FROM Games WHERE id=?', [gameId]);
+    if (result.isEmpty) return null;
+    return GameThing.fromJson(result.first);
+  }
+
   static Future<List<GameThing>?> getAllGames() async {
     final db = await _getDB();
     final List<Map<String, dynamic>> maps = await db.query("Games");
