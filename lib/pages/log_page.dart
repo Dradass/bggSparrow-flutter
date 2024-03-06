@@ -38,7 +38,7 @@ class _LogScaffoldState extends State<LogScaffold> {
   Uint8List imageTest = Uint8List.fromList(new List.empty());
   //Uint8List imageFounded = Uint8List.fromList(new List.empty());
 
-  Future<int?> TakePhoto() async {
+  Future<int?> TakePhoto(XFile capturedImage) async {
     // print("select test");
 
     // final database = openDatabase(
@@ -99,12 +99,16 @@ class _LogScaffoldState extends State<LogScaffold> {
       // print("image bytes = ${bytes}");
       //---
 
-      var capturedImage = await _controller.takePicture();
+      //var capturedImage = await _controller.takePicture();
       var bytes = await capturedImage.readAsBytes();
 
       imageDart.Image? img = imageDart.decodeImage(bytes);
-      imageDart.Image resizedImg =
-          imageDart.copyResize(img!, width: 200, height: 300);
+      if (img == null || img?.height == null) return 0;
+
+      var ratio = img.height / 150;
+      imageDart.Image resizedImg = imageDart.copyResize(img!,
+          width: (img.width / ratio).round(),
+          height: (img.height / ratio).round());
       var imgBytes = imageDart.encodeJpg(resizedImg);
 
       var getGamesWithThumb = await GameThingSQL.getAllGames();
@@ -271,18 +275,24 @@ class _LogScaffoldState extends State<LogScaffold> {
                                       setState(() {
                                         recognizedImage = "Getting image from";
                                       });
+
+                                      // Slow camera fix
+                                      var capturedImage =
+                                          await _controller.takePicture();
+
                                       Navigator.of(context, rootNavigator: true)
                                           .pop();
                                       setState(() {
                                         recognizedImage = "AfterPop";
                                       });
-                                      var gameId = await TakePhoto();
+                                      var gameId =
+                                          await TakePhoto(capturedImage);
                                       setState(() {
                                         recognizedImage = "Taken Photo";
                                       });
 
                                       var recognizedGameName =
-                                          "Cant response game";
+                                          "Cant find similar game";
 
                                       if (gameId != null) {
                                         var recognizedGame =
@@ -369,9 +379,9 @@ Future<int?> getSimilarGameID(
       if (gameImage.thumbBinary == null) continue;
       var binaryImage = base64Decode(gameImage.thumbBinary!);
       imageDart.Image? img = imageDart.decodeImage(binaryImage);
-      imageDart.Image resizedImg =
-          imageDart.copyResize(img!, width: 200, height: 200);
-      var imgBytes = imageDart.encodeJpg(resizedImg);
+      // imageDart.Image resizedImg =
+      //     imageDart.copyResize(img!, width: 200, height: 200);
+      var imgBytes = imageDart.encodeJpg(img!);
 
       //TODO resize bgg game image to camera game resolution
 
