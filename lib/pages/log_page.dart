@@ -109,7 +109,8 @@ class _LogScaffoldState extends State<LogScaffold> {
       imageDart.Image resizedImg = imageDart.copyResize(img!,
           width: (img.width / ratio).round(),
           height: (img.height / ratio).round());
-      var imgBytes = imageDart.encodeJpg(resizedImg);
+
+      var imgBytes = imageDart.encodeJpg(imageDart.grayscale(resizedImg));
 
       var getGamesWithThumb = await GameThingSQL.getAllGames();
 
@@ -129,9 +130,11 @@ class _LogScaffoldState extends State<LogScaffold> {
       // final image1 = Uri.parse(
       //     "https://cf.geekdo-images.com/2HKX0QANk_DY7CIVK5O5fQ__thumb/img/zcjkqn_HYDIIyVAZaAxJIkurQRg=/fit-in/200x150/filters:strip_icc()/pic2869710.jpg");
 
-      int? bestGameID = 0;
-      //final bestGame = getSimilarGameID(imageBytes, getGamesWithThumb);
+      int bestGameID = 0;
       bestGameID = await getSimilarGameID(imgBytes, getGamesWithThumb);
+      // bestGameID = await Isolate.run(() async {
+      //   return getSimilarGameID(imgBytes, getGamesWithThumb);
+      // });
       print(bestGameID);
       //bestGame.then((value) => bestGameID = value!);
 
@@ -160,7 +163,7 @@ class _LogScaffoldState extends State<LogScaffold> {
       //     //     imageDart.Image.fromBytes(200, 200, binaryImage));
       //   }
       // }
-      result = bestGameID!;
+      result = bestGameID;
       // print("matchedGameID = $matchedGameID");
       // recognizedImage = matchedGameID.toString();
       // result = matchedGameID!;
@@ -272,10 +275,6 @@ class _LogScaffoldState extends State<LogScaffold> {
                                 ),
                                 ElevatedButton(
                                     onPressed: () async {
-                                      setState(() {
-                                        recognizedImage = "Getting image from";
-                                      });
-
                                       // Slow camera fix
                                       var capturedImage =
                                           await _controller.takePicture();
@@ -283,14 +282,10 @@ class _LogScaffoldState extends State<LogScaffold> {
                                       Navigator.of(context, rootNavigator: true)
                                           .pop();
                                       setState(() {
-                                        recognizedImage = "AfterPop";
+                                        recognizedImage = "Recognizing";
                                       });
                                       var gameId =
                                           await TakePhoto(capturedImage);
-                                      setState(() {
-                                        recognizedImage = "Taken Photo";
-                                      });
-
                                       var recognizedGameName =
                                           "Cant find similar game";
 
@@ -367,25 +362,23 @@ class TakePictureScreen extends StatefulWidget {
 //   }
 // }
 
-Future<int?> getSimilarGameID(
+Future<int> getSimilarGameID(
     Uint8List bytes, List<GameThing> getGamesWithThumb) async {
-  var matching = PixelMatching();
+  final matching = PixelMatching();
   await matching.initialize(image: bytes);
 
   var bestSimilarity = 0.0;
   var bestSimilarGameID = 0;
   if (matching.isInitialized) {
-    for (var gameImage in getGamesWithThumb) {
+    for (final gameImage in getGamesWithThumb) {
       if (gameImage.thumbBinary == null) continue;
-      var binaryImage = base64Decode(gameImage.thumbBinary!);
-      imageDart.Image? img = imageDart.decodeImage(binaryImage);
-      // imageDart.Image resizedImg =
-      //     imageDart.copyResize(img!, width: 200, height: 200);
-      var imgBytes = imageDart.encodeJpg(img!);
+      final binaryImage = base64Decode(gameImage.thumbBinary!);
+      // imageDart.Image? img = imageDart.decodeImage(binaryImage);
+      // var imgBytes = imageDart.encodeJpg(imageDart.grayscale(img!));
 
       //TODO resize bgg game image to camera game resolution
 
-      var similarity = await matching.similarity(imgBytes);
+      final similarity = await matching.similarity(binaryImage);
       // similarity.then((value) {
       //   print("game = ${gameImage.name}, similarity = ${value}");
       //   if (value > bestSimilarity) {
@@ -406,6 +399,8 @@ Future<int?> getSimilarGameID(
     matching.dispose();
     return bestSimilarGameID;
   }
+  matching.dispose();
+  return bestSimilarGameID;
 }
 
 // Future<int?> getBestComparedImage(
