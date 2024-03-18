@@ -14,6 +14,7 @@ import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import '../db/database_helper.dart';
 import '../db/game_things_sql.dart';
+import '../db/players_sql.dart';
 import '../models/game_model.dart';
 import '../models/game_thing.dart';
 import 'dart:convert';
@@ -35,10 +36,35 @@ class LogScaffold extends StatefulWidget {
 class _LogScaffoldState extends State<LogScaffold> {
   late CameraController _controller;
   var recognizedImage = "No image";
+  bool? flagWarranty = false;
+  var recognizedGameId = 0;
   Uint8List imageTest = Uint8List.fromList(new List.empty());
+  List<Map> players = [];
+
+  var logData = {
+    "playdate": "2024-03-15",
+    "comments": "comments go here",
+    "length": 60,
+    "twitter": "false",
+    "minutes": 60,
+    "location": "Home",
+    "objectid": "158899",
+    "hours": 0,
+    "quantity": "1",
+    "action": "save",
+    "date": "2024-02-28T05:00:00.000Z",
+    "players": [],
+    "objecttype": "thing",
+    "ajax": 1
+  };
+
+  Map<String, bool> values = {
+    'foo': true,
+    'bar': false,
+  };
   //Uint8List imageFounded = Uint8List.fromList(new List.empty());
 
-  Future<int?> TakePhoto(XFile capturedImage) async {
+  Future<int?> TakePhoto() async {
     // print("select test");
 
     // final database = openDatabase(
@@ -99,7 +125,7 @@ class _LogScaffoldState extends State<LogScaffold> {
       // print("image bytes = ${bytes}");
       //---
 
-      //var capturedImage = await _controller.takePicture();
+      var capturedImage = await _controller.takePicture();
       var bytes = await capturedImage.readAsBytes();
 
       imageDart.Image? img = imageDart.decodeImage(bytes);
@@ -136,33 +162,6 @@ class _LogScaffoldState extends State<LogScaffold> {
       //   return getSimilarGameID(imgBytes, getGamesWithThumb);
       // });
       print(bestGameID);
-      //bestGame.then((value) => bestGameID = value!);
-
-      // final matching = PixelMatching();
-      // await matching.initialize(image: imageBytes);
-
-      // var bestSimilarity = 0.0;
-      // var bestSimilarGameID = 0;
-      // if (matching.isInitialized) {
-      //   for (var gameImage in getGamesWithThumb) {
-      //     if (gameImage.thumbBinary == null) break;
-      //     final binaryImage = base64Decode(gameImage.thumbBinary!);
-
-      //     var similarity = matching.similarity(binaryImage);
-      //     similarity.then((value) {
-      //       print("game = ${gameImage.name}, similarity = ${value}");
-      //       if (value > bestSimilarity) {
-      //         bestSimilarGameID = gameImage.id;
-      //         bestSimilarity = value;
-      //       }
-      //       ;
-      //     });
-
-      //     // final result = matching.
-      //     //     imageDart.Image.fromBytes(200, 200, bytes),
-      //     //     imageDart.Image.fromBytes(200, 200, binaryImage));
-      //   }
-      // }
       result = bestGameID;
       // print("matchedGameID = $matchedGameID");
       // recognizedImage = matchedGameID.toString();
@@ -194,6 +193,11 @@ class _LogScaffoldState extends State<LogScaffold> {
     super.initState();
     //_controller.initialize();
     ImportGameCollectionFromBGG();
+    GetAllPlaysFromServer();
+    var playersRes = FillPlayers();
+    playersRes.then((value) {
+      players = value;
+    });
 
     var imageTest = rootBundle
         .load("assets/not_bad.png")
@@ -240,23 +244,57 @@ class _LogScaffoldState extends State<LogScaffold> {
                 Text(recognizedImage),
                 Image.memory(imageTest),
                 IconButton(
-                    onPressed: sendLogRequest, icon: Icon(Icons.network_wifi)),
+                    onPressed: () async {
+                      List<Map> bggPlayers = [];
+                      for (var player in players
+                          .where((element) => element['isChecked'] == true)) {
+                        bggPlayers.add({
+                          'username': player['username'],
+                          'userid': player['userid'],
+                          'name': player['name']
+                        });
+                      }
+                      logData['players'] = bggPlayers;
+                      logData['objectid'] = recognizedGameId;
+                      String stringData = json.encode(logData);
+                      print(stringData);
+                      await sendLogRequest(stringData);
+                    },
+                    icon: Icon(Icons.donut_large)),
                 IconButton(
-                    onPressed: GameThingSQL.createTable,
+                    onPressed: () {
+                      showDialog(
+                          context: context,
+                          builder: (BuildContext) {
+                            return StatefulBuilder(
+                                builder: (context, setState) {
+                              return AlertDialog(
+                                  title: Text("Your friends"),
+                                  content: Column(
+                                      children: players.map((player) {
+                                    return CheckboxListTile(
+                                        title: Text(player['name']),
+                                        value: player['isChecked'],
+                                        onChanged: (bool? value) {
+                                          setState(() {
+                                            player['isChecked'] = value;
+                                          });
+                                        });
+                                  }).toList()));
+                            });
+                          });
+                    },
+                    icon: Icon(Icons.network_wifi)),
+                IconButton(
+                    onPressed:
+                        PlayersSQL.createTable, //GameThingSQL.createTable,
                     icon: Icon(Icons.add_circle)),
                 IconButton(
-                    onPressed: GameThingSQL.dropTable,
-                    icon: Icon(Icons.delete)),
+                    onPressed: PlayersSQL.dropTable, icon: Icon(Icons.delete)),
                 IconButton(
                     onPressed: () async {
-                      var getGames = await GameThingSQL.getAllGames();
-                      setState(() {
-                        if (getGames != null) {
-                          recognizedImage = getGames.length.toString();
-                        } else {
-                          recognizedImage = "Still no games";
-                        }
-                      });
+                      GetAllPlaysFromServer();
+                      players = await FillPlayers();
                     },
                     icon: Icon(Icons.abc)),
                 IconButton(
@@ -276,16 +314,15 @@ class _LogScaffoldState extends State<LogScaffold> {
                                 ElevatedButton(
                                     onPressed: () async {
                                       // Slow camera fix
-                                      var capturedImage =
-                                          await _controller.takePicture();
+                                      // var capturedImage =
+                                      //     await _controller.takePicture();
 
                                       Navigator.of(context, rootNavigator: true)
                                           .pop();
                                       setState(() {
                                         recognizedImage = "Recognizing";
                                       });
-                                      var gameId =
-                                          await TakePhoto(capturedImage);
+                                      var gameId = await TakePhoto();
                                       var recognizedGameName =
                                           "Cant find similar game";
 
@@ -293,9 +330,11 @@ class _LogScaffoldState extends State<LogScaffold> {
                                         var recognizedGame =
                                             await GameThingSQL.selectGameByID(
                                                 gameId);
-                                        if (recognizedGame != null)
+                                        if (recognizedGame != null) {
+                                          recognizedGameId = recognizedGame.id;
                                           recognizedGameName =
                                               recognizedGame.name;
+                                        }
                                       }
 
                                       setState(() {
@@ -428,7 +467,7 @@ Future<int?> testIsolate(Uint8List bytes) async {
   return result;
 }
 
-Future<int> sendLogRequest() async {
+Future<int> sendLogRequest(String logData) async {
   print("-----start sending");
   dynamic bodyLogin = json.encode({
     'credentials': {'username': 'dradass', 'password': '1414141414'}
@@ -513,7 +552,7 @@ Future<int> sendLogRequest() async {
               'Content-Type': 'application/json; charset=UTF-8',
               'cookie': sessionCookie,
             },
-            body: playPayload)
+            body: logData)
         .then((response2) {});
   });
 
