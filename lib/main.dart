@@ -8,6 +8,8 @@ import 'package:flutter/widgets.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
+import '../bggApi/bggApi.dart';
+
 late List<CameraDescription> cameras;
 
 Future<void> main() async {
@@ -19,15 +21,15 @@ Future<void> main() async {
     home: LogScaffold(),
   ));
 
-  final database = openDatabase(
-    join(await getDatabasesPath(), 'Notes.db'),
-    onCreate: (db, version) {
-      return db.execute(
-        'CREATE TABLE Games(id INTEGER PRIMARY KEY, name TEXT NOT NULL, image TEXT NOT NULL, thumbnail TEXT NOT NULL, thumbbin TEXT);',
-      );
-    },
-    version: 1,
-  );
+  // final database = openDatabase(
+  //   join(await getDatabasesPath(), 'Notes.db'),
+  //   onCreate: (db, version) {
+  //     db.execute(
+  //       'CREATE TABLE Games(id INTEGER PRIMARY KEY, name TEXT NOT NULL, image TEXT NOT NULL, thumbnail TEXT NOT NULL, thumbbin TEXT);',
+  //     );
+  //   },
+  //   version: 1,
+  // );
 
   // final database = openDatabase(
   //   // Set the path to the database. Note: Using the `join` function from the
@@ -236,6 +238,7 @@ class TakePictureScreenState extends State<TakePictureScreen> {
   @override
   void initState() {
     super.initState();
+
     // To display the current output from the Camera,
     // create a CameraController.
     _controller = CameraController(

@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter_application_1/models/game_thing.dart';
@@ -7,7 +8,8 @@ import 'package:http/http.dart' as http;
 import 'package:xml/xml.dart' as xml;
 import '../models/bgg_player_model.dart';
 
-void ImportGameCollectionFromBGG() async {
+Future<void> ImportGameCollectionFromBGG() async {
+  await GameThingSQL.createTable();
   final collectionResponse = await http.get(Uri.parse(
       'https://boardgamegeek.com/xmlapi2/collection?username=dradass'));
 
@@ -40,7 +42,7 @@ void ImportGameCollectionFromBGG() async {
   });
 }
 
-void GetAllPlaysFromServer() async {
+Future<void> GetAllPlaysFromServer() async {
   const max_pages_count = 1000;
   final userName = 'dradass';
 
@@ -116,4 +118,10 @@ Future<List<Map>> FillPlayers() async {
   print('test');
   print(playersMap);
   return playersMap;
+}
+
+void initializeBggData() async {
+  await GameThingSQL.initTables();
+  await ImportGameCollectionFromBGG();
+  await GetAllPlaysFromServer();
 }

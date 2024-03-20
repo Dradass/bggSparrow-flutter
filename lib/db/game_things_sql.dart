@@ -8,20 +8,42 @@ class GameThingSQL {
   static const String _dbName = "Notes.db";
 
   static Future<Database> _getDB() async {
-    return openDatabase(join(await getDatabasesPath(), _dbName),
-        onCreate: (db, version) async => await db.execute(
-            "CREATE TABLE Games(id INTEGER PRIMARY KEY, name TEXT NOT NULL, image TEXT NOT NULL, thumbnail TEXT NOT NULL, thumbbin TEXT);"),
-        version: _version);
+    String path = join(await getDatabasesPath(), _dbName);
+    print(path);
+
+    return openDatabase(path, onCreate: _onCreate, version: _version);
   }
 
-  static void createTable() async {
-    final db = await _getDB();
+  static void _onCreate(Database db, int version) async {
     await db.execute(
-        "CREATE TABLE Games(id INTEGER PRIMARY KEY, name TEXT NOT NULL, image TEXT NOT NULL, thumbnail TEXT NOT NULL, thumbbin TEXT);");
+        "CREATE TABLE IF NOT EXISTS Games(id INTEGER PRIMARY KEY, name TEXT NOT NULL, image TEXT NOT NULL, thumbnail TEXT NOT NULL, thumbbin TEXT);");
+    await db.execute(
+        "CREATE TABLE IF NOT EXISTS Players(id INTEGER PRIMARY KEY, name TEXT NOT NULL, userid INTEGER, username TEXT);");
+    print('TABLE CREATED');
+  }
+
+  static Future<void> createTable() async {
+    final db = await _getDB();
+    // await db.execute(
+    //     "CREATE TABLE Games(id INTEGER PRIMARY KEY, name TEXT NOT NULL, image TEXT NOT NULL, thumbnail TEXT NOT NULL, thumbbin TEXT);");
+    // await db.execute(
+    //     "CREATE TABLE Players(id INTEGER PRIMARY KEY, name TEXT NOT NULL, userid INTEGER, username TEXT);");
+  }
+
+  static Future<void> initTables() async {
+    await _getDB();
+  }
+
+  static void deleteDB() async {
+    final path = join(await getDatabasesPath(), _dbName);
+
+    //await ((await openDatabase(path)).close());
+    await deleteDatabase(path);
   }
 
   static void dropTable() async {
     final db = await _getDB();
+    print('drop table');
     await db.execute("DROP TABLE Games;");
   }
 

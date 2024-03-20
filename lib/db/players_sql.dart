@@ -8,10 +8,12 @@ class PlayersSQL {
   static const String _dbName = "Notes.db";
 
   static Future<Database> _getDB() async {
+    print('db creating');
     return openDatabase(join(await getDatabasesPath(), _dbName),
-        onCreate: (db, version) async => await db.execute(
-            "CREATE TABLE Players(id INTEGER PRIMARY KEY, name TEXT NOT NULL, userid INTEGER, username TEXT);"),
-        version: _version);
+        onCreate: (db, version) async {
+      // await db.execute(
+      //     "CREATE TABLE Players(id INTEGER PRIMARY KEY, name TEXT NOT NULL, userid INTEGER, username TEXT);");
+    }, version: _version);
   }
 
   static void createTable() async {
@@ -22,6 +24,7 @@ class PlayersSQL {
 
   static void dropTable() async {
     final db = await _getDB();
+    print('drop table');
     await db.execute("DROP TABLE Players;");
   }
 

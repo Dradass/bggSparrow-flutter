@@ -10,9 +10,7 @@ import 'package:image/image.dart' as imageDart;
 import 'package:flutter_application_1/main.dart';
 import 'package:camera/camera.dart';
 //import 'package:image_compare/image_compare.dart';
-import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
-import '../db/database_helper.dart';
 import '../db/game_things_sql.dart';
 import '../db/players_sql.dart';
 import '../models/game_model.dart';
@@ -22,9 +20,9 @@ import 'package:http/http.dart' as http;
 import 'package:xml/xml.dart' as xml;
 import '../bggApi/bggApi.dart';
 import 'package:collection/collection.dart';
-import 'dart:math';
-import 'package:requests/requests.dart';
 import 'package:flutter_pixelmatching/flutter_pixelmatching.dart';
+
+import '../widgets/duration_sliders.dart';
 
 class LogScaffold extends StatefulWidget {
   const LogScaffold({super.key});
@@ -38,8 +36,10 @@ class _LogScaffoldState extends State<LogScaffold> {
   var recognizedImage = "No image";
   bool? flagWarranty = false;
   var recognizedGameId = 0;
+  double durationCurrentValue = 60;
   Uint8List imageTest = Uint8List.fromList(new List.empty());
   List<Map> players = [];
+  DurationSlider durationSlider = const DurationSlider();
 
   var logData = {
     "playdate": "2024-03-15",
@@ -136,7 +136,7 @@ class _LogScaffoldState extends State<LogScaffold> {
           width: (img.width / ratio).round(),
           height: (img.height / ratio).round());
 
-      var imgBytes = imageDart.encodeJpg(imageDart.grayscale(resizedImg));
+      var imgBytes = imageDart.encodeJpg(resizedImg);
 
       var getGamesWithThumb = await GameThingSQL.getAllGames();
 
@@ -189,15 +189,9 @@ class _LogScaffoldState extends State<LogScaffold> {
   @override
   void initState() {
     print("INIT LOG");
-    // TODO: implement initState
     super.initState();
-    //_controller.initialize();
-    ImportGameCollectionFromBGG();
-    GetAllPlaysFromServer();
-    var playersRes = FillPlayers();
-    playersRes.then((value) {
-      players = value;
-    });
+
+    initializeBggData();
 
     var imageTest = rootBundle
         .load("assets/not_bad.png")
@@ -205,7 +199,8 @@ class _LogScaffoldState extends State<LogScaffold> {
 
     imageTest.then((value) => null);
 
-    _controller = CameraController(cameras.first, ResolutionPreset.max);
+    _controller = CameraController(cameras.first, ResolutionPreset.max,
+        enableAudio: false);
     _controller.initialize().then((_) {
       if (!mounted) {
         return;
@@ -256,13 +251,15 @@ class _LogScaffoldState extends State<LogScaffold> {
                       }
                       logData['players'] = bggPlayers;
                       logData['objectid'] = recognizedGameId;
+                      logData['length'] = durationCurrentValue;
                       String stringData = json.encode(logData);
                       print(stringData);
                       await sendLogRequest(stringData);
                     },
                     icon: Icon(Icons.donut_large)),
                 IconButton(
-                    onPressed: () {
+                    onPressed: () async {
+                      players = await FillPlayers();
                       showDialog(
                           context: context,
                           builder: (BuildContext) {
@@ -284,39 +281,54 @@ class _LogScaffoldState extends State<LogScaffold> {
                             });
                           });
                     },
-                    icon: Icon(Icons.network_wifi)),
-                IconButton(
+                    icon: Icon(Icons.people)),
+                const IconButton(
                     onPressed:
                         PlayersSQL.createTable, //GameThingSQL.createTable,
                     icon: Icon(Icons.add_circle)),
-                IconButton(
+                Slider(
+                  value: durationCurrentValue,
+                  max: 500,
+                  divisions: 50,
+                  label: durationCurrentValue.round().toString(),
+                  onChanged: (double value) {
+                    setState(() {
+                      durationCurrentValue = value;
+                    });
+                  },
+                ),
+                const IconButton(
+                    onPressed: GameThingSQL.deleteDB,
+                    icon: Icon(Icons.dangerous)),
+                const IconButton(
                     onPressed: PlayersSQL.dropTable, icon: Icon(Icons.delete)),
                 IconButton(
                     onPressed: () async {
-                      GetAllPlaysFromServer();
-                      players = await FillPlayers();
+                      try {
+                        await GetAllPlaysFromServer();
+                        players = await FillPlayers();
+                      } catch (e) {
+                        setState(() {
+                          recognizedImage = e.toString();
+                        });
+                      }
                     },
-                    icon: Icon(Icons.abc)),
+                    icon: const Icon(Icons.abc)),
                 IconButton(
                     onPressed: () {
-                      //_controller.initialize();
                       showDialog(
                           context: context,
                           builder: (BuildContext) {
                             return AlertDialog(
                               title: Text('Take photo'),
                               content: Column(children: [
-                                Text("$recognizedImage"),
+                                Text(recognizedImage),
                                 Container(
                                   height: 300,
                                   child: CameraPreview(_controller),
                                 ),
                                 ElevatedButton(
                                     onPressed: () async {
-                                      // Slow camera fix
-                                      // var capturedImage =
-                                      //     await _controller.takePicture();
-
                                       Navigator.of(context, rootNavigator: true)
                                           .pop();
                                       setState(() {
@@ -341,12 +353,12 @@ class _LogScaffoldState extends State<LogScaffold> {
                                         recognizedImage = recognizedGameName;
                                       });
                                     },
-                                    child: Text('Press me'))
+                                    child: const Text('Press me'))
                               ]),
                             );
                           });
                     },
-                    icon: Icon(Icons.photo_camera))
+                    icon: const Icon(Icons.photo_camera))
               ],
             )
           ],
@@ -367,40 +379,6 @@ class TakePictureScreen extends StatefulWidget {
   TakePictureScreenState createState() => TakePictureScreenState();
 }
 
-// class TakePictureScreenState extends State<TakePictureScreen> {
-//   late CameraController _controller;
-//   late Future<void> _initializeControllerFuture;
-
-//   @override
-//   void initState() {
-//     super.initState();
-//     // To display the current output from the Camera,
-//     // create a CameraController.
-//     _controller = CameraController(
-//       // Get a specific camera from the list of available cameras.
-//       widget.camera,
-//       // Define the resolution to use.
-//       ResolutionPreset.medium,
-//     );
-
-//     // Next, initialize the controller. This returns a Future.
-//     _initializeControllerFuture = _controller.initialize();
-//   }
-
-//   @override
-//   void dispose() {
-//     // Dispose of the controller when the widget is disposed.
-//     _controller.dispose();
-//     super.dispose();
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     // Fill this out in the next steps.
-//     return Container();
-//   }
-// }
-
 Future<int> getSimilarGameID(
     Uint8List bytes, List<GameThing> getGamesWithThumb) async {
   final matching = PixelMatching();
@@ -415,17 +393,7 @@ Future<int> getSimilarGameID(
       // imageDart.Image? img = imageDart.decodeImage(binaryImage);
       // var imgBytes = imageDart.encodeJpg(imageDart.grayscale(img!));
 
-      //TODO resize bgg game image to camera game resolution
-
       final similarity = await matching.similarity(binaryImage);
-      // similarity.then((value) {
-      //   print("game = ${gameImage.name}, similarity = ${value}");
-      //   if (value > bestSimilarity) {
-      //     bestSimilarGameID = gameImage.id;
-      //     bestSimilarity = value;
-      //   }
-      //   ;
-      // });
       print(
           "game = ${gameImage.name}, id = ${gameImage.id}, similarity = ${similarity}");
       if (similarity > bestSimilarity) {
@@ -441,25 +409,6 @@ Future<int> getSimilarGameID(
   matching.dispose();
   return bestSimilarGameID;
 }
-
-// Future<int?> getBestComparedImage(
-//     Uint8List bytes, List<GameThing> getGamesWithThumb) async {
-//   int result = 0;
-//   if (getGamesWithThumb != null) {
-//     final thumbBinList =
-//         List.from(getGamesWithThumb.map((e) => base64Decode(e.thumbBinary!)));
-//     final res = await listCompare(target: bytes, list: thumbBinList);
-//     if (res != null) {
-//       final minValue = res.reduce(min);
-//       final index = res.indexOf(minValue);
-//       final finalMin = getGamesWithThumb[index];
-//       result = finalMin.id;
-//     }
-//   }
-//   ;
-//   print(result.toString());
-//   return result;
-// }
 
 Future<int?> testIsolate(Uint8List bytes) async {
   int result = 0;
@@ -512,8 +461,6 @@ Future<int> sendLogRequest(String logData) async {
           body: bodyLogin)
       .then((response) {
     var logCookie = response.headers['set-cookie'];
-    var headers = response.headers;
-    var altsvc = response.headers['alt-svc'];
     var indexOfSessionID = logCookie!.indexOf("SessionID=");
     var indexOfSessionIDEnd = logCookie!.indexOf(";", indexOfSessionID);
 
@@ -542,10 +489,6 @@ Future<int> sendLogRequest(String logData) async {
     }
     print(sessionCookie);
 
-    String basicAuth =
-        'Basic ' + base64.encode(utf8.encode('dradass:1414141414'));
-    var sessionID =
-        logCookie.substring(indexOfSessionID + 10, indexOfSessionIDEnd);
     http
         .post(Uri.parse("https://boardgamegeek.com/geekplay.php"),
             headers: {
@@ -558,89 +501,3 @@ Future<int> sendLogRequest(String logData) async {
 
   return 1;
 }
-
-//------------------------------------------------------------------------------
-
-// import 'package:flutter/foundation.dart';
-// import 'package:flutter/material.dart';
-// import '../matching_view.dart';
-
-// // ignore: depend_on_referenced_packages
-// import 'package:image_picker/image_picker.dart';
-
-// void main() {
-//   runApp(const MaterialApp(home: LogScaffold()));
-// }
-
-// class LogScaffold extends StatefulWidget {
-//   const LogScaffold({super.key});
-
-//   @override
-//   State<LogScaffold> createState() => _LogScaffoldState();
-// }
-
-// class _LogScaffoldState extends State<LogScaffold> {
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(
-//         title: const Text('PixelMatching Sample'),
-//       ),
-//       body: Center(
-//         child: Column(
-//           mainAxisAlignment: MainAxisAlignment.center,
-//           children: [
-//             buildFromGallery(),
-//             buildFromCamera(),
-//           ],
-//         ),
-//       ),
-//     );
-//   }
-
-//   /// Build a button to fetch from the gallery, and set `image1` on image selection.
-//   buildFromGallery() {
-//     return TextButton.icon(
-//       icon: const Icon(Icons.photo),
-//       label: const Text("From Gallery"),
-//       onPressed: () async {
-//         ImagePicker().pickImage(source: ImageSource.gallery).then(
-//           (value) async {
-//             final Uint8List? target = await value?.readAsBytes();
-//             if (target != null) {
-//               openMatchingView(target);
-//             }
-//           },
-//         );
-//       },
-//     );
-//   }
-
-//   /// Build a button to fetch from the camera, and set `image1` on image selection.
-//   buildFromCamera() {
-//     return TextButton.icon(
-//       label: const Text("From Camera"),
-//       icon: const Icon(Icons.camera),
-//       onPressed: () async {
-//         ImagePicker().pickImage(source: ImageSource.camera).then(
-//           (value) async {
-//             final Uint8List? target = await value?.readAsBytes();
-//             if (target != null) {
-//               openMatchingView(target);
-//             }
-//           },
-//         );
-//       },
-//     );
-//   }
-
-//   openMatchingView(Uint8List target) {
-//     Navigator.of(context).push(
-//       MaterialPageRoute(
-//         builder: (context) {
-//           return MatchingView(target: target);
-//         },
-//       ),
-//     );
-//   }
-// }
