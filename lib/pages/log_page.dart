@@ -131,7 +131,8 @@ class _LogScaffoldState extends State<LogScaffold> {
       imageDart.Image? img = imageDart.decodeImage(bytes);
       if (img == null || img?.height == null) return 0;
 
-      var ratio = img.height / 150;
+      //print("Height = ${WidgetsBinding.instance.window.physicalSize.height}");
+      var ratio = 1; // img.height / 150;
       imageDart.Image resizedImg = imageDart.copyResize(img!,
           width: (img.width / ratio).round(),
           height: (img.height / ratio).round());
@@ -193,11 +194,11 @@ class _LogScaffoldState extends State<LogScaffold> {
 
     initializeBggData();
 
-    var imageTest = rootBundle
-        .load("assets/not_bad.png")
-        .then((value) => value.buffer.asUint8List());
+    // var imageTest = rootBundle
+    //     .load("assets/not_bad.png")
+    //     .then((value) => value.buffer.asUint8List());
 
-    imageTest.then((value) => null);
+    // imageTest.then((value) => null);
 
     _controller = CameraController(cameras.first, ResolutionPreset.max,
         enableAudio: false);
@@ -236,129 +237,152 @@ class _LogScaffoldState extends State<LogScaffold> {
             Column(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                Text(recognizedImage),
-                Image.memory(imageTest),
-                IconButton(
-                    onPressed: () async {
-                      List<Map> bggPlayers = [];
-                      for (var player in players
-                          .where((element) => element['isChecked'] == true)) {
-                        bggPlayers.add({
-                          'username': player['username'],
-                          'userid': player['userid'],
-                          'name': player['name']
-                        });
-                      }
-                      logData['players'] = bggPlayers;
-                      logData['objectid'] = recognizedGameId;
-                      logData['length'] = durationCurrentValue;
-                      String stringData = json.encode(logData);
-                      print(stringData);
-                      await sendLogRequest(stringData);
-                    },
-                    icon: Icon(Icons.donut_large)),
-                IconButton(
-                    onPressed: () async {
-                      players = await FillPlayers();
-                      showDialog(
-                          context: context,
-                          builder: (BuildContext) {
-                            return StatefulBuilder(
-                                builder: (context, setState) {
-                              return AlertDialog(
-                                  title: Text("Your friends"),
-                                  content: Column(
-                                      children: players.map((player) {
-                                    return CheckboxListTile(
-                                        title: Text(player['name']),
-                                        value: player['isChecked'],
-                                        onChanged: (bool? value) {
-                                          setState(() {
-                                            player['isChecked'] = value;
-                                          });
-                                        });
-                                  }).toList()));
+                Flexible(
+                    flex: 1,
+                    child: Container(
+                      //color: Colors.tealAccent,
+                      width: MediaQuery.of(context).size.width,
+                      height: MediaQuery.of(context).size.height,
+                      child: Center(
+                          child: Text(recognizedImage,
+                              textAlign: TextAlign.center)),
+                    )),
+                Flexible(
+                    flex: 2,
+                    child: Container(
+                        //color: Colors.lime,
+                        width: MediaQuery.of(context).size.width,
+                        child: Image.memory(
+                          imageTest,
+                          height: MediaQuery.of(context).size.height,
+                        ))),
+                Flexible(
+                    flex: 1,
+                    child: Container(
+                        //color: Colors.green,
+                        width: MediaQuery.of(context).size.width,
+                        height: MediaQuery.of(context).size.height,
+                        child: IconButton(
+                            onPressed: () async {
+                              List<Map> bggPlayers = [];
+                              for (var player in players.where(
+                                  (element) => element['isChecked'] == true)) {
+                                bggPlayers.add({
+                                  'username': player['username'],
+                                  'userid': player['userid'],
+                                  'name': player['name']
+                                });
+                              }
+                              logData['players'] = bggPlayers;
+                              logData['objectid'] = recognizedGameId;
+                              logData['length'] = durationCurrentValue;
+                              String stringData = json.encode(logData);
+                              print(stringData);
+                              await sendLogRequest(stringData);
+                            },
+                            icon: Icon(Icons.send_and_archive)))),
+                Flexible(
+                    flex: 1,
+                    child: Container(
+                        //color: Colors.tealAccent,
+                        width: MediaQuery.of(context).size.width,
+                        height: MediaQuery.of(context).size.height,
+                        child: IconButton(
+                            onPressed: () async {
+                              players = await FillPlayers();
+                              showDialog(
+                                  context: context,
+                                  builder: (BuildContext) {
+                                    return StatefulBuilder(
+                                        builder: (context, setState) {
+                                      return AlertDialog(
+                                          title: Text("Your friends"),
+                                          content: Column(
+                                              children: players.map((player) {
+                                            return CheckboxListTile(
+                                                title: Text(player['name']),
+                                                value: player['isChecked'],
+                                                onChanged: (bool? value) {
+                                                  setState(() {
+                                                    player['isChecked'] = value;
+                                                  });
+                                                });
+                                          }).toList()));
+                                    });
+                                  });
+                            },
+                            icon: Icon(Icons.people)))),
+                Flexible(
+                    flex: 1,
+                    child: Container(
+                        //color: Colors.blueAccent,
+                        width: MediaQuery.of(context).size.width,
+                        height: MediaQuery.of(context).size.height,
+                        child: Slider(
+                          value: durationCurrentValue,
+                          max: 500,
+                          divisions: 50,
+                          label: durationCurrentValue.round().toString(),
+                          onChanged: (double value) {
+                            setState(() {
+                              durationCurrentValue = value;
                             });
-                          });
-                    },
-                    icon: Icon(Icons.people)),
-                const IconButton(
-                    onPressed:
-                        PlayersSQL.createTable, //GameThingSQL.createTable,
-                    icon: Icon(Icons.add_circle)),
-                Slider(
-                  value: durationCurrentValue,
-                  max: 500,
-                  divisions: 50,
-                  label: durationCurrentValue.round().toString(),
-                  onChanged: (double value) {
-                    setState(() {
-                      durationCurrentValue = value;
-                    });
-                  },
-                ),
-                const IconButton(
-                    onPressed: GameThingSQL.deleteDB,
-                    icon: Icon(Icons.dangerous)),
-                const IconButton(
-                    onPressed: PlayersSQL.dropTable, icon: Icon(Icons.delete)),
-                IconButton(
-                    onPressed: () async {
-                      try {
-                        await GetAllPlaysFromServer();
-                        players = await FillPlayers();
-                      } catch (e) {
-                        setState(() {
-                          recognizedImage = e.toString();
-                        });
-                      }
-                    },
-                    icon: const Icon(Icons.abc)),
-                IconButton(
-                    onPressed: () {
-                      showDialog(
-                          context: context,
-                          builder: (BuildContext) {
-                            return AlertDialog(
-                              title: Text('Take photo'),
-                              content: Column(children: [
-                                Text(recognizedImage),
-                                Container(
-                                  height: 300,
-                                  child: CameraPreview(_controller),
-                                ),
-                                ElevatedButton(
-                                    onPressed: () async {
-                                      Navigator.of(context, rootNavigator: true)
-                                          .pop();
-                                      setState(() {
-                                        recognizedImage = "Recognizing";
-                                      });
-                                      var gameId = await TakePhoto();
-                                      var recognizedGameName =
-                                          "Cant find similar game";
+                          },
+                        ))),
+                Flexible(
+                    flex: 1,
+                    child: Container(
+                        //color: Colors.tealAccent,
+                        width: MediaQuery.of(context).size.width,
+                        height: MediaQuery.of(context).size.height,
+                        child: IconButton(
+                            onPressed: () {
+                              showDialog(
+                                  context: context,
+                                  builder: (BuildContext) {
+                                    return AlertDialog(
+                                      title: Text('Take photo'),
+                                      content: Column(children: [
+                                        Text(recognizedImage),
+                                        Container(
+                                          height: 300,
+                                          child: CameraPreview(_controller),
+                                        ),
+                                        ElevatedButton(
+                                            onPressed: () async {
+                                              Navigator.of(context,
+                                                      rootNavigator: true)
+                                                  .pop();
+                                              setState(() {
+                                                recognizedImage = "Recognizing";
+                                              });
+                                              var gameId = await TakePhoto();
+                                              var recognizedGameName =
+                                                  "Cant find similar game";
 
-                                      if (gameId != null) {
-                                        var recognizedGame =
-                                            await GameThingSQL.selectGameByID(
-                                                gameId);
-                                        if (recognizedGame != null) {
-                                          recognizedGameId = recognizedGame.id;
-                                          recognizedGameName =
-                                              recognizedGame.name;
-                                        }
-                                      }
+                                              if (gameId != null) {
+                                                var recognizedGame =
+                                                    await GameThingSQL
+                                                        .selectGameByID(gameId);
+                                                if (recognizedGame != null) {
+                                                  recognizedGameId =
+                                                      recognizedGame.id;
+                                                  recognizedGameName =
+                                                      recognizedGame.name;
+                                                }
+                                              }
 
-                                      setState(() {
-                                        recognizedImage = recognizedGameName;
-                                      });
-                                    },
-                                    child: const Text('Press me'))
-                              ]),
-                            );
-                          });
-                    },
-                    icon: const Icon(Icons.photo_camera))
+                                              setState(() {
+                                                recognizedImage =
+                                                    recognizedGameName;
+                                              });
+                                            },
+                                            child: const Text('Press me'))
+                                      ]),
+                                    );
+                                  });
+                            },
+                            icon: const Icon(Icons.photo_camera))))
               ],
             )
           ],
