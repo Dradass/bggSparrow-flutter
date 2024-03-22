@@ -62,69 +62,12 @@ class _LogScaffoldState extends State<LogScaffold> {
     'foo': true,
     'bar': false,
   };
-  //Uint8List imageFounded = Uint8List.fromList(new List.empty());
 
   Future<int?> TakePhoto() async {
-    // print("select test");
-
-    // final database = openDatabase(
-    //   // Set the path to the database. Note: Using the `join` function from the
-    //   // `path` package is best practice to ensure the path is correctly
-    //   // constructed for each platform.
-    //   join(await getDatabasesPath(), 'doggie_database.db'),
-    //   // When the database is first created, create a table to store dogs.
-    //   onCreate: (db, version) {
-    //     // Run the CREATE TABLE statement on the database.
-    //     return db.execute(
-    //       'CREATE TABLE dogs(id INTEGER PRIMARY KEY, name TEXT, age INTEGER)',
-    //     );
-    //   },
-    //   // Set the version. This executes the onCreate function and provides a
-    //   // path to perform database upgrades and downgrades.
-    //   version: 1,
-    // );
-    // final db = await database;
-    // final testinfo = await db.rawQuery('select * from dogs');
-    // print(testinfo);
-
-    //GameThingSQL.dropTable();
-    //GameThingSQL.createTable();
-
-    // print('http check');
-    // var response = await http
-    //     .get(Uri.parse('https://boardgamegeek.com//xmlapi2/things?id=14'));
-
-    // var gameItem = GameThing.fromXml(response.body);
-    // print(gameItem.name);
     var result = 0;
 
     print("---------------Got photo");
     try {
-      // Ensure that the camera is initialized.
-      //await _controller.initialize();
-
-      // Attempt to take a picture and then get the location
-      // where the image file is saved.
-      print('get image');
-
-      // ByteData bytesData = await rootBundle.load('assets/colt3.jpg');
-      // var bytes = Uint8List.sublistView(bytesData);
-
-      // var random = Random().nextInt(2);
-      // print(random);
-
-      // var url1 = "https://studiobombyx.com/assets/SSAP_3dbox_right-2.png";
-      // var url2 = "https://media.lavkaigr.ru/catalog/2017/12/colt-express.jpg";
-
-      // var finalUrl = random == 1 ? url1 : url2;
-      // print(finalUrl);
-
-      //---
-      // http.Response response = await http.get(Uri.parse(finalUrl));
-      // var bytes = response.bodyBytes; //Uint8List
-      // print("image bytes = ${bytes}");
-      //---
-
       var capturedImage = await _controller.takePicture();
       var bytes = await capturedImage.readAsBytes();
 
@@ -132,7 +75,7 @@ class _LogScaffoldState extends State<LogScaffold> {
       if (img == null || img?.height == null) return 0;
 
       //print("Height = ${WidgetsBinding.instance.window.physicalSize.height}");
-      var ratio = 1; // img.height / 150;
+      var ratio = img.height / 150;
       imageDart.Image resizedImg = imageDart.copyResize(img!,
           width: (img.width / ratio).round(),
           height: (img.height / ratio).round());
@@ -149,14 +92,6 @@ class _LogScaffoldState extends State<LogScaffold> {
       print("recognizedImage = $recognizedImage");
       Map<int, double> compareResults = {};
 
-      // var matchedGameID = await Isolate.run(() async {
-      //   return getBestComparedImage(bytes, getGamesWithThumb);
-      // });
-      //var matchedGameID = await getBestComparedImage(bytes, getGamesWithThumb);
-
-      // final image1 = Uri.parse(
-      //     "https://cf.geekdo-images.com/2HKX0QANk_DY7CIVK5O5fQ__thumb/img/zcjkqn_HYDIIyVAZaAxJIkurQRg=/fit-in/200x150/filters:strip_icc()/pic2869710.jpg");
-
       int bestGameID = 0;
       bestGameID = await getSimilarGameID(imgBytes, getGamesWithThumb);
       // bestGameID = await Isolate.run(() async {
@@ -164,9 +99,6 @@ class _LogScaffoldState extends State<LogScaffold> {
       // });
       print(bestGameID);
       result = bestGameID;
-      // print("matchedGameID = $matchedGameID");
-      // recognizedImage = matchedGameID.toString();
-      // result = matchedGameID!;
       return result;
     } catch (e) {
       // If an error occurs, log the error to the console.
@@ -175,30 +107,12 @@ class _LogScaffoldState extends State<LogScaffold> {
     }
   }
 
-  // /// Setup Camera
-  // ///
-  // initializeCamera() async {
-  //   final cameras = await availableCameras();
-  //   final camera = cameras[0];
-  //   _controller =
-  //       CameraController(camera, ResolutionPreset.high, enableAudio: false);
-  //   await _controller.initialize();
-  //   //_controller?.startImageStream(cameraStream);
-  //   setState(() {});
-  // }
-
   @override
   void initState() {
     print("INIT LOG");
     super.initState();
 
     initializeBggData();
-
-    // var imageTest = rootBundle
-    //     .load("assets/not_bad.png")
-    //     .then((value) => value.buffer.asUint8List());
-
-    // imageTest.then((value) => null);
 
     _controller = CameraController(cameras.first, ResolutionPreset.max,
         enableAudio: false);
@@ -262,8 +176,14 @@ class _LogScaffoldState extends State<LogScaffold> {
                         //color: Colors.green,
                         width: MediaQuery.of(context).size.width,
                         height: MediaQuery.of(context).size.height,
-                        child: IconButton(
+                        child: ElevatedButton.icon(
                             onPressed: () async {
+                              if (recognizedGameId <= 0)
+                                ScaffoldMessenger.of(context)
+                                    .showSnackBar(SnackBar(
+                                  content:
+                                      Text('No game was chosen to log play'),
+                                ));
                               List<Map> bggPlayers = [];
                               for (var player in players.where(
                                   (element) => element['isChecked'] == true)) {
@@ -276,10 +196,26 @@ class _LogScaffoldState extends State<LogScaffold> {
                               logData['players'] = bggPlayers;
                               logData['objectid'] = recognizedGameId;
                               logData['length'] = durationCurrentValue;
+                              //"playdate": "2024-03-15",
+                              //"date": "2024-02-28T05:00:00.000Z",
                               String stringData = json.encode(logData);
                               print(stringData);
                               await sendLogRequest(stringData);
+                              ScaffoldMessenger.of(context)
+                                  .showSnackBar(SnackBar(
+                                content: Text('Request was sent'),
+                              ));
                             },
+                            style: ButtonStyle(
+                                backgroundColor:
+                                    MaterialStateProperty.all(Colors.amber),
+                                shape: MaterialStateProperty.all<
+                                        RoundedRectangleBorder>(
+                                    RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.zero,
+                                        side: BorderSide(
+                                            color: Colors.black12)))),
+                            label: Text("Log play"),
                             icon: Icon(Icons.send_and_archive)))),
                 Flexible(
                     flex: 1,
@@ -287,7 +223,7 @@ class _LogScaffoldState extends State<LogScaffold> {
                         //color: Colors.tealAccent,
                         width: MediaQuery.of(context).size.width,
                         height: MediaQuery.of(context).size.height,
-                        child: IconButton(
+                        child: ElevatedButton.icon(
                             onPressed: () async {
                               players = await FillPlayers();
                               showDialog(
@@ -311,6 +247,16 @@ class _LogScaffoldState extends State<LogScaffold> {
                                     });
                                   });
                             },
+                            style: ButtonStyle(
+                                backgroundColor:
+                                    MaterialStateProperty.all(Colors.amber),
+                                shape: MaterialStateProperty.all<
+                                        RoundedRectangleBorder>(
+                                    RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.zero,
+                                        side: BorderSide(
+                                            color: Colors.black12)))),
+                            label: Text("Chose players"),
                             icon: Icon(Icons.people)))),
                 Flexible(
                     flex: 1,
@@ -318,16 +264,21 @@ class _LogScaffoldState extends State<LogScaffold> {
                         //color: Colors.blueAccent,
                         width: MediaQuery.of(context).size.width,
                         height: MediaQuery.of(context).size.height,
-                        child: Slider(
-                          value: durationCurrentValue,
-                          max: 500,
-                          divisions: 50,
-                          label: durationCurrentValue.round().toString(),
-                          onChanged: (double value) {
-                            setState(() {
-                              durationCurrentValue = value;
-                            });
-                          },
+                        child: Column(
+                          children: [
+                            Slider(
+                              value: durationCurrentValue,
+                              max: 500,
+                              divisions: 50,
+                              label: durationCurrentValue.round().toString(),
+                              onChanged: (double value) {
+                                setState(() {
+                                  durationCurrentValue = value;
+                                });
+                              },
+                            ),
+                            Text("Duration"),
+                          ],
                         ))),
                 Flexible(
                     flex: 1,
@@ -335,13 +286,13 @@ class _LogScaffoldState extends State<LogScaffold> {
                         //color: Colors.tealAccent,
                         width: MediaQuery.of(context).size.width,
                         height: MediaQuery.of(context).size.height,
-                        child: IconButton(
+                        child: ElevatedButton.icon(
                             onPressed: () {
                               showDialog(
                                   context: context,
                                   builder: (BuildContext) {
                                     return AlertDialog(
-                                      title: Text('Take photo'),
+                                      title: const Text('Take photo'),
                                       content: Column(children: [
                                         Text(recognizedImage),
                                         Container(
@@ -349,39 +300,50 @@ class _LogScaffoldState extends State<LogScaffold> {
                                           child: CameraPreview(_controller),
                                         ),
                                         ElevatedButton(
-                                            onPressed: () async {
-                                              Navigator.of(context,
-                                                      rootNavigator: true)
-                                                  .pop();
-                                              setState(() {
-                                                recognizedImage = "Recognizing";
-                                              });
-                                              var gameId = await TakePhoto();
-                                              var recognizedGameName =
-                                                  "Cant find similar game";
+                                          onPressed: () async {
+                                            Navigator.of(context,
+                                                    rootNavigator: true)
+                                                .pop();
+                                            setState(() {
+                                              recognizedImage = "Recognizing";
+                                            });
+                                            var gameId = await TakePhoto();
+                                            var recognizedGameName =
+                                                "Cant find similar game";
 
-                                              if (gameId != null) {
-                                                var recognizedGame =
-                                                    await GameThingSQL
-                                                        .selectGameByID(gameId);
-                                                if (recognizedGame != null) {
-                                                  recognizedGameId =
-                                                      recognizedGame.id;
-                                                  recognizedGameName =
-                                                      recognizedGame.name;
-                                                }
+                                            if (gameId != null) {
+                                              var recognizedGame =
+                                                  await GameThingSQL
+                                                      .selectGameByID(gameId);
+                                              if (recognizedGame != null) {
+                                                recognizedGameId =
+                                                    recognizedGame.id;
+                                                recognizedGameName =
+                                                    recognizedGame.name;
                                               }
+                                            }
 
-                                              setState(() {
-                                                recognizedImage =
-                                                    recognizedGameName;
-                                              });
-                                            },
-                                            child: const Text('Press me'))
+                                            setState(() {
+                                              recognizedImage =
+                                                  recognizedGameName;
+                                            });
+                                          },
+                                          child: const Text('Press me'),
+                                        )
                                       ]),
                                     );
                                   });
                             },
+                            style: ButtonStyle(
+                                backgroundColor:
+                                    MaterialStateProperty.all(Colors.amber),
+                                shape: MaterialStateProperty.all<
+                                        RoundedRectangleBorder>(
+                                    RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.zero,
+                                        side: BorderSide(
+                                            color: Colors.black12)))),
+                            label: Text("Recognize game"),
                             icon: const Icon(Icons.photo_camera))))
               ],
             )
@@ -414,8 +376,6 @@ Future<int> getSimilarGameID(
     for (final gameImage in getGamesWithThumb) {
       if (gameImage.thumbBinary == null) continue;
       final binaryImage = base64Decode(gameImage.thumbBinary!);
-      // imageDart.Image? img = imageDart.decodeImage(binaryImage);
-      // var imgBytes = imageDart.encodeJpg(imageDart.grayscale(img!));
 
       final similarity = await matching.similarity(binaryImage);
       print(
