@@ -3,6 +3,7 @@
 import 'dart:io';
 import 'dart:isolate';
 
+import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_application_1/models/game_thing.dart';
@@ -140,7 +141,7 @@ class _LogScaffoldState extends State<LogScaffold> {
     return Scaffold(
         backgroundColor: Colors.blue,
         appBar: AppBar(
-          title: Text("Some app bar text"),
+          title: const Text("Log play screen"),
           centerTitle: true,
           backgroundColor: Colors.amberAccent,
         ),
@@ -176,88 +177,18 @@ class _LogScaffoldState extends State<LogScaffold> {
                         //color: Colors.green,
                         width: MediaQuery.of(context).size.width,
                         height: MediaQuery.of(context).size.height,
-                        child: ElevatedButton.icon(
-                            onPressed: () async {
-                              if (recognizedGameId <= 0)
-                                ScaffoldMessenger.of(context)
-                                    .showSnackBar(SnackBar(
-                                  content:
-                                      Text('No game was chosen to log play'),
-                                ));
-                              List<Map> bggPlayers = [];
-                              for (var player in players.where(
-                                  (element) => element['isChecked'] == true)) {
-                                bggPlayers.add({
-                                  'username': player['username'],
-                                  'userid': player['userid'],
-                                  'name': player['name']
-                                });
-                              }
-                              logData['players'] = bggPlayers;
-                              logData['objectid'] = recognizedGameId;
-                              logData['length'] = durationCurrentValue;
-                              //"playdate": "2024-03-15",
-                              //"date": "2024-02-28T05:00:00.000Z",
-                              String stringData = json.encode(logData);
-                              print(stringData);
-                              await sendLogRequest(stringData);
-                              ScaffoldMessenger.of(context)
-                                  .showSnackBar(SnackBar(
-                                content: Text('Request was sent'),
-                              ));
-                            },
-                            style: ButtonStyle(
-                                backgroundColor:
-                                    MaterialStateProperty.all(Colors.amber),
-                                shape: MaterialStateProperty.all<
-                                        RoundedRectangleBorder>(
-                                    RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.zero,
-                                        side: BorderSide(
-                                            color: Colors.black12)))),
-                            label: Text("Log play"),
-                            icon: Icon(Icons.send_and_archive)))),
-                Flexible(
-                    flex: 1,
-                    child: Container(
-                        //color: Colors.tealAccent,
-                        width: MediaQuery.of(context).size.width,
-                        height: MediaQuery.of(context).size.height,
-                        child: ElevatedButton.icon(
-                            onPressed: () async {
-                              players = await FillPlayers();
-                              showDialog(
-                                  context: context,
-                                  builder: (BuildContext) {
-                                    return StatefulBuilder(
-                                        builder: (context, setState) {
-                                      return AlertDialog(
-                                          title: Text("Your friends"),
-                                          content: Column(
-                                              children: players.map((player) {
-                                            return CheckboxListTile(
-                                                title: Text(player['name']),
-                                                value: player['isChecked'],
-                                                onChanged: (bool? value) {
-                                                  setState(() {
-                                                    player['isChecked'] = value;
-                                                  });
-                                                });
-                                          }).toList()));
-                                    });
-                                  });
-                            },
-                            style: ButtonStyle(
-                                backgroundColor:
-                                    MaterialStateProperty.all(Colors.amber),
-                                shape: MaterialStateProperty.all<
-                                        RoundedRectangleBorder>(
-                                    RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.zero,
-                                        side: BorderSide(
-                                            color: Colors.black12)))),
-                            label: Text("Chose players"),
-                            icon: Icon(Icons.people)))),
+                        child: TextField(
+                          keyboardType: TextInputType.multiline,
+                          maxLines: 5,
+                          decoration: InputDecoration(
+                            //prefixIcon: Icon(Icons.search),
+                            suffixIcon: Icon(Icons.clear),
+                            labelText: '#bggSparrow',
+                            hintText: 'Enter your comments',
+                            //helperText: 'supporting text',
+                            border: OutlineInputBorder(),
+                          ),
+                        ))),
                 Flexible(
                     flex: 1,
                     child: Container(
@@ -280,6 +211,110 @@ class _LogScaffoldState extends State<LogScaffold> {
                             Text("Duration"),
                           ],
                         ))),
+                Flexible(
+                    flex: 1,
+                    child: Container(
+                        //color: Colors.green,
+                        width: MediaQuery.of(context).size.width,
+                        height: MediaQuery.of(context).size.height,
+                        child: ElevatedButton.icon(
+                            onPressed: () async {
+                              if (recognizedGameId <= 0)
+                                ScaffoldMessenger.of(context)
+                                    .showSnackBar(SnackBar(
+                                  content:
+                                      Text('No game was chosen to log play'),
+                                ));
+                              List<Map> bggPlayers = [];
+                              for (var player in players.where(
+                                  (element) => element['isChecked'] == true)) {
+                                bggPlayers.add({
+                                  'username': player['username'],
+                                  'userid': player['userid'],
+                                  'name': player['name'],
+                                  'win': player['win'] ? 1 : 0
+                                });
+                              }
+                              final nowData = DateFormat('yyyy-MM-dd')
+                                  .format(DateTime.now());
+                              logData['players'] = bggPlayers;
+                              logData['objectid'] = recognizedGameId;
+                              logData['length'] = durationCurrentValue;
+                              logData['playdate'] = nowData;
+                              logData['date'] = "${nowData}T05:00:00.000Z";
+                              String stringData = json.encode(logData);
+                              print(stringData);
+                              await sendLogRequest(stringData);
+                              ScaffoldMessenger.of(context)
+                                  .showSnackBar(const SnackBar(
+                                content: Text('Request was sent'),
+                              ));
+                            },
+                            style: ButtonStyle(
+                                backgroundColor:
+                                    MaterialStateProperty.all(Colors.amber),
+                                shape: MaterialStateProperty.all<
+                                        RoundedRectangleBorder>(
+                                    RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.zero,
+                                        side: BorderSide(
+                                            color: Colors.black12)))),
+                            label: Text("Log play"),
+                            icon: Icon(Icons.send_and_archive)))),
+                Flexible(
+                    flex: 1,
+                    child: Container(
+                        //color: Colors.tealAccent,
+                        width: MediaQuery.of(context).size.width,
+                        height: MediaQuery.of(context).size.height,
+                        child: ElevatedButton.icon(
+                            onPressed: () async {
+                              print(
+                                  "DATE = ${DateFormat('yyyy-MM-dd').format(DateTime.now())}");
+                              players = await FillPlayers();
+                              showDialog(
+                                  context: context,
+                                  builder: (BuildContext) {
+                                    return StatefulBuilder(
+                                        builder: (context, setState) {
+                                      return AlertDialog(
+                                          title: Text("Your friends"),
+                                          content: Column(
+                                              children: players.map((player) {
+                                            return CheckboxListTile(
+                                              title: Row(children: [
+                                                ChoiceChip(
+                                                    label: Text("Win?"),
+                                                    selected: player['win'],
+                                                    onSelected: (bool? value) {
+                                                      setState(() {
+                                                        player['win'] = value;
+                                                      });
+                                                    }),
+                                                Text(player['name'])
+                                              ]),
+                                              value: player['isChecked'],
+                                              onChanged: (bool? value) {
+                                                setState(() {
+                                                  player['isChecked'] = value;
+                                                });
+                                              },
+                                            );
+                                          }).toList()));
+                                    });
+                                  });
+                            },
+                            style: ButtonStyle(
+                                backgroundColor:
+                                    MaterialStateProperty.all(Colors.amber),
+                                shape: MaterialStateProperty.all<
+                                        RoundedRectangleBorder>(
+                                    RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.zero,
+                                        side: BorderSide(
+                                            color: Colors.black12)))),
+                            label: Text("Chose players"),
+                            icon: Icon(Icons.people)))),
                 Flexible(
                     flex: 1,
                     child: Container(

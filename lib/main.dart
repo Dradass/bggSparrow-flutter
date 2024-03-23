@@ -9,6 +9,7 @@ import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
 import '../bggApi/bggApi.dart';
+import '../navigation_bar.dart';
 
 late List<CameraDescription> cameras;
 
@@ -18,7 +19,7 @@ Future<void> main() async {
   final firstCamera = cameras.first;
 
   runApp(MaterialApp(
-    home: LogScaffold(),
+    home: NavigationExample(),
   ));
 
   // final database = openDatabase(

@@ -45,6 +45,7 @@ dependencies:
   http: ^0.13.4
   flutter_pixelmatching: ^1.0.0
   video_player: ^2.8.3
+  intl: ^0.19.0
 
 dependency_overrides:
   camera_android:

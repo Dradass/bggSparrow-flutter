@@ -93,6 +93,7 @@ class PlayersSQL {
         'name': player.name,
         'id': player.id,
         'isChecked': false,
+        'win': false,
         'username': player.username,
         'userid': player.userid
       });
