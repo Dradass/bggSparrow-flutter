@@ -38,7 +38,8 @@ class _NavigationExampleState extends State<NavigationExample> {
             label: 'Statistics',
           ),
           NavigationDestination(
-            icon: Icon(Icons.messenger_sharp),
+            selectedIcon: Icon(Icons.smart_toy),
+            icon: Icon(Icons.casino_outlined),
             label: 'Play helper',
           ),
         ],

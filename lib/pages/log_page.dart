@@ -278,9 +278,12 @@ class _LogScaffoldState extends State<LogScaffold> {
                                     return StatefulBuilder(
                                         builder: (context, setState) {
                                       return AlertDialog(
+                                          insetPadding: EdgeInsets.zero,
                                           title: Text("Your friends"),
-                                          content: Column(
-                                              children: players.map((player) {
+                                          content: SingleChildScrollView(
+                                              child: Column(
+                                                  children:
+                                                      players.map((player) {
                                             return CheckboxListTile(
                                               title: Row(children: [
                                                 ChoiceChip(
@@ -291,7 +294,12 @@ class _LogScaffoldState extends State<LogScaffold> {
                                                         player['win'] = value;
                                                       });
                                                     }),
-                                                Text(player['name'])
+                                                Expanded(
+                                                    child: Text(
+                                                  player['name'],
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                ))
                                               ]),
                                               value: player['isChecked'],
                                               onChanged: (bool? value) {
@@ -300,7 +308,7 @@ class _LogScaffoldState extends State<LogScaffold> {
                                                 });
                                               },
                                             );
-                                          }).toList()));
+                                          }).toList())));
                                     });
                                   });
                             },
