@@ -12,14 +12,33 @@ import '../bggApi/bggApi.dart';
 import '../navigation_bar.dart';
 
 late List<CameraDescription> cameras;
+const primaryTextColor = Color.fromARGB(255, 85, 92, 89);
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   cameras = await availableCameras();
-  final firstCamera = cameras.first;
+  //final firstCamera = cameras.first;
 
   runApp(MaterialApp(
-    home: NavigationExample(),
+    theme: ThemeData(
+        //primaryColor: Color.fromARGB(255, 219, 202, 124),
+        textTheme: TextTheme()
+            .apply(bodyColor: primaryTextColor, displayColor: Colors.blue),
+        colorScheme: const ColorScheme(
+            brightness: Brightness.light,
+            background: Color.fromARGB(255, 218, 245, 234),
+            onBackground: Color.fromARGB(255, 16, 50, 73),
+            primary: primaryTextColor,
+            onPrimary: Color.fromARGB(255, 183, 187, 187),
+            secondary: Color.fromARGB(255, 46, 207, 127),
+            onSecondary: primaryTextColor,
+            error: Colors.red,
+            onError: primaryTextColor,
+            surface: Color.fromARGB(255, 114, 223, 160),
+            onSurface: primaryTextColor),
+        //scaffoldBackgroundColor: Colors.deepPurple,
+        secondaryHeaderColor: Color.fromARGB(255, 43, 132, 190)),
+    home: const NavigationExample(),
   ));
 
   // final database = openDatabase(

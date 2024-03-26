@@ -18,13 +18,13 @@ class _NavigationExampleState extends State<NavigationExample> {
     final ThemeData theme = Theme.of(context);
     return Scaffold(
       bottomNavigationBar: NavigationBar(
-        backgroundColor: Colors.amber,
+        //backgroundColor: Colors.amber,
         onDestinationSelected: (int index) {
           setState(() {
             currentPageIndex = index;
           });
         },
-        indicatorColor: Colors.amber,
+        //indicatorColor: Colors.amber,
         selectedIndex: currentPageIndex,
         destinations: const <Widget>[
           NavigationDestination(

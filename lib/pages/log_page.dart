@@ -14,7 +14,7 @@ import 'package:camera/camera.dart';
 import 'package:path/path.dart';
 import '../db/game_things_sql.dart';
 import '../db/players_sql.dart';
-import '../models/game_model.dart';
+import '../db/location_sql.dart';
 import '../models/game_thing.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
@@ -40,6 +40,7 @@ class _LogScaffoldState extends State<LogScaffold> {
   double durationCurrentValue = 60;
   Uint8List imageTest = Uint8List.fromList(new List.empty());
   List<Map> players = [];
+  List<Map> locations = [];
   DurationSlider durationSlider = const DurationSlider();
 
   var logData = {
@@ -139,11 +140,12 @@ class _LogScaffoldState extends State<LogScaffold> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: Colors.blue,
+        //backgroundColor: Color.fromARGB(255, 96, 193, 231),
         appBar: AppBar(
           title: const Text("Log play screen"),
           centerTitle: true,
-          backgroundColor: Colors.amberAccent,
+          //backgroundColor: Theme.of(context).primaryColor,
+          //backgroundColor: Theme.of(context).primaryColor,
         ),
         body: SafeArea(
             child: Row(
@@ -152,6 +154,10 @@ class _LogScaffoldState extends State<LogScaffold> {
             Column(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
+                ElevatedButton(
+                  child: Text("Load all data"),
+                  onPressed: (getAllPlaysFromServer),
+                ),
                 Flexible(
                     flex: 1,
                     child: Container(
@@ -174,10 +180,79 @@ class _LogScaffoldState extends State<LogScaffold> {
                 Flexible(
                     flex: 1,
                     child: Container(
+                        //color: Colors.tealAccent,
+                        width: MediaQuery.of(context).size.width,
+                        height: MediaQuery.of(context).size.height,
+                        child: ElevatedButton.icon(
+                            onPressed: () async {
+                              print(
+                                  "DATE = ${DateFormat('yyyy-MM-dd').format(DateTime.now())}");
+                              if (locations.isEmpty)
+                                locations = await getLocalLocations();
+                              showDialog(
+                                  context: context,
+                                  builder: (BuildContext) {
+                                    return StatefulBuilder(
+                                        builder: (context, setState) {
+                                      return AlertDialog(
+                                          //insetPadding: EdgeInsets.zero,
+                                          title: Text("Your locations"),
+                                          content: SingleChildScrollView(
+                                              child: Column(
+                                                  children:
+                                                      locations.map((location) {
+                                            return ElevatedButton(
+                                              child: Row(children: [
+                                                ChoiceChip(
+                                                    label: Text("Default"),
+                                                    selected:
+                                                        location['default'],
+                                                    onSelected: (bool? value) {
+                                                      setState(() {
+                                                        location['default'] =
+                                                            value;
+                                                      });
+                                                    }),
+                                                Expanded(
+                                                    child: Text(
+                                                  location['name'],
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                ))
+                                              ]),
+                                              //value: location['isChecked'],
+                                              onPressed: () {
+                                                Navigator.of(context,
+                                                        rootNavigator: true)
+                                                    .pop();
+                                                for (var checkedLocation
+                                                    in locations) {
+                                                  checkedLocation['isChecked'] =
+                                                      false;
+                                                }
+                                                location['isChecked'] = true;
+                                              },
+                                            );
+                                          }).toList())));
+                                    });
+                                  });
+                            },
+                            style: ButtonStyle(
+                                shape: MaterialStateProperty.all<
+                                        RoundedRectangleBorder>(
+                                    RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.zero,
+                                        side: BorderSide(
+                                            color: Colors.black12)))),
+                            label: Text("Chose locations"),
+                            icon: Icon(Icons.home)))),
+                Flexible(
+                    flex: 2,
+                    child: Container(
                         //color: Colors.green,
                         width: MediaQuery.of(context).size.width,
                         height: MediaQuery.of(context).size.height,
-                        child: TextField(
+                        child: const TextField(
                           keyboardType: TextInputType.multiline,
                           maxLines: 5,
                           decoration: InputDecoration(
@@ -208,7 +283,7 @@ class _LogScaffoldState extends State<LogScaffold> {
                                 });
                               },
                             ),
-                            Text("Duration"),
+                            const Text("Duration"),
                           ],
                         ))),
                 Flexible(
@@ -251,8 +326,6 @@ class _LogScaffoldState extends State<LogScaffold> {
                               ));
                             },
                             style: ButtonStyle(
-                                backgroundColor:
-                                    MaterialStateProperty.all(Colors.amber),
                                 shape: MaterialStateProperty.all<
                                         RoundedRectangleBorder>(
                                     RoundedRectangleBorder(
@@ -271,14 +344,15 @@ class _LogScaffoldState extends State<LogScaffold> {
                             onPressed: () async {
                               print(
                                   "DATE = ${DateFormat('yyyy-MM-dd').format(DateTime.now())}");
-                              players = await FillPlayers();
+                              if (players.isEmpty)
+                                players = await getLocalPlayers();
                               showDialog(
                                   context: context,
                                   builder: (BuildContext) {
                                     return StatefulBuilder(
                                         builder: (context, setState) {
                                       return AlertDialog(
-                                          insetPadding: EdgeInsets.zero,
+                                          //insetPadding: EdgeInsets.zero,
                                           title: Text("Your friends"),
                                           content: SingleChildScrollView(
                                               child: Column(
@@ -313,8 +387,6 @@ class _LogScaffoldState extends State<LogScaffold> {
                                   });
                             },
                             style: ButtonStyle(
-                                backgroundColor:
-                                    MaterialStateProperty.all(Colors.amber),
                                 shape: MaterialStateProperty.all<
                                         RoundedRectangleBorder>(
                                     RoundedRectangleBorder(
@@ -378,8 +450,8 @@ class _LogScaffoldState extends State<LogScaffold> {
                                   });
                             },
                             style: ButtonStyle(
-                                backgroundColor:
-                                    MaterialStateProperty.all(Colors.amber),
+                                // backgroundColor: MaterialStateProperty.all(
+                                //     Theme.of(context).primaryColor),
                                 shape: MaterialStateProperty.all<
                                         RoundedRectangleBorder>(
                                     RoundedRectangleBorder(

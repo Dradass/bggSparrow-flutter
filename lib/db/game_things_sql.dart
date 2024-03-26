@@ -19,6 +19,8 @@ class GameThingSQL {
         "CREATE TABLE IF NOT EXISTS Games(id INTEGER PRIMARY KEY, name TEXT NOT NULL, image TEXT NOT NULL, thumbnail TEXT NOT NULL, thumbbin TEXT);");
     await db.execute(
         "CREATE TABLE IF NOT EXISTS Players(id INTEGER PRIMARY KEY, name TEXT NOT NULL, userid INTEGER, username TEXT);");
+    await db.execute(
+        "CREATE TABLE IF NOT EXISTS Locations(id INTEGER PRIMARY KEY, name TEXT NOT NULL);");
     print('TABLE CREATED');
   }
 

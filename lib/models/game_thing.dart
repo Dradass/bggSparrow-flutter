@@ -62,18 +62,22 @@ class GameThing {
   }
 
   void CreateBinaryThumb() async {
-    http.Response response = await http.get(Uri.parse(thumbnail));
-    var imageBytes = response.bodyBytes; //Uint8List
-    var bodyBytes = base64Encode(imageBytes);
+    try {
+      http.Response response = await http.get(Uri.parse(thumbnail));
+      var imageBytes = response.bodyBytes; //Uint8List
+      var bodyBytes = base64Encode(imageBytes);
 
-    final gameThing = GameThing(
-        name: name,
-        id: id,
-        thumbnail: thumbnail,
-        image: image,
-        thumbBinary: bodyBytes);
-    print("Create thumb for $name");
-    GameThingSQL.updateGame(gameThing);
+      final gameThing = GameThing(
+          name: name,
+          id: id,
+          thumbnail: thumbnail,
+          image: image,
+          thumbBinary: bodyBytes);
+      print("Create thumb for $name");
+      GameThingSQL.updateGame(gameThing);
+    } catch (e) {
+      print("Error while creating thumb: $e");
+    }
   }
 
   Map<String, dynamic> toJson() => {
