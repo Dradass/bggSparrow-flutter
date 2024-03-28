@@ -11,7 +11,6 @@ import 'package:flutter_application_1/models/game_thing.dart';
 import 'package:image/image.dart' as imageDart;
 import 'package:flutter_application_1/main.dart';
 import 'package:camera/camera.dart';
-//import 'package:image_compare/image_compare.dart';
 import 'package:path/path.dart';
 import '../db/game_things_sql.dart';
 import '../db/players_sql.dart';
@@ -179,20 +178,31 @@ class _LogScaffoldState extends State<LogScaffold> {
                   child: Text("Load all data"),
                   onPressed: (getAllPlaysFromServer),
                 ),
-                // ElevatedButton(
-                //   child: Text("del tables"),
-                //   onPressed: () {
-                //     GameThingSQL.deleteDB();
-                //   },
-                // ),
-                // ElevatedButton(
-                //   child: Text("create tables"),
-                //   onPressed: () {
-                //     GameThingSQL.createTable();
-                //     PlayersSQL.createTable();
-                //     LocationSQL.createTable();
-                //   },
-                // ),
+                ElevatedButton(
+                  child: Text("show games"),
+                  onPressed: () async {
+                    var allGames = await GameThingSQL.getAllGames();
+                    if (allGames == null) return;
+                    for (var game in allGames) {
+                      print(
+                          "Game = ${game.name}, min = ${game.minPlayers}, max = ${game.maxPlayers}");
+                    }
+                  },
+                ),
+                ElevatedButton(
+                  child: Text("del tables"),
+                  onPressed: () {
+                    GameThingSQL.deleteDB();
+                  },
+                ),
+                ElevatedButton(
+                  child: Text("create tables"),
+                  onPressed: () {
+                    GameThingSQL.createTable();
+                    PlayersSQL.createTable();
+                    LocationSQL.createTable();
+                  },
+                ),
                 Flexible(
                     flex: 1,
                     child: Container(
