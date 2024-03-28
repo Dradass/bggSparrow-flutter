@@ -15,7 +15,7 @@ class GameThingSQL {
 
   static void _onCreate(Database db, int version) async {
     await db.execute(
-        "CREATE TABLE IF NOT EXISTS Games(id INTEGER PRIMARY KEY, name TEXT NOT NULL, image TEXT NOT NULL, thumbnail TEXT NOT NULL, thumbbin TEXT, minPlayers INTEGER, maxPlayers INTEGER);");
+        "CREATE TABLE IF NOT EXISTS Games(id INTEGER PRIMARY KEY, name TEXT NOT NULL, image TEXT NOT NULL, thumbnail TEXT NOT NULL, thumbbin TEXT, minPlayers INTEGER, maxPlayers INTEGER, owned INTEGER);");
     await db.execute(
         "CREATE TABLE Players(id INTEGER PRIMARY KEY, name TEXT NOT NULL, userid INTEGER, username TEXT);");
     await db.execute(
@@ -26,7 +26,7 @@ class GameThingSQL {
   static Future<void> createTable() async {
     final db = await _getDB();
     await db.execute(
-        "CREATE TABLE IF NOT EXISTS Games(id INTEGER PRIMARY KEY, name TEXT NOT NULL, image TEXT NOT NULL, thumbnail TEXT NOT NULL, thumbbin TEXT, minPlayers INTEGER, maxPlayers INTEGER);");
+        "CREATE TABLE IF NOT EXISTS Games(id INTEGER PRIMARY KEY, name TEXT NOT NULL, image TEXT NOT NULL, thumbnail TEXT NOT NULL, thumbbin TEXT, minPlayers INTEGER, maxPlayers INTEGER, owned INTEGER);");
     // await db.execute(
     //     "CREATE TABLE Games(id INTEGER PRIMARY KEY, name TEXT NOT NULL, image TEXT NOT NULL, thumbnail TEXT NOT NULL, thumbbin TEXT);");
     // await db.execute(

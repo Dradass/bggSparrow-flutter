@@ -11,6 +11,7 @@ class GameThing {
   final String? thumbBinary;
   final int minPlayers;
   final int maxPlayers;
+  final int owned;
 
   const GameThing(
       {required this.name,
@@ -19,7 +20,8 @@ class GameThing {
       required this.image,
       this.thumbBinary,
       required this.minPlayers,
-      required this.maxPlayers});
+      required this.maxPlayers,
+      required this.owned});
 
   factory GameThing.fromJson(Map<String, dynamic> json) {
     return GameThing(
@@ -29,7 +31,8 @@ class GameThing {
         image: json['image'],
         thumbBinary: json['thumbbin'],
         minPlayers: json['minPlayers'],
-        maxPlayers: json['maxPlayers']);
+        maxPlayers: json['maxPlayers'],
+        owned: json['owned']);
   }
 
   factory GameThing.fromXml(String xmlBody) {
@@ -58,7 +61,8 @@ class GameThing {
         thumbnail: thumbnail,
         image: image,
         minPlayers: minPlayers,
-        maxPlayers: maxPlayers);
+        maxPlayers: maxPlayers,
+        owned: 0);
   }
 
   // factory GameThing.fromXmlCollection(String xmlBody) {
@@ -89,7 +93,8 @@ class GameThing {
           image: image,
           thumbBinary: bodyBytes,
           minPlayers: minPlayers,
-          maxPlayers: maxPlayers);
+          maxPlayers: maxPlayers,
+          owned: owned);
       print("Create thumb for $name");
       GameThingSQL.updateGame(gameThing);
     } catch (e) {
@@ -104,6 +109,7 @@ class GameThing {
         'thumbnail': thumbnail,
         'thumbbin': thumbBinary,
         'minPlayers': minPlayers,
-        'maxPlayers': maxPlayers
+        'maxPlayers': maxPlayers,
+        'owned': owned
       };
 }

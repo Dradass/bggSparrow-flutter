@@ -24,6 +24,8 @@ Future<void> ImportGameCollectionFromBGG() async {
       final objectName = item.findElements('name').first.text;
       final thumbnail = item.findElements('thumbnail').first.text;
       final image = item.findElements('image').first.text;
+      final owned = int.parse(
+          item.findElements('status').first.getAttribute('own').toString());
       var minPlayers = 0;
       var maxPlayers = 0;
       final gameThingResponse = await http.get(
@@ -39,7 +41,8 @@ Future<void> ImportGameCollectionFromBGG() async {
           thumbnail: thumbnail,
           image: image,
           minPlayers: minPlayers,
-          maxPlayers: maxPlayers);
+          maxPlayers: maxPlayers,
+          owned: owned);
       GameThingSQL.addGame(gameThing);
     }
   }

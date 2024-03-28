@@ -15,6 +15,7 @@ class _GameHelperState extends State<GameHelper> {
   String chosenGame = "No game was chosen";
   RangeValues minRangeValues = const RangeValues(1, 4);
   RangeValues maxRangeValues = const RangeValues(1, 4);
+  bool? onlyOwnedGames = true;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -73,6 +74,14 @@ class _GameHelperState extends State<GameHelper> {
                         const Text("Max players count"),
                       ],
                     ))),
+            Checkbox(
+              value: onlyOwnedGames,
+              onChanged: (bool? value) {
+                setState(() {
+                  onlyOwnedGames = value;
+                });
+              },
+            ),
             ElevatedButton(
               child: Text("Chose game"),
               onPressed: () async {
@@ -86,6 +95,9 @@ class _GameHelperState extends State<GameHelper> {
                       game.minPlayers <= minRangeValues.end.round() &&
                       game.maxPlayers >= maxRangeValues.start.round() &&
                       game.maxPlayers <= maxRangeValues.end.round()) {
+                    if (onlyOwnedGames!) {
+                      if (game.owned == 0) continue;
+                    }
                     filteredGames.add(game);
                   }
                   if (filteredGames.isEmpty) {
