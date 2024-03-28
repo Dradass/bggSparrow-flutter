@@ -8,7 +8,6 @@ class LocationSQL {
   static const String _dbName = "Notes.db";
 
   static Future<Database> _getDB() async {
-    print('db creating');
     return openDatabase(join(await getDatabasesPath(), _dbName),
         onCreate: (db, version) async {}, version: _version);
   }
@@ -16,7 +15,7 @@ class LocationSQL {
   static void createTable() async {
     final db = await _getDB();
     await db.execute(
-        "CREATE TABLE Locations(id INTEGER PRIMARY KEY, name TEXT NOT NULL);");
+        "CREATE TABLE Locations(id INTEGER PRIMARY KEY, name TEXT NOT NULL, isDefault INTEGER);");
   }
 
   static void dropTable() async {
@@ -61,10 +60,9 @@ class LocationSQL {
         await db.rawQuery('SELECT * FROM Locations');
     if (result.isEmpty) return 0;
     return result.length;
-    //return null;
   }
 
-  static Future<List<Map>> getAllPlayers() async {
+  static Future<List<Map>> getAllLocations() async {
     final db = await _getDB();
     List<Map> locations = [];
     List<Map<String, dynamic>> result =
@@ -75,10 +73,60 @@ class LocationSQL {
       locations.add({
         'name': location.name,
         'id': location.id,
-        'default': false,
-        'isChecked': false
+        'isDefault': location.isDefault
       });
     }
     return locations;
+  }
+
+  static Future<Location?> getDefaultLocation() async {
+    final db = await _getDB();
+    List<Map> locations = [];
+    List<Map<String, dynamic>> result =
+        await db.rawQuery('SELECT * FROM Locations WHERE isDefault=1');
+    print(result);
+    if (result.isEmpty) return null;
+    for (var locationResult in result) {
+      var location = Location.fromJson(locationResult);
+      locations.add({
+        'name': location.name,
+        'id': location.id,
+        'isDefault': location.isDefault
+      });
+    }
+    return Location.fromJson(result.first);
+  }
+
+  static Location? getDefaultLocationSync() {
+    final dbRes = _getDB();
+    dbRes.then((db) {
+      List<Map> locations = [];
+      var queryQesult =
+          db.rawQuery('SELECT * FROM Locations WHERE isDefault=1');
+      queryQesult.then((result) {
+        if (result.isEmpty) return null;
+        for (var locationResult in result) {
+          var location = Location.fromJson(locationResult);
+          locations.add({
+            'name': location.name,
+            'id': location.id,
+            'isDefault': location.isDefault
+          });
+        }
+        print(result.first);
+        return Location.fromJson(result.first);
+      });
+    });
+    return null;
+  }
+
+  static void updateDefaultLocation(Location location) async {
+    var defaultLocation = await getDefaultLocation();
+    if (defaultLocation == null) return;
+
+    updateLocation(Location(
+        id: defaultLocation.id, name: defaultLocation.name, isDefault: 0));
+
+    updateLocation(location);
   }
 }

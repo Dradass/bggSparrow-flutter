@@ -24,14 +24,27 @@ Future<void> ImportGameCollectionFromBGG() async {
       final objectName = item.findElements('name').first.text;
       final thumbnail = item.findElements('thumbnail').first.text;
       final image = item.findElements('image').first.text;
+      var minPlayers = 0;
+      var maxPlayers = 0;
+      final gameThingResponse = await http.get(
+          Uri.parse('https://boardgamegeek.com//xmlapi2/things?id=$objectId'));
+      if (gameThingResponse.statusCode == 200) {
+        final gameThingServer = GameThing.fromXml(gameThingResponse.body);
+        minPlayers = gameThingServer.minPlayers;
+        maxPlayers = gameThingServer.maxPlayers;
+      }
       GameThing gameThing = GameThing(
-          name: objectName, id: objectId, thumbnail: thumbnail, image: image);
+          name: objectName,
+          id: objectId,
+          thumbnail: thumbnail,
+          image: image,
+          minPlayers: minPlayers,
+          maxPlayers: maxPlayers);
       GameThingSQL.addGame(gameThing);
     }
   }
   ;
   final gamesCount = await GameThingSQL.getAllGames();
-  print(gamesCount?.length);
   print("-----finished adding games");
   final gettingAllGames = GameThingSQL.getAllGames();
   gettingAllGames.then((allGames) {
@@ -48,7 +61,6 @@ Future<void> getAllPlaysFromServer() async {
   const max_pages_count = 1000;
   int maxPlayerId = await PlayersSQL.getMaxID();
   int maxLocationId = await LocationSQL.getMaxID();
-  print("max ID = $maxPlayerId");
 
   for (var i = 1; i < max_pages_count; i++) {
     var stillHavePlays = await getPlaysFromPage(i, maxPlayerId, maxLocationId);
@@ -68,6 +80,7 @@ Future<bool> getPlaysFromPage(
   final collectionResponse = await http.get(Uri.parse(
       'https://boardgamegeek.com/xmlapi2/plays?username=$userName&page=${pageNumber}'));
   final rootNode = xml.XmlDocument.parse(collectionResponse.body);
+  if (rootNode.findElements('plays').isEmpty) return false;
   final playsRoot = rootNode.findElements('plays').first;
   final plays = playsRoot.findElements('play');
 
@@ -148,6 +161,7 @@ Future<void> fillLocalLocations(
       print("New location :${newLocation.name}");
       maxLocationId++;
       newLocation.id = maxLocationId;
+      newLocation.isDefault = 0;
       LocationSQL.addLocation(newLocation);
     }
   }
@@ -155,14 +169,11 @@ Future<void> fillLocalLocations(
 
 Future<List<Map>> getLocalPlayers() async {
   var playersMap = await PlayersSQL.getAllPlayers();
-  print('test');
-  print(playersMap);
   return playersMap;
 }
 
 Future<List<Map>> getLocalLocations() async {
-  var locationsMap = await LocationSQL.getAllPlayers();
-  print(locationsMap);
+  var locationsMap = await LocationSQL.getAllLocations();
   return locationsMap;
 }
 

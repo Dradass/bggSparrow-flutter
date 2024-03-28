@@ -9,13 +9,17 @@ class GameThing {
   final String thumbnail;
   final String image;
   final String? thumbBinary;
+  final int minPlayers;
+  final int maxPlayers;
 
   const GameThing(
       {required this.name,
       required this.id,
       required this.thumbnail,
       required this.image,
-      this.thumbBinary});
+      this.thumbBinary,
+      required this.minPlayers,
+      required this.maxPlayers});
 
   factory GameThing.fromJson(Map<String, dynamic> json) {
     return GameThing(
@@ -23,7 +27,9 @@ class GameThing {
         id: json['id'],
         thumbnail: json['thumbnail'],
         image: json['image'],
-        thumbBinary: json['thumbbin']);
+        thumbBinary: json['thumbbin'],
+        minPlayers: json['minPlayers'],
+        maxPlayers: json['maxPlayers']);
   }
 
   factory GameThing.fromXml(String xmlBody) {
@@ -39,27 +45,36 @@ class GameThing {
         .first
         .getAttribute('value')
         .toString();
+    final minPlayers = int.parse(
+        item.findElements('minplayers').first.getAttribute('value').toString());
+    final maxPlayers = int.parse(
+        item.findElements('maxplayers').first.getAttribute('value').toString());
     final thumbnail = item.findElements('thumbnail').first.toString();
     final image = item.findElements('image').first.toString();
 
     return GameThing(
-        name: itemName, id: itemID, thumbnail: thumbnail, image: image);
+        name: itemName,
+        id: itemID,
+        thumbnail: thumbnail,
+        image: image,
+        minPlayers: minPlayers,
+        maxPlayers: maxPlayers);
   }
 
-  factory GameThing.fromXmlCollection(String xmlBody) {
-    final document = xml.XmlDocument.parse(xmlBody);
-    final itemsNode = document.findElements('items').first;
-    final items = itemsNode.findElements('item');
+  // factory GameThing.fromXmlCollection(String xmlBody) {
+  //   final document = xml.XmlDocument.parse(xmlBody);
+  //   final itemsNode = document.findElements('items').first;
+  //   final items = itemsNode.findElements('item');
 
-    final item = items.first;
-    final itemID = int.parse(item.getAttribute("objectid").toString());
-    final itemName = item.findElements('name').first.toString();
-    final thumbnail = item.findElements('thumbnail').first.toString();
-    final image = item.findElements('image').first.toString();
+  //   final item = items.first;
+  //   final itemID = int.parse(item.getAttribute("objectid").toString());
+  //   final itemName = item.findElements('name').first.toString();
+  //   final thumbnail = item.findElements('thumbnail').first.toString();
+  //   final image = item.findElements('image').first.toString();
 
-    return GameThing(
-        name: itemName, id: itemID, thumbnail: thumbnail, image: image);
-  }
+  //   return GameThing(
+  //       name: itemName, id: itemID, thumbnail: thumbnail, image: image);
+  // }
 
   void CreateBinaryThumb() async {
     try {
@@ -72,7 +87,9 @@ class GameThing {
           id: id,
           thumbnail: thumbnail,
           image: image,
-          thumbBinary: bodyBytes);
+          thumbBinary: bodyBytes,
+          minPlayers: minPlayers,
+          maxPlayers: maxPlayers);
       print("Create thumb for $name");
       GameThingSQL.updateGame(gameThing);
     } catch (e) {
@@ -85,6 +102,8 @@ class GameThing {
         'name': name,
         'image': image,
         'thumbnail': thumbnail,
-        'thumbbin': thumbBinary
+        'thumbbin': thumbBinary,
+        'minPlayers': minPlayers,
+        'maxPlayers': maxPlayers
       };
 }

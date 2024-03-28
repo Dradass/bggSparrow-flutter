@@ -3,6 +3,7 @@
 import 'dart:io';
 import 'dart:isolate';
 
+import 'package:flutter_application_1/models/bgg_location.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -41,11 +42,17 @@ class _LogScaffoldState extends State<LogScaffold> {
   Uint8List imageTest = Uint8List.fromList(new List.empty());
   List<Map> players = [];
   List<Map> locations = [];
+  // String defaultLocation = LocationSQL.getDefaultLocationSync() != null
+  //     ? LocationSQL.getDefaultLocationSync()!.name
+  //     : "";
+  String defaultLocation = "";
+  final TextEditingController commentsController =
+      TextEditingController(text: "#bggSparrow");
   DurationSlider durationSlider = const DurationSlider();
 
   var logData = {
     "playdate": "2024-03-15",
-    "comments": "comments go here",
+    "comments": "#bggSparrow",
     "length": 60,
     "twitter": "false",
     "minutes": 60,
@@ -110,11 +117,28 @@ class _LogScaffoldState extends State<LogScaffold> {
   }
 
   @override
+  void dispose() {
+    // Clean up the controller when the widget is disposed.
+    commentsController.dispose();
+    super.dispose();
+  }
+
+  void FillLocationName() async {
+    var defaultLocationRes = await LocationSQL.getDefaultLocation();
+    if (defaultLocationRes != null) {
+      setState(() {
+        defaultLocation = defaultLocationRes.name;
+      });
+    }
+  }
+
+  @override
   void initState() {
     print("INIT LOG");
     super.initState();
 
     initializeBggData();
+    FillLocationName();
 
     _controller = CameraController(cameras.first, ResolutionPreset.max,
         enableAudio: false);
@@ -140,12 +164,9 @@ class _LogScaffoldState extends State<LogScaffold> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        //backgroundColor: Color.fromARGB(255, 96, 193, 231),
         appBar: AppBar(
           title: const Text("Log play screen"),
           centerTitle: true,
-          //backgroundColor: Theme.of(context).primaryColor,
-          //backgroundColor: Theme.of(context).primaryColor,
         ),
         body: SafeArea(
             child: Row(
@@ -158,6 +179,20 @@ class _LogScaffoldState extends State<LogScaffold> {
                   child: Text("Load all data"),
                   onPressed: (getAllPlaysFromServer),
                 ),
+                // ElevatedButton(
+                //   child: Text("del tables"),
+                //   onPressed: () {
+                //     GameThingSQL.deleteDB();
+                //   },
+                // ),
+                // ElevatedButton(
+                //   child: Text("create tables"),
+                //   onPressed: () {
+                //     GameThingSQL.createTable();
+                //     PlayersSQL.createTable();
+                //     LocationSQL.createTable();
+                //   },
+                // ),
                 Flexible(
                     flex: 1,
                     child: Container(
@@ -185,10 +220,9 @@ class _LogScaffoldState extends State<LogScaffold> {
                         height: MediaQuery.of(context).size.height,
                         child: ElevatedButton.icon(
                             onPressed: () async {
-                              print(
-                                  "DATE = ${DateFormat('yyyy-MM-dd').format(DateTime.now())}");
-                              if (locations.isEmpty)
+                              if (locations.isEmpty) {
                                 locations = await getLocalLocations();
+                              }
                               showDialog(
                                   context: context,
                                   builder: (BuildContext) {
@@ -206,11 +240,25 @@ class _LogScaffoldState extends State<LogScaffold> {
                                                 ChoiceChip(
                                                     label: Text("Default"),
                                                     selected:
-                                                        location['default'],
-                                                    onSelected: (bool? value) {
+                                                        location['isDefault'] ==
+                                                            1,
+                                                    onSelected: (bool value) {
                                                       setState(() {
-                                                        location['default'] =
-                                                            value;
+                                                        location['isDefault'] =
+                                                            value ? 1 : 0;
+                                                        if (!value) {
+                                                          var locationObject =
+                                                              Location(
+                                                                  id: location[
+                                                                      'id'],
+                                                                  name: location[
+                                                                      'name'],
+                                                                  isDefault: 0);
+                                                          LocationSQL
+                                                              .updateDefaultLocation(
+                                                                  locationObject);
+                                                        }
+                                                        ;
                                                       });
                                                     }),
                                                 Expanded(
@@ -231,11 +279,34 @@ class _LogScaffoldState extends State<LogScaffold> {
                                                       false;
                                                 }
                                                 location['isChecked'] = true;
+
+                                                if (location['isDefault'] !=
+                                                    1) {
+                                                  defaultLocation =
+                                                      location['name'];
+                                                  for (var existedLocation
+                                                      in locations) {
+                                                    existedLocation[
+                                                        'isDefault'] = 0;
+                                                  }
+                                                  location['isDefault'] = 1;
+                                                  var locationObject = Location(
+                                                      id: location['id'],
+                                                      name: location['name'],
+                                                      isDefault: 1);
+                                                  LocationSQL
+                                                      .updateDefaultLocation(
+                                                          locationObject);
+                                                }
                                               },
                                             );
                                           }).toList())));
                                     });
-                                  });
+                                  }).then((value) {
+                                setState(() {
+                                  //defaultLocation = '111';
+                                });
+                              });
                             },
                             style: ButtonStyle(
                                 shape: MaterialStateProperty.all<
@@ -244,21 +315,24 @@ class _LogScaffoldState extends State<LogScaffold> {
                                         borderRadius: BorderRadius.zero,
                                         side: BorderSide(
                                             color: Colors.black12)))),
-                            label: Text("Chose locations"),
-                            icon: Icon(Icons.home)))),
+                            label: Text(defaultLocation.isEmpty
+                                ? "Chose location"
+                                : defaultLocation),
+                            icon: const Icon(Icons.home)))),
                 Flexible(
                     flex: 2,
                     child: Container(
                         //color: Colors.green,
                         width: MediaQuery.of(context).size.width,
                         height: MediaQuery.of(context).size.height,
-                        child: const TextField(
+                        child: TextField(
+                          controller: commentsController,
                           keyboardType: TextInputType.multiline,
                           maxLines: 5,
-                          decoration: InputDecoration(
+                          decoration: const InputDecoration(
                             //prefixIcon: Icon(Icons.search),
                             suffixIcon: Icon(Icons.clear),
-                            labelText: '#bggSparrow',
+                            labelText: 'Comments',
                             hintText: 'Enter your comments',
                             //helperText: 'supporting text',
                             border: OutlineInputBorder(),
@@ -317,6 +391,14 @@ class _LogScaffoldState extends State<LogScaffold> {
                               logData['length'] = durationCurrentValue;
                               logData['playdate'] = nowData;
                               logData['date'] = "${nowData}T05:00:00.000Z";
+                              logData['comments'] = commentsController.text;
+
+                              var chosenLocation =
+                                  await LocationSQL.getDefaultLocation();
+                              print(chosenLocation);
+                              logData['location'] = chosenLocation != null
+                                  ? chosenLocation.name
+                                  : "";
                               String stringData = json.encode(logData);
                               print(stringData);
                               await sendLogRequest(stringData);
@@ -342,8 +424,6 @@ class _LogScaffoldState extends State<LogScaffold> {
                         height: MediaQuery.of(context).size.height,
                         child: ElevatedButton.icon(
                             onPressed: () async {
-                              print(
-                                  "DATE = ${DateFormat('yyyy-MM-dd').format(DateTime.now())}");
                               if (players.isEmpty)
                                 players = await getLocalPlayers();
                               showDialog(
@@ -521,37 +601,6 @@ Future<int> sendLogRequest(String logData) async {
     'credentials': {'username': 'dradass', 'password': '1414141414'}
   });
 
-  String playPayload = json.encode({
-    "playdate": "2024-02-28",
-    "comments": "comments go here",
-    "length": 60,
-    "twitter": "false",
-    "minutes": 60,
-    "location": "Home",
-    "objectid": "158899",
-    "hours": 0,
-    "quantity": "1",
-    "action": "save",
-    "date": "2024-02-28T05:00:00.000Z",
-    "players": [
-      {
-        "username": "Test",
-        "userid": 0,
-        "repeat": "true",
-        "name": "Non-BGG Friend",
-        "selected": "false"
-      },
-      {
-        "username": "youruserid",
-        "userid": 2364945,
-        "name": "Me!",
-        "selected": "false"
-      }
-    ],
-    "objecttype": "thing",
-    "ajax": 1
-  });
-
   http
       .post(Uri.parse("https://boardgamegeek.com/login/api/v1"),
           headers: {
@@ -559,10 +608,6 @@ Future<int> sendLogRequest(String logData) async {
           },
           body: bodyLogin)
       .then((response) {
-    var logCookie = response.headers['set-cookie'];
-    var indexOfSessionID = logCookie!.indexOf("SessionID=");
-    var indexOfSessionIDEnd = logCookie!.indexOf(";", indexOfSessionID);
-
     String sessionCookie = '';
     for (final cookie in response.headers['set-cookie']!.split(';')) {
       if (cookie.startsWith('bggusername')) {
@@ -586,7 +631,6 @@ Future<int> sendLogRequest(String logData) async {
         continue;
       }
     }
-    print(sessionCookie);
 
     http
         .post(Uri.parse("https://boardgamegeek.com/geekplay.php"),

@@ -34,7 +34,7 @@ Future<void> main() async {
             onSecondary: primaryTextColor,
             error: Colors.red,
             onError: primaryTextColor,
-            surface: Color.fromARGB(255, 114, 223, 160),
+            surface: Color.fromARGB(255, 148, 226, 181),
             onSurface: primaryTextColor),
         //scaffoldBackgroundColor: Colors.deepPurple,
         secondaryHeaderColor: Color.fromARGB(255, 43, 132, 190)),

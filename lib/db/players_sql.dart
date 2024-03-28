@@ -8,7 +8,6 @@ class PlayersSQL {
   static const String _dbName = "Notes.db";
 
   static Future<Database> _getDB() async {
-    print('db creating');
     return openDatabase(join(await getDatabasesPath(), _dbName),
         onCreate: (db, version) async {
       // await db.execute(
@@ -55,7 +54,6 @@ class PlayersSQL {
     //return await db.("Games", where: 'id = ?', whereArgs: [gameThing.id]);
     List<Map<String, dynamic>> result =
         await db.rawQuery('SELECT * FROM Players WHERE userid=?', [userId]);
-    print(result);
     if (result.isEmpty) return null;
     var foundPlayer = Player.fromJson(result.first);
     print("found player ${foundPlayer.name}, userid = ${foundPlayer}");
@@ -98,19 +96,6 @@ class PlayersSQL {
         'userid': player.userid
       });
     }
-    print(players);
     return players;
-    //return null;
   }
-
-  // static Future<List<Player>?> getAllGames() async {
-  //   final db = await _getDB();
-  //   final List<Map<String, dynamic>> maps = await db.query("Players");
-
-  //   if (maps.isEmpty) {
-  //     return null;
-  //   }
-
-  //   return List.generate(maps.length, (index) => Player.fromJson(maps[index]));
-  // }
 }
