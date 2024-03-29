@@ -13,8 +13,8 @@ class _GameHelperState extends State<GameHelper> {
   double minPlayersValue = 1;
   double maxPlayersValue = 4;
   String chosenGame = "No game was chosen";
-  RangeValues minRangeValues = const RangeValues(1, 4);
-  RangeValues maxRangeValues = const RangeValues(1, 4);
+  double chosenPlayersCount = 4;
+  RangeValues maxPlayersRangeValues = const RangeValues(0, 0);
   bool? onlyOwnedGames = true;
   @override
   Widget build(BuildContext context) {
@@ -34,20 +34,19 @@ class _GameHelperState extends State<GameHelper> {
                     height: MediaQuery.of(context).size.height,
                     child: Column(
                       children: [
-                        RangeSlider(
-                          values: minRangeValues,
-                          max: 10,
-                          divisions: 10,
-                          labels: RangeLabels(
-                              minRangeValues.start.round().toString(),
-                              minRangeValues.end.round().toString()),
-                          onChanged: (RangeValues values) {
+                        Slider(
+                          value: chosenPlayersCount,
+                          min: 1,
+                          max: 12,
+                          divisions: 11,
+                          label: chosenPlayersCount.round().toString(),
+                          onChanged: (double value) {
                             setState(() {
-                              minRangeValues = values;
+                              chosenPlayersCount = value;
                             });
                           },
                         ),
-                        const Text("Min players count"),
+                        const Text("Players count"),
                       ],
                     ))),
             Flexible(
@@ -59,19 +58,20 @@ class _GameHelperState extends State<GameHelper> {
                     child: Column(
                       children: [
                         RangeSlider(
-                          values: maxRangeValues,
-                          max: 10,
-                          divisions: 10,
+                          values: maxPlayersRangeValues,
+                          max: 12,
+                          divisions: 12,
                           labels: RangeLabels(
-                              maxRangeValues.start.round().toString(),
-                              maxRangeValues.end.round().toString()),
+                            maxPlayersRangeValues.start.round().toString(),
+                            maxPlayersRangeValues.end.round().toString(),
+                          ),
                           onChanged: (RangeValues values) {
                             setState(() {
-                              maxRangeValues = values;
+                              maxPlayersRangeValues = values;
                             });
                           },
                         ),
-                        const Text("Max players count"),
+                        const Text("Maximum players limit"),
                       ],
                     ))),
             Checkbox(
@@ -85,16 +85,25 @@ class _GameHelperState extends State<GameHelper> {
             ElevatedButton(
               child: Text("Chose game"),
               onPressed: () async {
+                // if (maxPlayersCount < chosenPlayersCount &&
+                //     maxPlayersCount != 0)
+                //   setState(() {
+                //     maxPlayersCount = chosenPlayersCount;
+                //   });
                 var allGames = await GameThingSQL.getAllGames();
                 List<GameThing> filteredGames = [];
                 if (allGames == null) return;
                 for (var game in allGames) {
                   print(
                       "Game = ${game.name}, min = ${game.minPlayers}, max = ${game.maxPlayers}");
-                  if (game.minPlayers >= minRangeValues.start.round() &&
-                      game.minPlayers <= minRangeValues.end.round() &&
-                      game.maxPlayers >= maxRangeValues.start.round() &&
-                      game.maxPlayers <= maxRangeValues.end.round()) {
+
+                  if (game.minPlayers <= chosenPlayersCount &&
+                          game.maxPlayers >= chosenPlayersCount &&
+                          maxPlayersRangeValues.end != 0
+                      ? game.maxPlayers <= maxPlayersRangeValues.end
+                      : true && maxPlayersRangeValues.start != 0
+                          ? game.maxPlayers >= maxPlayersRangeValues.start
+                          : true) {
                     if (onlyOwnedGames!) {
                       if (game.owned == 0) continue;
                     }
@@ -113,7 +122,18 @@ class _GameHelperState extends State<GameHelper> {
                 }
               },
             ),
-            Text(chosenGame),
+            Flexible(
+                flex: 1,
+                child: Container(
+                    width: MediaQuery.of(context).size.width,
+                    height: MediaQuery.of(context).size.height,
+                    child: Expanded(
+                        child: Text(
+                      chosenGame,
+                      textAlign: TextAlign.center,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(fontSize: 30),
+                    )))),
           ])
         ])));
   }
