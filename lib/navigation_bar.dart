@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/pages/log_page.dart';
 import 'package:flutter_application_1/pages/game_helper.dart';
+import 'package:flutter_application_1/pages/first_player.dart';
 
 /// Flutter code sample for [NavigationBar].
 
@@ -49,29 +50,7 @@ class _NavigationExampleState extends State<NavigationExample> {
         children: <Widget>[
           /// Home page
           LogScaffold(),
-
-          /// Notifications page
-          const Padding(
-            padding: EdgeInsets.all(8.0),
-            child: Column(
-              children: <Widget>[
-                Card(
-                  child: ListTile(
-                    leading: Icon(Icons.notifications_sharp),
-                    title: Text('Notification 1'),
-                    subtitle: Text('This is a notification'),
-                  ),
-                ),
-                Card(
-                  child: ListTile(
-                    leading: Icon(Icons.notifications_sharp),
-                    title: Text('Notification 2'),
-                    subtitle: Text('This is a notification'),
-                  ),
-                ),
-              ],
-            ),
-          ),
+          FirstPlayerChoser(),
           GameHelper()
         ],
         index: currentPageIndex,
