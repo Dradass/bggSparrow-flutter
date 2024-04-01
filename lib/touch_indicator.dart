@@ -100,79 +100,11 @@ class _TouchIndicatorState extends State<TouchIndicator> {
       widget.child,
       ...buildTouchIndicators(),
     ];
-    //children = [widget.child];
-    print("build children = $children");
-    if (touchPositions.length > 0) {
-      //checkTouchPositions(touchPositions.length);
-      //print(children);
-      print(touchPositions);
-      //var winner = Random().nextInt(children.length - 1) + 1;
-      // setState(() {
-      //   for (var i = 1; i < children.length; i++) {
-      //     children[i] = Positioned.directional(
-      //       textDirection: TextDirection.ltr,
-      //       child: widget.indicator != null
-      //           ? widget.indicator!
-      //           : Container(
-      //               decoration: BoxDecoration(
-      //                 shape: BoxShape.circle,
-      //                 color: widget.indicatorColor.withOpacity(0.3),
-      //               ),
-      //               child: Icon(
-      //                 Icons.fingerprint,
-      //                 size: 0,
-      //                 color: Colors.cyan,
-      //               ),
-      //             ),
-      //     );
-      //   }
-      //   // children[1] = Positioned.directional(
-      //   //   textDirection: TextDirection.ltr,
-      //   //   child: widget.indicator != null
-      //   //       ? widget.indicator!
-      //   //       : Container(
-      //   //           decoration: BoxDecoration(
-      //   //             shape: BoxShape.circle,
-      //   //             color: widget.indicatorColor.withOpacity(0.3),
-      //   //           ),
-      //   //           child: Icon(
-      //   //             Icons.fingerprint,
-      //   //             size: widget.indicatorSize * 2,
-      //   //             color: Colors.cyan,
-      //   //           ),
-      //   //         ),
-      //   // );
-      // });
-    }
 
     return Listener(
       onPointerDown: (opm) {
-        print('onPointerDown');
-        print("down children = $children");
         savePointerPosition(opm.pointer, opm.position);
         checkTouchPositions(touchPositions.length);
-        // setState(() {
-        //   var newChild = Positioned.directional(
-        //     start: 50 - widget.indicatorSize / 2,
-        //     top: 50 - widget.indicatorSize / 2,
-        //     textDirection: TextDirection.ltr,
-        //     child: widget.indicator != null
-        //         ? widget.indicator!
-        //         : Container(
-        //             decoration: BoxDecoration(
-        //               shape: BoxShape.circle,
-        //               color: widget.indicatorColor.withOpacity(0.3),
-        //             ),
-        //             child: Icon(
-        //               Icons.fingerprint,
-        //               size: widget.indicatorSize * 2,
-        //               color: widget.indicatorColor.withOpacity(0.9),
-        //             ),
-        //           ),
-        //   );
-
-        //   children.add(newChild);
-        // });
       },
       // onPointerMove: (opm) {
       //   print('savePointerPosition');
@@ -192,12 +124,9 @@ class _TouchIndicatorState extends State<TouchIndicator> {
   }
 
   void checkTouchPositions(int firstPositionsCount) async {
-    print(touchPositions);
     await Future.delayed(const Duration(seconds: 3));
-    print(touchPositions);
     if (touchPositions.length == firstPositionsCount) {
-      print("success");
-      if (touchPositions.length > 0) {
+      if (touchPositions.length > 1) {
         randomPlayer = ((touchPositions.keys).toList()..shuffle()).first;
         for (var position in (touchPositions.keys).toList()..shuffle()) {
           if (position != randomPlayer) {
@@ -205,56 +134,7 @@ class _TouchIndicatorState extends State<TouchIndicator> {
             savePointerPosition(position, touchPositions[position]!);
           }
         }
-        // setState(() {
-        //   children[0] = Positioned.directional(
-        //     start: 0,
-        //     top: 0,
-        //     textDirection: TextDirection.ltr,
-        //     child: widget.indicator != null
-        //         ? widget.indicator!
-        //         : Container(
-        //             decoration: BoxDecoration(
-        //               shape: BoxShape.circle,
-        //               color: widget.indicatorColor.withOpacity(0.3),
-        //             ),
-        //             child: Icon(
-        //               Icons.fingerprint,
-        //               size: widget.indicatorSize,
-        //               color: Colors.cyan,
-        //             ),
-        //           ),
-        //   );
-        // });
-        print(children);
-        // Positioned child = children[1] as Positioned;
-        // var childContainer = child.child as Container;
-        // childContainer.decoration = DecoratedSliver
-
-        for (var i = 1; i < children.length; i++) {
-          print('remove = $i');
-
-          //children.remove(children[i]);
-          // children[i] = Positioned.directional(
-          //   textDirection: TextDirection.ltr,
-          //   child: widget.indicator != null
-          //       ? widget.indicator!
-          //       : Container(
-          //           decoration: BoxDecoration(
-          //             shape: BoxShape.circle,
-          //             color: widget.indicatorColor.withOpacity(0.3),
-          //           ),
-          //           child: Icon(
-          //             Icons.fingerprint,
-          //             size: 0,
-          //             color: Colors.cyan,
-          //           ),
-          //         ),
-          // );
-
-          //print(children);
-        }
       }
     }
-    print(touchPositions);
   }
 }

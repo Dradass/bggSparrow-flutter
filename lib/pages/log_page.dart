@@ -218,10 +218,12 @@ class _LogScaffoldState extends State<LogScaffold> {
                     child: Container(
                         //color: Colors.lime,
                         width: MediaQuery.of(context).size.width,
-                        child: Image.memory(
-                          imageTest,
-                          height: MediaQuery.of(context).size.height,
-                        ))),
+                        child: imageTest.isNotEmpty
+                            ? Image.memory(
+                                imageTest,
+                                height: MediaQuery.of(context).size.height,
+                              )
+                            : Image.asset('assets/not_bad.png'))),
                 Flexible(
                     flex: 1,
                     child: Container(
