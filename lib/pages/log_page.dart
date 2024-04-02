@@ -37,7 +37,7 @@ class _LogScaffoldState extends State<LogScaffold> {
   // String defaultLocation = LocationSQL.getDefaultLocationSync() != null
   //     ? LocationSQL.getDefaultLocationSync()!.name
   //     : "";
-  String defaultLocation = "";
+  String selectedLocation = "";
   final TextEditingController commentsController =
       TextEditingController(text: "#bggSparrow");
   DurationSlider durationSlider = const DurationSlider();
@@ -115,36 +115,27 @@ class _LogScaffoldState extends State<LogScaffold> {
     super.dispose();
   }
 
+  void setLocationButtonName() {
+    var defaultLocationRes = fillLocationName();
+    defaultLocationRes.then((defaultLocationValue) {
+      if (defaultLocationValue != null) {
+        setState(() {
+          selectedLocation = defaultLocationValue.name;
+        });
+      }
+    });
+  }
+
   @override
   void initState() {
-    print("INIT LOG");
     super.initState();
 
     GameThingSQL.initTables().then(
       (value) {
-        var defaultLocationRes = fillLocationName();
-        defaultLocationRes.then((defaultLocationValue) {
-          if (defaultLocationValue != null) {
-            print("Fill location = ${defaultLocationValue.name}");
-            setState(() {
-              defaultLocation = defaultLocationValue.name;
-            });
-          }
-        });
-
+        setLocationButtonName();
         initializeBggData();
       },
     );
-
-    // var defaultLocationRes = fillLocationName();
-    // defaultLocationRes.then((defaultLocationValue) {
-    //   if (defaultLocationValue != null) {
-    //     print("Fill location = ${defaultLocationValue.name}");
-    //     setState(() {
-    //       defaultLocation = defaultLocationValue.name;
-    //     });
-    //   }
-    // });
 
     _controller = CameraController(cameras.first, ResolutionPreset.max,
         enableAudio: false);
@@ -264,20 +255,27 @@ class _LogScaffoldState extends State<LogScaffold> {
                                                             1,
                                                     onSelected: (bool value) {
                                                       setState(() {
+                                                        for (var location
+                                                            in locations) {
+                                                          location[
+                                                              'isDefault'] = 0;
+                                                        }
+
                                                         location['isDefault'] =
                                                             value ? 1 : 0;
-                                                        if (!value) {
-                                                          var locationObject =
-                                                              Location(
-                                                                  id: location[
-                                                                      'id'],
-                                                                  name: location[
-                                                                      'name'],
-                                                                  isDefault: 0);
-                                                          LocationSQL
-                                                              .updateDefaultLocation(
-                                                                  locationObject);
-                                                        }
+                                                        print(value);
+                                                        var locationObject =
+                                                            Location(
+                                                                id: location[
+                                                                    'id'],
+                                                                name: location[
+                                                                    'name'],
+                                                                isDefault: value
+                                                                    ? 1
+                                                                    : 0);
+                                                        LocationSQL
+                                                            .updateDefaultLocation(
+                                                                locationObject);
                                                       });
                                                     }),
                                                 Expanded(
@@ -287,7 +285,6 @@ class _LogScaffoldState extends State<LogScaffold> {
                                                       TextOverflow.ellipsis,
                                                 ))
                                               ]),
-                                              //value: location['isChecked'],
                                               onPressed: () {
                                                 Navigator.of(context,
                                                         rootNavigator: true)
@@ -298,29 +295,8 @@ class _LogScaffoldState extends State<LogScaffold> {
                                                       false;
                                                 }
                                                 location['isChecked'] = true;
-
-                                                if (location['isDefault'] !=
-                                                    1) {
-                                                  defaultLocation =
-                                                      location['name'];
-                                                  // print(
-                                                  //     "set def location = ${defaultLocation}");
-
-                                                  for (var existedLocation
-                                                      in locations) {
-                                                    existedLocation[
-                                                        'isDefault'] = 0;
-                                                  }
-                                                  location['isDefault'] = 1;
-                                                  //print(locations);
-                                                  var locationObject = Location(
-                                                      id: location['id'],
-                                                      name: location['name'],
-                                                      isDefault: 1);
-                                                  LocationSQL
-                                                      .updateDefaultLocation(
-                                                          locationObject);
-                                                }
+                                                selectedLocation =
+                                                    location['name'];
                                               },
                                             );
                                           }).toList())));
@@ -338,9 +314,9 @@ class _LogScaffoldState extends State<LogScaffold> {
                                         borderRadius: BorderRadius.zero,
                                         side: BorderSide(
                                             color: Colors.black12)))),
-                            label: Text(defaultLocation.isEmpty
+                            label: Text(selectedLocation.isEmpty
                                 ? "Chose location"
-                                : defaultLocation),
+                                : selectedLocation),
                             icon: const Icon(Icons.home)))),
                 Flexible(
                     flex: 2,
@@ -418,7 +394,8 @@ class _LogScaffoldState extends State<LogScaffold> {
                               logData['comments'] = commentsController.text;
 
                               var chosenLocation =
-                                  await LocationSQL.getDefaultLocation();
+                                  await LocationSQL.selectLocationByName(
+                                      selectedLocation);
                               print(chosenLocation);
                               logData['location'] = chosenLocation != null
                                   ? chosenLocation.name
