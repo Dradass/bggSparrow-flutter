@@ -44,6 +44,11 @@ class _NavigationExampleState extends State<NavigationExample> {
             icon: Icon(Icons.casino_outlined),
             label: 'Play helper',
           ),
+          NavigationDestination(
+            selectedIcon: Icon(Icons.smart_toy),
+            icon: Icon(Icons.casino_outlined),
+            label: 'First player',
+          ),
         ],
       ),
       body: IndexedStack(
@@ -52,7 +57,8 @@ class _NavigationExampleState extends State<NavigationExample> {
           /// Home page
           LogScaffold(),
           FirstPlayerChoser(),
-          GameHelper()
+          GameHelper(),
+          FirstPlayerChoser(),
         ],
       ),
     );

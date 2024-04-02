@@ -161,6 +161,7 @@ class _LogScaffoldState extends State<LogScaffold> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        resizeToAvoidBottomInset: false,
         appBar: AppBar(
           title: const Text("Log play screen"),
           centerTitle: true,
@@ -212,7 +213,7 @@ class _LogScaffoldState extends State<LogScaffold> {
                               textAlign: TextAlign.center)),
                     )),
                 Flexible(
-                    flex: 2,
+                    flex: 3,
                     child: SizedBox(
                         //color: Colors.lime,
                         width: MediaQuery.of(context).size.width,
@@ -223,7 +224,7 @@ class _LogScaffoldState extends State<LogScaffold> {
                               )
                             : Image.asset('assets/not_bad.png'))),
                 Flexible(
-                    flex: 1,
+                    flex: 2,
                     child: SizedBox(
                         //color: Colors.tealAccent,
                         width: MediaQuery.of(context).size.width,
@@ -319,7 +320,7 @@ class _LogScaffoldState extends State<LogScaffold> {
                                 : selectedLocation),
                             icon: const Icon(Icons.home)))),
                 Flexible(
-                    flex: 2,
+                    flex: 4,
                     child: SizedBox(
                         //color: Colors.green,
                         width: MediaQuery.of(context).size.width,
@@ -328,23 +329,26 @@ class _LogScaffoldState extends State<LogScaffold> {
                           controller: commentsController,
                           keyboardType: TextInputType.multiline,
                           maxLines: 5,
-                          decoration: const InputDecoration(
-                            //prefixIcon: Icon(Icons.search),
-                            suffixIcon: Icon(Icons.clear),
-                            labelText: 'Comments',
-                            hintText: 'Enter your comments',
-                            //helperText: 'supporting text',
-                            border: OutlineInputBorder(),
-                          ),
+                          decoration: InputDecoration(
+                              //prefixIcon: Icon(Icons.search),
+                              suffixIcon: IconButton(
+                                  onPressed: commentsController.clear,
+                                  icon: const Icon(Icons.clear)),
+                              labelText: 'Comments',
+                              hintText: 'Enter your comments',
+                              //helperText: 'supporting text',
+                              //border: OutlineInputBorder(),
+                              border: UnderlineInputBorder()),
                         ))),
                 Flexible(
-                    flex: 1,
+                    flex: 3,
                     child: SizedBox(
                         //color: Colors.blueAccent,
                         width: MediaQuery.of(context).size.width,
                         height: MediaQuery.of(context).size.height,
                         child: Column(
                           children: [
+                            //const Text("Duration"),
                             Slider(
                               value: durationCurrentValue,
                               max: 500,
@@ -356,11 +360,12 @@ class _LogScaffoldState extends State<LogScaffold> {
                                 });
                               },
                             ),
-                            const Text("Duration"),
+
+                            Text("Duration")
                           ],
                         ))),
                 Flexible(
-                    flex: 1,
+                    flex: 2,
                     child: SizedBox(
                         //color: Colors.green,
                         width: MediaQuery.of(context).size.width,
@@ -418,7 +423,7 @@ class _LogScaffoldState extends State<LogScaffold> {
                             label: const Text("Log play"),
                             icon: const Icon(Icons.send_and_archive)))),
                 Flexible(
-                    flex: 1,
+                    flex: 2,
                     child: SizedBox(
                         //color: Colors.tealAccent,
                         width: MediaQuery.of(context).size.width,
@@ -478,7 +483,7 @@ class _LogScaffoldState extends State<LogScaffold> {
                             label: const Text("Chose players"),
                             icon: const Icon(Icons.people)))),
                 Flexible(
-                    flex: 1,
+                    flex: 2,
                     child: SizedBox(
                         //color: Colors.tealAccent,
                         width: MediaQuery.of(context).size.width,

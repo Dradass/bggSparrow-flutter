@@ -3,7 +3,6 @@ import 'package:camera/camera.dart';
 
 import 'dart:async';
 
-
 import '../navigation_bar.dart';
 
 late List<CameraDescription> cameras;
@@ -22,7 +21,7 @@ Future<void> main() async {
         colorScheme: const ColorScheme(
             brightness: Brightness.light,
             background: Color.fromARGB(255, 218, 245, 234),
-            onBackground: Color.fromARGB(255, 16, 50, 73),
+            onBackground: primaryTextColor,
             primary: primaryTextColor,
             onPrimary: Color.fromARGB(255, 183, 187, 187),
             secondary: Color.fromARGB(255, 46, 207, 127),
