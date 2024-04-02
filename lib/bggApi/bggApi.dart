@@ -1,6 +1,3 @@
-import 'dart:io';
-import 'dart:math';
-
 import 'package:flutter_application_1/models/game_thing.dart';
 import '../db/game_things_sql.dart';
 import '../db/players_sql.dart';
@@ -21,6 +18,7 @@ Future<void> ImportGameCollectionFromBGG() async {
     final items = itemsNode.findElements('item');
     for (final item in items) {
       final objectId = int.parse(item.getAttribute('objectid').toString());
+      if (await GameThingSQL.selectGameByID(objectId) != null) continue;
       final objectName = item.findElements('name').first.text;
       final thumbnail = item.findElements('thumbnail').first.text;
       final image = item.findElements('image').first.text;
@@ -46,26 +44,30 @@ Future<void> ImportGameCollectionFromBGG() async {
       GameThingSQL.addGame(gameThing);
     }
   }
-  ;
   final gamesCount = await GameThingSQL.getAllGames();
   print("-----finished adding games");
-  final gettingAllGames = GameThingSQL.getAllGames();
-  gettingAllGames.then((allGames) {
-    if (allGames != null) {
-      for (var game in allGames) {
-        if (game.thumbBinary == null) game.CreateBinaryThumb();
-      }
-      print("-----finished adding thumbs");
+  final gettingAllGames = await GameThingSQL.getAllGames();
+  if (gettingAllGames != null) {
+    for (var game in gettingAllGames) {
+      if (game.thumbBinary == null) game.CreateBinaryThumb();
     }
-  });
+  }
+  // gettingAllGames.then((allGames) {
+  //   if (allGames != null) {
+  //     for (var game in allGames) {
+  //       if (game.thumbBinary == null) game.CreateBinaryThumb();
+  //     }
+  //     print("-----finished adding thumbs");
+  //   }
+  // });
 }
 
 Future<void> getAllPlaysFromServer() async {
-  const max_pages_count = 1000;
+  const maxPagesCount = 1000;
   int maxPlayerId = await PlayersSQL.getMaxID();
   int maxLocationId = await LocationSQL.getMaxID();
 
-  for (var i = 1; i < max_pages_count; i++) {
+  for (var i = 1; i < maxPagesCount; i++) {
     var stillHavePlays = await getPlaysFromPage(i, maxPlayerId, maxLocationId);
     if (!stillHavePlays) break;
   }
@@ -73,15 +75,14 @@ Future<void> getAllPlaysFromServer() async {
 
 Future<bool> getPlaysFromPage(
     int pageNumber, int maxPlayerId, maxLocationId) async {
-  const max_pages_count = 1000;
-  final userName = 'dradass';
+  const userName = 'dradass';
 
   List<Player> uniquePlayers = [];
   List<Location> uniqueLocations = [];
 
   print("create players, iteration = $pageNumber");
   final collectionResponse = await http.get(Uri.parse(
-      'https://boardgamegeek.com/xmlapi2/plays?username=$userName&page=${pageNumber}'));
+      'https://boardgamegeek.com/xmlapi2/plays?username=$userName&page=$pageNumber'));
   final rootNode = xml.XmlDocument.parse(collectionResponse.body);
   if (rootNode.findElements('plays').isEmpty) return false;
   final playsRoot = rootNode.findElements('plays').first;
@@ -99,9 +100,11 @@ Future<bool> getPlaysFromPage(
         play.findElements('item').first.getAttribute('objectid').toString());
 
     if (location.isNotEmpty) {
-      var gotLocation = Location(id: maxLocationId, name: location);
-      if (!uniqueLocations.map((e) => e.name).contains(gotLocation.name)) {
-        uniqueLocations.add(gotLocation);
+      if (await LocationSQL.selectLocationByName(location) == null) {
+        var gotLocation = Location(id: maxLocationId, name: location);
+        if (!uniqueLocations.map((e) => e.name).contains(gotLocation.name)) {
+          uniqueLocations.add(gotLocation);
+        }
       }
     }
 
@@ -117,7 +120,12 @@ Future<bool> getPlaysFromPage(
         username: player.getAttribute('username').toString(),
       );
       if (!uniquePlayers.map((e) => e.name).contains(newPlayer.name)) {
-        uniquePlayers.add(newPlayer);
+        if (newPlayer.userid != 0 &&
+            await PlayersSQL.selectPlayerByUserID(newPlayer.userid!) == null) {
+          if (await PlayersSQL.selectPlayerByName(newPlayer.name) == null) {
+            uniquePlayers.add(newPlayer);
+          }
+        }
       }
     }
   }
@@ -180,8 +188,12 @@ Future<List<Map>> getLocalLocations() async {
   return locationsMap;
 }
 
-void initializeBggData() async {
-  await GameThingSQL.initTables();
+Future<Location?> fillLocationName() async {
+  return await LocationSQL.getDefaultLocation();
+}
+
+Future<void> initializeBggData() async {
+  //await GameThingSQL.initTables();
   await ImportGameCollectionFromBGG();
   int maxPlayerId = await PlayersSQL.getMaxID();
   int maxLocationId = await LocationSQL.getMaxID();

@@ -15,10 +15,10 @@ class _FirstPlayerChoserState extends State<FirstPlayerChoser> {
         forceInReleaseMode: true,
         enabled: true,
         indicatorSize: 120,
-        indicatorColor: Color.fromARGB(255, 32, 184, 19),
+        indicatorColor: const Color.fromARGB(255, 32, 184, 19),
         child: Scaffold(
-          appBar: AppBar(title: Text("Touch")),
-          body: Text(
+          appBar: AppBar(title: const Text("Touch")),
+          body: const Text(
             "Chose first player",
             textAlign: TextAlign.center,
           ),

@@ -43,8 +43,8 @@ class MatchingViewState extends State<MatchingView> {
 
       var response = http.get(Uri.parse(
           "https://cf.geekdo-images.com/2HKX0QANk_DY7CIVK5O5fQ__thumb/img/zcjkqn_HYDIIyVAZaAxJIkurQRg=/fit-in/200x150/filters:strip_icc()/pic2869710.jpg"));
-      response.then((response_answer) {
-        var imageBytes = response_answer.bodyBytes; //Uint8List
+      response.then((responseAnswer) {
+        var imageBytes = responseAnswer.bodyBytes; //Uint8List
         print(imageBytes);
 
         // initialize PixelMatching and Camera

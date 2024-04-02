@@ -56,14 +56,13 @@ class PlayersSQL {
         await db.rawQuery('SELECT * FROM Players WHERE userid=?', [userId]);
     if (result.isEmpty) return null;
     var foundPlayer = Player.fromJson(result.first);
-    print("found player ${foundPlayer.name}, userid = ${foundPlayer}");
+    print("found player ${foundPlayer.name}, userid = $foundPlayer");
     return foundPlayer;
   }
 
   static Future<Player?> selectPlayerByName(String name) async {
     final db = await _getDB();
 
-    //return await db.("Games", where: 'id = ?', whereArgs: [gameThing.id]);
     List<Map<String, dynamic>> result = await db
         .rawQuery("SELECT * FROM Players WHERE name=? AND userid=0", [name]);
     if (result.isEmpty) return null;

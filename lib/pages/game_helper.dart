@@ -29,7 +29,7 @@ class _GameHelperState extends State<GameHelper> {
           Column(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
             Flexible(
                 flex: 1,
-                child: Container(
+                child: SizedBox(
                     //color: Colors.blueAccent,
                     width: MediaQuery.of(context).size.width,
                     height: MediaQuery.of(context).size.height,
@@ -52,7 +52,7 @@ class _GameHelperState extends State<GameHelper> {
                     ))),
             Flexible(
                 flex: 1,
-                child: Container(
+                child: SizedBox(
                     //color: Colors.blueAccent,
                     width: MediaQuery.of(context).size.width,
                     height: MediaQuery.of(context).size.height,
@@ -83,7 +83,7 @@ class _GameHelperState extends State<GameHelper> {
               },
             ),
             ElevatedButton(
-              child: Text("Chose game"),
+              child: const Text("Chose game"),
               onPressed: () async {
                 var allGames = await GameThingSQL.getAllGames();
                 List<GameThing> filteredGames = [];

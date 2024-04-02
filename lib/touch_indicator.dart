@@ -1,6 +1,5 @@
 library touch_indicator;
 
-import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -51,7 +50,7 @@ class TouchIndicator extends StatefulWidget {
 class _TouchIndicatorState extends State<TouchIndicator> {
   Map<int, Offset> touchPositions = <int, Offset>{};
   List<Widget> children = [];
-  int? randomPlayer = null;
+  int? randomPlayer;
 
   Iterable<Widget> buildTouchIndicators() sync* {
     if (touchPositions.isNotEmpty) {
@@ -130,7 +129,7 @@ class _TouchIndicatorState extends State<TouchIndicator> {
         randomPlayer = ((touchPositions.keys).toList()..shuffle()).first;
         for (var position in (touchPositions.keys).toList()..shuffle()) {
           if (position != randomPlayer) {
-            touchPositions[position] = Offset(-100, -100);
+            touchPositions[position] = const Offset(-100, -100);
             savePointerPosition(position, touchPositions[position]!);
           }
         }

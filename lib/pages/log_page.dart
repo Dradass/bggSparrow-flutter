@@ -1,8 +1,5 @@
 // TODO - Random game chooser
 
-import 'dart:io';
-import 'dart:isolate';
-
 import 'package:flutter_application_1/models/bgg_location.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
@@ -11,16 +8,12 @@ import 'package:flutter_application_1/models/game_thing.dart';
 import 'package:image/image.dart' as imageDart;
 import 'package:flutter_application_1/main.dart';
 import 'package:camera/camera.dart';
-import 'package:path/path.dart';
 import '../db/game_things_sql.dart';
 import '../db/players_sql.dart';
 import '../db/location_sql.dart';
-import '../models/game_thing.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:xml/xml.dart' as xml;
 import '../bggApi/bggApi.dart';
-import 'package:collection/collection.dart';
 import 'package:flutter_pixelmatching/flutter_pixelmatching.dart';
 
 import '../widgets/duration_sliders.dart';
@@ -38,7 +31,7 @@ class _LogScaffoldState extends State<LogScaffold> {
   bool? flagWarranty = false;
   var recognizedGameId = 0;
   double durationCurrentValue = 60;
-  Uint8List imageTest = Uint8List.fromList(new List.empty());
+  Uint8List imageFromCamera = Uint8List.fromList(List.empty());
   List<Map> players = [];
   List<Map> locations = [];
   // String defaultLocation = LocationSQL.getDefaultLocationSync() != null
@@ -80,11 +73,11 @@ class _LogScaffoldState extends State<LogScaffold> {
       var bytes = await capturedImage.readAsBytes();
 
       imageDart.Image? img = imageDart.decodeImage(bytes);
-      if (img == null || img?.height == null) return 0;
+      if (img == null) return 0;
 
       //print("Height = ${WidgetsBinding.instance.window.physicalSize.height}");
       var ratio = img.height / 150;
-      imageDart.Image resizedImg = imageDart.copyResize(img!,
+      imageDart.Image resizedImg = imageDart.copyResize(img,
           width: (img.width / ratio).round(),
           height: (img.height / ratio).round());
 
@@ -93,7 +86,7 @@ class _LogScaffoldState extends State<LogScaffold> {
       var getGamesWithThumb = await GameThingSQL.getAllGames();
 
       setState(() {
-        imageTest = imgBytes;
+        imageFromCamera = imgBytes;
       });
 
       if (getGamesWithThumb == null) return 0;
@@ -122,22 +115,36 @@ class _LogScaffoldState extends State<LogScaffold> {
     super.dispose();
   }
 
-  void FillLocationName() async {
-    var defaultLocationRes = await LocationSQL.getDefaultLocation();
-    if (defaultLocationRes != null) {
-      setState(() {
-        defaultLocation = defaultLocationRes.name;
-      });
-    }
-  }
-
   @override
   void initState() {
     print("INIT LOG");
     super.initState();
 
-    initializeBggData();
-    FillLocationName();
+    GameThingSQL.initTables().then(
+      (value) {
+        var defaultLocationRes = fillLocationName();
+        defaultLocationRes.then((defaultLocationValue) {
+          if (defaultLocationValue != null) {
+            print("Fill location = ${defaultLocationValue.name}");
+            setState(() {
+              defaultLocation = defaultLocationValue.name;
+            });
+          }
+        });
+
+        initializeBggData();
+      },
+    );
+
+    // var defaultLocationRes = fillLocationName();
+    // defaultLocationRes.then((defaultLocationValue) {
+    //   if (defaultLocationValue != null) {
+    //     print("Fill location = ${defaultLocationValue.name}");
+    //     setState(() {
+    //       defaultLocation = defaultLocationValue.name;
+    //     });
+    //   }
+    // });
 
     _controller = CameraController(cameras.first, ResolutionPreset.max,
         enableAudio: false);
@@ -174,38 +181,38 @@ class _LogScaffoldState extends State<LogScaffold> {
             Column(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                ElevatedButton(
-                  child: Text("Load all data"),
+                const ElevatedButton(
                   onPressed: (getAllPlaysFromServer),
+                  child: Text("Load all data"),
                 ),
+                // ElevatedButton(
+                //   child: const Text("show games"),
+                //   onPressed: () async {
+                //     var allGames = await GameThingSQL.getAllGames();
+                //     if (allGames == null) return;
+                //     for (var game in allGames) {
+                //       print(
+                //           "Game = ${game.name}, min = ${game.minPlayers}, max = ${game.maxPlayers}");
+                //     }
+                //   },
+                // ),
                 ElevatedButton(
-                  child: Text("show games"),
-                  onPressed: () async {
-                    var allGames = await GameThingSQL.getAllGames();
-                    if (allGames == null) return;
-                    for (var game in allGames) {
-                      print(
-                          "Game = ${game.name}, min = ${game.minPlayers}, max = ${game.maxPlayers}");
-                    }
-                  },
-                ),
-                ElevatedButton(
-                  child: Text("del tables"),
+                  child: const Text("del tables"),
                   onPressed: () {
                     GameThingSQL.deleteDB();
                   },
                 ),
-                ElevatedButton(
-                  child: Text("create tables"),
-                  onPressed: () {
-                    GameThingSQL.createTable();
-                    PlayersSQL.createTable();
-                    LocationSQL.createTable();
-                  },
-                ),
+                // ElevatedButton(
+                //   child: const Text("create tables"),
+                //   onPressed: () {
+                //     GameThingSQL.createTable();
+                //     PlayersSQL.createTable();
+                //     LocationSQL.createTable();
+                //   },
+                // ),
                 Flexible(
                     flex: 1,
-                    child: Container(
+                    child: SizedBox(
                       //color: Colors.tealAccent,
                       width: MediaQuery.of(context).size.width,
                       height: MediaQuery.of(context).size.height,
@@ -215,18 +222,18 @@ class _LogScaffoldState extends State<LogScaffold> {
                     )),
                 Flexible(
                     flex: 2,
-                    child: Container(
+                    child: SizedBox(
                         //color: Colors.lime,
                         width: MediaQuery.of(context).size.width,
-                        child: imageTest.isNotEmpty
+                        child: imageFromCamera.isNotEmpty
                             ? Image.memory(
-                                imageTest,
+                                imageFromCamera,
                                 height: MediaQuery.of(context).size.height,
                               )
                             : Image.asset('assets/not_bad.png'))),
                 Flexible(
                     flex: 1,
-                    child: Container(
+                    child: SizedBox(
                         //color: Colors.tealAccent,
                         width: MediaQuery.of(context).size.width,
                         height: MediaQuery.of(context).size.height,
@@ -242,7 +249,7 @@ class _LogScaffoldState extends State<LogScaffold> {
                                         builder: (context, setState) {
                                       return AlertDialog(
                                           //insetPadding: EdgeInsets.zero,
-                                          title: Text("Your locations"),
+                                          title: const Text("Your locations"),
                                           content: SingleChildScrollView(
                                               child: Column(
                                                   children:
@@ -250,7 +257,8 @@ class _LogScaffoldState extends State<LogScaffold> {
                                             return ElevatedButton(
                                               child: Row(children: [
                                                 ChoiceChip(
-                                                    label: Text("Default"),
+                                                    label:
+                                                        const Text("Default"),
                                                     selected:
                                                         location['isDefault'] ==
                                                             1,
@@ -270,7 +278,6 @@ class _LogScaffoldState extends State<LogScaffold> {
                                                               .updateDefaultLocation(
                                                                   locationObject);
                                                         }
-                                                        ;
                                                       });
                                                     }),
                                                 Expanded(
@@ -296,12 +303,16 @@ class _LogScaffoldState extends State<LogScaffold> {
                                                     1) {
                                                   defaultLocation =
                                                       location['name'];
+                                                  // print(
+                                                  //     "set def location = ${defaultLocation}");
+
                                                   for (var existedLocation
                                                       in locations) {
                                                     existedLocation[
                                                         'isDefault'] = 0;
                                                   }
                                                   location['isDefault'] = 1;
+                                                  //print(locations);
                                                   var locationObject = Location(
                                                       id: location['id'],
                                                       name: location['name'],
@@ -323,7 +334,7 @@ class _LogScaffoldState extends State<LogScaffold> {
                             style: ButtonStyle(
                                 shape: MaterialStateProperty.all<
                                         RoundedRectangleBorder>(
-                                    RoundedRectangleBorder(
+                                    const RoundedRectangleBorder(
                                         borderRadius: BorderRadius.zero,
                                         side: BorderSide(
                                             color: Colors.black12)))),
@@ -333,7 +344,7 @@ class _LogScaffoldState extends State<LogScaffold> {
                             icon: const Icon(Icons.home)))),
                 Flexible(
                     flex: 2,
-                    child: Container(
+                    child: SizedBox(
                         //color: Colors.green,
                         width: MediaQuery.of(context).size.width,
                         height: MediaQuery.of(context).size.height,
@@ -352,7 +363,7 @@ class _LogScaffoldState extends State<LogScaffold> {
                         ))),
                 Flexible(
                     flex: 1,
-                    child: Container(
+                    child: SizedBox(
                         //color: Colors.blueAccent,
                         width: MediaQuery.of(context).size.width,
                         height: MediaQuery.of(context).size.height,
@@ -374,18 +385,19 @@ class _LogScaffoldState extends State<LogScaffold> {
                         ))),
                 Flexible(
                     flex: 1,
-                    child: Container(
+                    child: SizedBox(
                         //color: Colors.green,
                         width: MediaQuery.of(context).size.width,
                         height: MediaQuery.of(context).size.height,
                         child: ElevatedButton.icon(
                             onPressed: () async {
-                              if (recognizedGameId <= 0)
+                              if (recognizedGameId <= 0) {
                                 ScaffoldMessenger.of(context)
-                                    .showSnackBar(SnackBar(
+                                    .showSnackBar(const SnackBar(
                                   content:
                                       Text('No game was chosen to log play'),
                                 ));
+                              }
                               List<Map> bggPlayers = [];
                               for (var player in players.where(
                                   (element) => element['isChecked'] == true)) {
@@ -422,22 +434,23 @@ class _LogScaffoldState extends State<LogScaffold> {
                             style: ButtonStyle(
                                 shape: MaterialStateProperty.all<
                                         RoundedRectangleBorder>(
-                                    RoundedRectangleBorder(
+                                    const RoundedRectangleBorder(
                                         borderRadius: BorderRadius.zero,
                                         side: BorderSide(
                                             color: Colors.black12)))),
-                            label: Text("Log play"),
-                            icon: Icon(Icons.send_and_archive)))),
+                            label: const Text("Log play"),
+                            icon: const Icon(Icons.send_and_archive)))),
                 Flexible(
                     flex: 1,
-                    child: Container(
+                    child: SizedBox(
                         //color: Colors.tealAccent,
                         width: MediaQuery.of(context).size.width,
                         height: MediaQuery.of(context).size.height,
                         child: ElevatedButton.icon(
                             onPressed: () async {
-                              if (players.isEmpty)
+                              if (players.isEmpty) {
                                 players = await getLocalPlayers();
+                              }
                               showDialog(
                                   context: context,
                                   builder: (BuildContext) {
@@ -445,7 +458,7 @@ class _LogScaffoldState extends State<LogScaffold> {
                                         builder: (context, setState) {
                                       return AlertDialog(
                                           //insetPadding: EdgeInsets.zero,
-                                          title: Text("Your friends"),
+                                          title: const Text("Your friends"),
                                           content: SingleChildScrollView(
                                               child: Column(
                                                   children:
@@ -453,7 +466,7 @@ class _LogScaffoldState extends State<LogScaffold> {
                                             return CheckboxListTile(
                                               title: Row(children: [
                                                 ChoiceChip(
-                                                    label: Text("Win?"),
+                                                    label: const Text("Win?"),
                                                     selected: player['win'],
                                                     onSelected: (bool? value) {
                                                       setState(() {
@@ -481,15 +494,15 @@ class _LogScaffoldState extends State<LogScaffold> {
                             style: ButtonStyle(
                                 shape: MaterialStateProperty.all<
                                         RoundedRectangleBorder>(
-                                    RoundedRectangleBorder(
+                                    const RoundedRectangleBorder(
                                         borderRadius: BorderRadius.zero,
                                         side: BorderSide(
                                             color: Colors.black12)))),
-                            label: Text("Chose players"),
-                            icon: Icon(Icons.people)))),
+                            label: const Text("Chose players"),
+                            icon: const Icon(Icons.people)))),
                 Flexible(
                     flex: 1,
-                    child: Container(
+                    child: SizedBox(
                         //color: Colors.tealAccent,
                         width: MediaQuery.of(context).size.width,
                         height: MediaQuery.of(context).size.height,
@@ -502,7 +515,7 @@ class _LogScaffoldState extends State<LogScaffold> {
                                       title: const Text('Take photo'),
                                       content: Column(children: [
                                         Text(recognizedImage),
-                                        Container(
+                                        SizedBox(
                                           height: 300,
                                           child: CameraPreview(_controller),
                                         ),
@@ -546,11 +559,11 @@ class _LogScaffoldState extends State<LogScaffold> {
                                 //     Theme.of(context).primaryColor),
                                 shape: MaterialStateProperty.all<
                                         RoundedRectangleBorder>(
-                                    RoundedRectangleBorder(
+                                    const RoundedRectangleBorder(
                                         borderRadius: BorderRadius.zero,
                                         side: BorderSide(
                                             color: Colors.black12)))),
-                            label: Text("Recognize game"),
+                            label: const Text("Recognize game"),
                             icon: const Icon(Icons.photo_camera))))
               ],
             )
@@ -586,7 +599,7 @@ Future<int> getSimilarGameID(
 
       final similarity = await matching.similarity(binaryImage);
       print(
-          "game = ${gameImage.name}, id = ${gameImage.id}, similarity = ${similarity}");
+          "game = ${gameImage.name}, id = ${gameImage.id}, similarity = $similarity");
       if (similarity > bestSimilarity) {
         bestSimilarGameID = gameImage.id;
         bestSimilarity = similarity;
@@ -623,23 +636,19 @@ Future<int> sendLogRequest(String logData) async {
     String sessionCookie = '';
     for (final cookie in response.headers['set-cookie']!.split(';')) {
       if (cookie.startsWith('bggusername')) {
-        sessionCookie += (cookie.length > 0 ? ' ' : '') + cookie + ';';
+        sessionCookie += '${cookie.isNotEmpty ? ' ' : ''}$cookie;';
         continue;
       }
       var idx = cookie.indexOf('bggpassword=');
       if (idx != -1) {
-        sessionCookie += (cookie.length > 0 ? ' ' : '') +
-            'bggpassword=' +
-            cookie.substring(idx + 12) +
-            ';';
+        sessionCookie +=
+            '${cookie.isNotEmpty ? ' ' : ''}bggpassword=${cookie.substring(idx + 12)};';
         continue;
       }
       idx = cookie.indexOf('SessionID=');
       if (idx != -1) {
-        sessionCookie += (cookie.length > 0 ? ' ' : '') +
-            'SessionID=' +
-            cookie.substring(idx + 10) +
-            ';';
+        sessionCookie +=
+            '${cookie.isNotEmpty ? ' ' : ''}SessionID=${cookie.substring(idx + 10)};';
         continue;
       }
     }

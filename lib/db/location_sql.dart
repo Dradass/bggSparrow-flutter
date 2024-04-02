@@ -83,7 +83,7 @@ class LocationSQL {
     final db = await _getDB();
     List<Map> locations = [];
     List<Map<String, dynamic>> result =
-        await db.rawQuery('SELECT * FROM Locations WHERE isDefault=1');
+        await db.rawQuery('SELECT * FROM Locations WHERE isdefault=1');
     print(result);
     if (result.isEmpty) return null;
     for (var locationResult in result) {
@@ -97,36 +97,16 @@ class LocationSQL {
     return Location.fromJson(result.first);
   }
 
-  static Location? getDefaultLocationSync() {
-    final dbRes = _getDB();
-    dbRes.then((db) {
-      List<Map> locations = [];
-      var queryQesult =
-          db.rawQuery('SELECT * FROM Locations WHERE isDefault=1');
-      queryQesult.then((result) {
-        if (result.isEmpty) return null;
-        for (var locationResult in result) {
-          var location = Location.fromJson(locationResult);
-          locations.add({
-            'name': location.name,
-            'id': location.id,
-            'isDefault': location.isDefault
-          });
-        }
-        print(result.first);
-        return Location.fromJson(result.first);
-      });
-    });
-    return null;
-  }
-
   static void updateDefaultLocation(Location location) async {
     var defaultLocation = await getDefaultLocation();
-    if (defaultLocation == null) return;
+    print(defaultLocation);
 
-    updateLocation(Location(
-        id: defaultLocation.id, name: defaultLocation.name, isDefault: 0));
+    if (defaultLocation != null) {
+      updateLocation(Location(
+          id: defaultLocation.id, name: defaultLocation.name, isDefault: 0));
+    }
 
     updateLocation(location);
+    print("new def loca = ${location.name}, isdefault = ${location.isDefault}");
   }
 }

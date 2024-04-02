@@ -47,13 +47,13 @@ class _NavigationExampleState extends State<NavigationExample> {
         ],
       ),
       body: IndexedStack(
-        children: <Widget>[
+        index: currentPageIndex,
+        children: const <Widget>[
           /// Home page
           LogScaffold(),
           FirstPlayerChoser(),
           GameHelper()
         ],
-        index: currentPageIndex,
       ),
     );
   }

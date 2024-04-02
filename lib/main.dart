@@ -1,14 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
-import 'package:flutter_application_1/pages/log_page.dart';
 
 import 'dart:async';
 
-import 'package:flutter/widgets.dart';
-import 'package:path/path.dart';
-import 'package:sqflite/sqflite.dart';
 
-import '../bggApi/bggApi.dart';
 import '../navigation_bar.dart';
 
 late List<CameraDescription> cameras;
@@ -22,7 +17,7 @@ Future<void> main() async {
   runApp(MaterialApp(
     theme: ThemeData(
         //primaryColor: Color.fromARGB(255, 219, 202, 124),
-        textTheme: TextTheme()
+        textTheme: const TextTheme()
             .apply(bodyColor: primaryTextColor, displayColor: Colors.blue),
         colorScheme: const ColorScheme(
             brightness: Brightness.light,
@@ -37,7 +32,7 @@ Future<void> main() async {
             surface: Color.fromARGB(255, 148, 226, 181),
             onSurface: primaryTextColor),
         //scaffoldBackgroundColor: Colors.deepPurple,
-        secondaryHeaderColor: Color.fromARGB(255, 43, 132, 190)),
+        secondaryHeaderColor: const Color.fromARGB(255, 43, 132, 190)),
     home: const NavigationExample(),
   ));
 
@@ -227,12 +222,12 @@ class _MainScreenState extends State<MainScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Column(children: [
-        Text('111'),
-        Container(
+        const Text('111'),
+        SizedBox(
           height: 300,
           child: CameraPreview(_controller),
         ),
-        Text("222"),
+        const Text("222"),
       ]),
     );
   }
