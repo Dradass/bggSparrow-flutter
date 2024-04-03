@@ -54,11 +54,8 @@ class PlaysSQL {
     List<Map<String, dynamic>> result =
         await db.rawQuery('SELECT * FROM Plays WHERE id=?', [playId]);
     if (result.isEmpty) {
-      print('cant find play ID = $playId');
       return null;
     }
-    ;
-    print('found play ID = $playId');
     var foundPlayer = BggPlay.fromJson(result.first);
     return foundPlayer;
   }
@@ -76,7 +73,6 @@ class PlaysSQL {
     List<BggPlay> plays = [];
     List<Map<String, dynamic>> result =
         await db.rawQuery('SELECT * FROM Plays');
-    print(result.length);
     if (result.isEmpty) return plays;
     for (var playerResult in result) {
       var play = BggPlay.fromJson(playerResult);

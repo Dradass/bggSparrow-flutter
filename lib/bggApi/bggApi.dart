@@ -28,12 +28,16 @@ Future<void> ImportGameCollectionFromBGG() async {
           item.findElements('status').first.getAttribute('own').toString());
       var minPlayers = 0;
       var maxPlayers = 0;
+      // TODO FIX too much requests
       final gameThingResponse = await http.get(
           Uri.parse('https://boardgamegeek.com//xmlapi2/things?id=$objectId'));
       if (gameThingResponse.statusCode == 200) {
         final gameThingServer = GameThing.fromXml(gameThingResponse.body);
         minPlayers = gameThingServer.minPlayers;
         maxPlayers = gameThingServer.maxPlayers;
+      } else {
+        print("Error while getting info about game objectName");
+        continue;
       }
       GameThing gameThing = GameThing(
           name: objectName,
@@ -43,7 +47,7 @@ Future<void> ImportGameCollectionFromBGG() async {
           minPlayers: minPlayers,
           maxPlayers: maxPlayers,
           owned: owned);
-      GameThingSQL.addGame(gameThing);
+      await GameThingSQL.addGame(gameThing);
     }
   }
   final gamesCount = await GameThingSQL.getAllGames();
@@ -99,7 +103,6 @@ Future<bool> getPlaysFromPage(
   for (var play in plays) {
     winnersId = [];
     final objectId = int.parse(play.getAttribute('id').toString());
-    print("objectId = $objectId");
     final date = play.getAttribute('date').toString();
     final location = play.getAttribute('location').toString();
     final duration = int.parse(play.getAttribute('length').toString());
@@ -158,13 +161,10 @@ Future<bool> getPlaysFromPage(
         location: location,
         winners: winnersId.join(';'),
         players: uniquePlayers.map((e) => e.id).join(';'));
-    print("bgg play new = $objectId");
     if (await PlaysSQL.selectPlayByID(bggPlay.id) == null) {
       bggPlays.add(bggPlay);
-      print("bgg play added = $objectId");
     }
   }
-  print("bggPlays count = ${bggPlays.length}");
   await fillLocalPlayers(uniquePlayers, maxPlayerId);
   await fillLocalLocations(uniqueLocations, maxLocationId);
   await fillLocalPlays(bggPlays);
@@ -216,7 +216,6 @@ Future<void> fillLocalLocations(
 }
 
 Future<void> fillLocalPlays(List<BggPlay> bggPlays) async {
-  print("creating bgg plays count = ${bggPlays.length}");
   for (var bggPlay in bggPlays) {
     print(bggPlay.id);
     if (await PlaysSQL.selectPlayByID(bggPlay.id) != null) {

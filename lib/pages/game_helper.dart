@@ -88,31 +88,35 @@ class _GameHelperState extends State<GameHelper> {
                 var allGames = await GameThingSQL.getAllGames();
                 List<GameThing> filteredGames = [];
                 if (allGames == null) return;
+                print(allGames.length);
+                print(chosenPlayersCount);
                 for (var game in allGames) {
-                  print(
-                      "Game = ${game.name}, min = ${game.minPlayers}, max = ${game.maxPlayers}");
-                  if (game.minPlayers <= chosenPlayersCount &&
-                          game.maxPlayers >= chosenPlayersCount &&
-                          maxRangeValues.end != 0
-                      ? game.maxPlayers <= maxRangeValues.end
-                      : true && maxRangeValues.start != 0
-                          ? game.maxPlayers >= maxRangeValues.start
-                          : true) {
+                  // print(
+                  //     "Game = ${game.name}, min = ${game.minPlayers}, max = ${game.maxPlayers}");
+                  if (game.minPlayers <= chosenPlayersCount.round() &&
+                      game.maxPlayers >= chosenPlayersCount.round() &&
+                      (maxRangeValues.end == 0 ||
+                          (maxRangeValues.end != 0 &&
+                              game.maxPlayers <= maxRangeValues.end &&
+                              game.maxPlayers >= maxRangeValues.start))) {
                     if (onlyOwnedGames!) {
                       if (game.owned == 0) continue;
                     }
                     filteredGames.add(game);
                   }
-                  if (filteredGames.isEmpty) {
-                    setState(() {
-                      chosenGame = "No game with chosen players count";
-                    });
-                  } else {
-                    print(filteredGames);
-                    setState(() {
-                      chosenGame = ((filteredGames..shuffle()).first).name;
-                    });
+                }
+                if (filteredGames.isEmpty) {
+                  setState(() {
+                    chosenGame = "No game with chosen players count";
+                  });
+                } else {
+                  for (var game in filteredGames) {
+                    print(
+                        "Game = ${game.name}, min = ${game.minPlayers}, max = ${game.maxPlayers}");
                   }
+                  setState(() {
+                    chosenGame = ((filteredGames..shuffle()).first).name;
+                  });
                 }
               },
             ),
