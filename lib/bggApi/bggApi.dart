@@ -28,7 +28,11 @@ Future<void> ImportGameCollectionFromBGG() async {
           item.findElements('status').first.getAttribute('own').toString());
       var minPlayers = 0;
       var maxPlayers = 0;
-      // TODO FIX too much requests
+      print("Importing game $objectName");
+
+      // Anti DDOS
+      // await Future.delayed(const Duration(milliseconds: 1000));
+
       final gameThingResponse = await http.get(
           Uri.parse('https://boardgamegeek.com//xmlapi2/things?id=$objectId'));
       if (gameThingResponse.statusCode == 200) {
@@ -36,7 +40,7 @@ Future<void> ImportGameCollectionFromBGG() async {
         minPlayers = gameThingServer.minPlayers;
         maxPlayers = gameThingServer.maxPlayers;
       } else {
-        print("Error while getting info about game objectName");
+        print("Error while getting info about game $objectName id = $objectId");
         continue;
       }
       GameThing gameThing = GameThing(
@@ -242,7 +246,7 @@ Future<Location?> fillLocationName() async {
 }
 
 Future<void> initializeBggData() async {
-  await ImportGameCollectionFromBGG();
+  ImportGameCollectionFromBGG();
   int maxPlayerId = await PlayersSQL.getMaxID();
   int maxLocationId = await LocationSQL.getMaxID();
   await getPlaysFromPage(1, maxPlayerId, maxLocationId);
