@@ -1,11 +1,3 @@
-
-// final objectId = int.parse(play.getAttribute('id').toString());
-// final date = play.getAttribute('date').toString();
-// final location = play.getAttribute('location').toString();
-// final quantity = play.getAttribute('quantity').toString();
-// final gameId = int.parse(play.getAttribute('objectid').toString());
-//final players = userName, userId, name, win
-
 class BggPlay {
   final int id;
   final String date;
@@ -14,6 +6,8 @@ class BggPlay {
   final int gameId;
   final String? comments;
   final String? players;
+  final String? winners;
+  final int? duration;
 
   const BggPlay(
       {required this.id,
@@ -22,24 +16,32 @@ class BggPlay {
       this.quantity,
       this.comments,
       this.location,
-      this.players});
-
-  // factory GameThing.fromJson(Map<String, dynamic> json) {
-  //   return GameThing(
-  //       name: json['name'],
-  //       id: json['id'],
-  //       thumbnail: json['thumbnail'],
-  //       image: json['image'],
-  //       thumbBinary: json['thumbbin']);
-  // }
+      this.players,
+      this.winners,
+      this.duration});
 
   Map<String, dynamic> toJson() => {
         'id': id,
         'date': date,
-        'gameid': gameId,
+        'gameId': gameId,
         'quantity': quantity,
         'location': location,
         'players': players,
-        'comments': comments
+        'winners': winners,
+        'comments': comments,
+        'duration': duration
       };
+
+  factory BggPlay.fromJson(Map<String, dynamic> json) {
+    return BggPlay(
+        id: json['id'],
+        gameId: json['gameId'],
+        date: json['date'],
+        quantity: json['quantity'],
+        comments: json['comments'],
+        location: json['location'],
+        players: json['players'],
+        winners: json['winners'],
+        duration: json['duration']);
+  }
 }

@@ -20,7 +20,9 @@ class GameThingSQL {
         "CREATE TABLE Players(id INTEGER PRIMARY KEY, name TEXT NOT NULL, userid INTEGER, username TEXT);");
     await db.execute(
         "CREATE TABLE Locations(id INTEGER PRIMARY KEY, name TEXT NOT NULL, isDefault INTEGER);");
-    print('TABLE CREATED');
+    await db.execute(
+        "CREATE TABLE Plays(id INTEGER PRIMARY KEY, date DATETIME NOT NULL, quantity INTEGER, location TEXT, gameId INTEGER NOT NULL, comments TEXT, players TEXT, winners TEXT, duration INTEGER);");
+    print('TABLES WERE CREATED');
   }
 
   static Future<void> createTable() async {

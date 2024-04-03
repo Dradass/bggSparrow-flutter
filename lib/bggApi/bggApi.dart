@@ -1,10 +1,12 @@
 import 'package:flutter_application_1/models/game_thing.dart';
 import '../db/game_things_sql.dart';
 import '../db/players_sql.dart';
+import '../db/plays_sql.dart';
 import '../db/location_sql.dart';
 import 'package:http/http.dart' as http;
 import 'package:xml/xml.dart' as xml;
 import '../models/bgg_player_model.dart';
+import '../models/bgg_play_model.dart';
 import '../models/bgg_location.dart';
 
 Future<void> ImportGameCollectionFromBGG() async {
@@ -78,7 +80,9 @@ Future<bool> getPlaysFromPage(
   const userName = 'dradass';
 
   List<Player> uniquePlayers = [];
+  List<int> winnersId = [];
   List<Location> uniqueLocations = [];
+  List<BggPlay> bggPlays = [];
 
   print("create players, iteration = $pageNumber");
   final collectionResponse = await http.get(Uri.parse(
@@ -90,12 +94,19 @@ Future<bool> getPlaysFromPage(
 
   if (plays.isEmpty) return false;
 
+  print("plays count = ${plays.length}");
+
   for (var play in plays) {
+    winnersId = [];
     final objectId = int.parse(play.getAttribute('id').toString());
+    print("objectId = $objectId");
     final date = play.getAttribute('date').toString();
     final location = play.getAttribute('location').toString();
-    final quantity = play.getAttribute('quantity').toString();
-    final comments = play.findElements('comments');
+    final duration = int.parse(play.getAttribute('length').toString());
+    final quantity = int.parse(play.getAttribute('quantity').toString());
+    final comments = play.findElements('comments').firstOrNull != null
+        ? play.findElements('comments').first.text
+        : "";
     final gameId = int.parse(
         play.findElements('item').first.getAttribute('objectid').toString());
 
@@ -109,28 +120,54 @@ Future<bool> getPlaysFromPage(
     }
 
     final playersRoot = play.findElements('players').firstOrNull;
-    if (playersRoot == null) continue;
-    final players = playersRoot.findElements('player');
-    for (var player in players) {
-      if (player.getAttribute('name') == null) continue;
-      var newPlayer = Player(
-        id: maxPlayerId,
-        name: player.getAttribute('name').toString(),
-        userid: int.parse(player.getAttribute('userid').toString()),
-        username: player.getAttribute('username').toString(),
-      );
-      if (!uniquePlayers.map((e) => e.name).contains(newPlayer.name)) {
-        if (newPlayer.userid != 0 &&
-            await PlayersSQL.selectPlayerByUserID(newPlayer.userid!) == null) {
-          if (await PlayersSQL.selectPlayerByName(newPlayer.name) == null) {
-            uniquePlayers.add(newPlayer);
+    if (playersRoot != null) {
+      final players = playersRoot.findElements('player');
+      for (var player in players) {
+        if (player.getAttribute('name') == null) continue;
+        var newPlayer = Player(
+          id: maxPlayerId,
+          name: player.getAttribute('name').toString(),
+          userid: int.parse(player.getAttribute('userid').toString()),
+          username: player.getAttribute('username').toString(),
+        );
+        var win = player.getAttribute('win').toString();
+
+        if (!uniquePlayers.map((e) => e.name).contains(newPlayer.name)) {
+          if ((newPlayer.userid != 0 &&
+                  await PlayersSQL.selectPlayerByUserID(newPlayer.userid!) ==
+                      null) ||
+              newPlayer.userid == 0) {
+            if (await PlayersSQL.selectPlayerByName(newPlayer.name) == null) {
+              uniquePlayers.add(newPlayer);
+
+              if (win == '1') {
+                winnersId.add(maxPlayerId);
+              }
+            }
           }
         }
       }
     }
+    var bggPlay = BggPlay(
+        id: objectId,
+        gameId: gameId,
+        date: date,
+        comments: comments,
+        duration: duration,
+        quantity: quantity,
+        location: location,
+        winners: winnersId.join(';'),
+        players: uniquePlayers.map((e) => e.id).join(';'));
+    print("bgg play new = $objectId");
+    if (await PlaysSQL.selectPlayByID(bggPlay.id) == null) {
+      bggPlays.add(bggPlay);
+      print("bgg play added = $objectId");
+    }
   }
+  print("bggPlays count = ${bggPlays.length}");
   await fillLocalPlayers(uniquePlayers, maxPlayerId);
   await fillLocalLocations(uniqueLocations, maxLocationId);
+  await fillLocalPlays(bggPlays);
   return true;
 }
 
@@ -178,6 +215,19 @@ Future<void> fillLocalLocations(
   }
 }
 
+Future<void> fillLocalPlays(List<BggPlay> bggPlays) async {
+  print("creating bgg plays count = ${bggPlays.length}");
+  for (var bggPlay in bggPlays) {
+    print(bggPlay.id);
+    if (await PlaysSQL.selectPlayByID(bggPlay.id) != null) {
+      print("Existed play: ${bggPlay.id}");
+    } else {
+      print("New play :${bggPlay.id}");
+      PlaysSQL.addPlay(bggPlay);
+    }
+  }
+}
+
 Future<List<Map>> getLocalPlayers() async {
   var playersMap = await PlayersSQL.getAllPlayers();
   return playersMap;
@@ -193,7 +243,6 @@ Future<Location?> fillLocationName() async {
 }
 
 Future<void> initializeBggData() async {
-  //await GameThingSQL.initTables();
   await ImportGameCollectionFromBGG();
   int maxPlayerId = await PlayersSQL.getMaxID();
   int maxLocationId = await LocationSQL.getMaxID();

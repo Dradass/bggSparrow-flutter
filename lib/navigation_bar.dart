@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/pages/log_page.dart';
 import 'package:flutter_application_1/pages/game_helper.dart';
 import 'package:flutter_application_1/pages/first_player.dart';
+import 'package:flutter_application_1/pages/statistics.dart';
 
 /// Flutter code sample for [NavigationBar].
 
@@ -56,7 +57,7 @@ class _NavigationExampleState extends State<NavigationExample> {
         children: const <Widget>[
           /// Home page
           LogScaffold(),
-          FirstPlayerChoser(),
+          Statistics(),
           GameHelper(),
           FirstPlayerChoser(),
         ],

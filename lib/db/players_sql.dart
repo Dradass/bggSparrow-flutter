@@ -56,7 +56,6 @@ class PlayersSQL {
         await db.rawQuery('SELECT * FROM Players WHERE userid=?', [userId]);
     if (result.isEmpty) return null;
     var foundPlayer = Player.fromJson(result.first);
-    print("found player ${foundPlayer.name}, userid = $foundPlayer");
     return foundPlayer;
   }
 
