@@ -9,11 +9,11 @@ class GameThing {
   final String thumbnail;
   final String image;
   final String? thumbBinary;
-  final int minPlayers;
-  final int maxPlayers;
+  int minPlayers;
+  int maxPlayers;
   final int owned;
 
-  const GameThing(
+  GameThing(
       {required this.name,
       required this.id,
       required this.thumbnail,
@@ -83,20 +83,24 @@ class GameThing {
   void CreateBinaryThumb() async {
     try {
       http.Response response = await http.get(Uri.parse(thumbnail));
-      var imageBytes = response.bodyBytes; //Uint8List
-      var bodyBytes = base64Encode(imageBytes);
+      if (response.statusCode == 200) {
+        var imageBytes = response.bodyBytes; //Uint8List
+        var bodyBytes = base64Encode(imageBytes);
 
-      final gameThing = GameThing(
-          name: name,
-          id: id,
-          thumbnail: thumbnail,
-          image: image,
-          thumbBinary: bodyBytes,
-          minPlayers: minPlayers,
-          maxPlayers: maxPlayers,
-          owned: owned);
-      print("Create thumb for $name");
-      GameThingSQL.updateGame(gameThing);
+        final gameThing = GameThing(
+            name: name,
+            id: id,
+            thumbnail: thumbnail,
+            image: image,
+            thumbBinary: bodyBytes,
+            minPlayers: minPlayers,
+            maxPlayers: maxPlayers,
+            owned: owned);
+        print("Create thumb for $name");
+        GameThingSQL.updateGame(gameThing);
+      } else {
+        print("Error while getting thumb: $name");
+      }
     } catch (e) {
       print("Error while creating thumb: $e");
     }

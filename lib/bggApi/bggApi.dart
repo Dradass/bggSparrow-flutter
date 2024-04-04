@@ -9,6 +9,12 @@ import '../models/bgg_player_model.dart';
 import '../models/bgg_play_model.dart';
 import '../models/bgg_location.dart';
 
+Future<void> getGamesInfoFromBgg() async {
+  await ImportGameCollectionFromBGG();
+  await getGamesThumbnail();
+  await getGamesPlayersCount();
+}
+
 Future<void> ImportGameCollectionFromBGG() async {
   await GameThingSQL.createTable();
   final collectionResponse = await http.get(Uri.parse(
@@ -33,16 +39,16 @@ Future<void> ImportGameCollectionFromBGG() async {
       // Anti DDOS
       // await Future.delayed(const Duration(milliseconds: 1000));
 
-      final gameThingResponse = await http.get(
-          Uri.parse('https://boardgamegeek.com//xmlapi2/things?id=$objectId'));
-      if (gameThingResponse.statusCode == 200) {
-        final gameThingServer = GameThing.fromXml(gameThingResponse.body);
-        minPlayers = gameThingServer.minPlayers;
-        maxPlayers = gameThingServer.maxPlayers;
-      } else {
-        print("Error while getting info about game $objectName id = $objectId");
-        continue;
-      }
+      // final gameThingResponse = await http.get(
+      //     Uri.parse('https://boardgamegeek.com//xmlapi2/things?id=$objectId'));
+      // if (gameThingResponse.statusCode == 200) {
+      //   final gameThingServer = GameThing.fromXml(gameThingResponse.body);
+      //   minPlayers = gameThingServer.minPlayers;
+      //   maxPlayers = gameThingServer.maxPlayers;
+      // } else {
+      //   print("Error while getting info about game $objectName id = $objectId");
+      //   continue;
+      // }
       GameThing gameThing = GameThing(
           name: objectName,
           id: objectId,
@@ -54,22 +60,51 @@ Future<void> ImportGameCollectionFromBGG() async {
       await GameThingSQL.addGame(gameThing);
     }
   }
-  final gamesCount = await GameThingSQL.getAllGames();
-  print("-----finished adding games");
+  // final gamesCount = await GameThingSQL.getAllGames();
+  // print("-----finished adding games");
+  // final gettingAllGames = await GameThingSQL.getAllGames();
+  // if (gettingAllGames != null) {
+  //   for (var game in gettingAllGames) {
+  //     if (game.thumbBinary == null) game.CreateBinaryThumb();
+  //   }
+  // }
+}
+
+Future<void> getGamesThumbnail() async {
   final gettingAllGames = await GameThingSQL.getAllGames();
   if (gettingAllGames != null) {
     for (var game in gettingAllGames) {
-      if (game.thumbBinary == null) game.CreateBinaryThumb();
+      if (game.thumbBinary == null) {
+        game.CreateBinaryThumb();
+        // Anti DDOS
+        await Future.delayed(const Duration(milliseconds: 1000));
+      }
     }
   }
-  // gettingAllGames.then((allGames) {
-  //   if (allGames != null) {
-  //     for (var game in allGames) {
-  //       if (game.thumbBinary == null) game.CreateBinaryThumb();
-  //     }
-  //     print("-----finished adding thumbs");
-  //   }
-  // });
+}
+
+Future<void> getGamesPlayersCount() async {
+  final gettingAllGames = await GameThingSQL.getAllGames();
+  if (gettingAllGames != null) {
+    for (var game in gettingAllGames) {
+      if (game.minPlayers != 0 && game.maxPlayers != 0) continue;
+
+      final gameThingResponse = await http.get(
+          Uri.parse('https://boardgamegeek.com//xmlapi2/things?id=${game.id}'));
+      if (gameThingResponse.statusCode == 200) {
+        final gameThingServer = GameThing.fromXml(gameThingResponse.body);
+        game.minPlayers = gameThingServer.minPlayers;
+        game.maxPlayers = gameThingServer.maxPlayers;
+        print("Upadte players count of game ${game.name} id = ${game.id}");
+        await GameThingSQL.updateGame(game);
+        // Anti DDOS
+        await Future.delayed(const Duration(milliseconds: 1000));
+      } else {
+        print(
+            "Error while getting info about game ${game.name} id = ${game.id}");
+      }
+    }
+  }
 }
 
 Future<void> getAllPlaysFromServer() async {
@@ -246,7 +281,7 @@ Future<Location?> fillLocationName() async {
 }
 
 Future<void> initializeBggData() async {
-  ImportGameCollectionFromBGG();
+  getGamesInfoFromBgg();
   int maxPlayerId = await PlayersSQL.getMaxID();
   int maxLocationId = await LocationSQL.getMaxID();
   await getPlaysFromPage(1, maxPlayerId, maxLocationId);
