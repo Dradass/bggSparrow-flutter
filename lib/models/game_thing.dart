@@ -1,6 +1,7 @@
 import 'package:xml/xml.dart' as xml;
 import '../db/game_things_sql.dart';
 import 'package:http/http.dart' as http;
+import 'package:http/retry.dart';
 import 'dart:convert';
 
 class GameThing {
@@ -82,7 +83,11 @@ class GameThing {
 
   void CreateBinaryThumb() async {
     try {
-      http.Response response = await http.get(Uri.parse(thumbnail));
+      var client = RetryClient(http.Client(), retries: 5);
+      var response = await client.get(Uri.parse(thumbnail));
+      client.close();
+
+      //http.Response response = await http.get(Uri.parse(thumbnail));
       if (response.statusCode == 200) {
         var imageBytes = response.bodyBytes; //Uint8List
         var bodyBytes = base64Encode(imageBytes);

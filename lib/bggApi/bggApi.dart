@@ -1,4 +1,5 @@
 import 'package:flutter_application_1/models/game_thing.dart';
+import 'package:http/retry.dart';
 import '../db/game_things_sql.dart';
 import '../db/players_sql.dart';
 import '../db/plays_sql.dart';
@@ -77,7 +78,7 @@ Future<void> getGamesThumbnail() async {
       if (game.thumbBinary == null) {
         game.CreateBinaryThumb();
         // Anti DDOS
-        await Future.delayed(const Duration(milliseconds: 1000));
+        //await Future.delayed(const Duration(milliseconds: 1000));
       }
     }
   }
@@ -89,8 +90,13 @@ Future<void> getGamesPlayersCount() async {
     for (var game in gettingAllGames) {
       if (game.minPlayers != 0 && game.maxPlayers != 0) continue;
 
-      final gameThingResponse = await http.get(
+      var client = RetryClient(http.Client(), retries: 5);
+      var gameThingResponse = await client.get(
           Uri.parse('https://boardgamegeek.com//xmlapi2/things?id=${game.id}'));
+      client.close();
+
+      // final gameThingResponse = await http.get(
+      //     Uri.parse('https://boardgamegeek.com//xmlapi2/things?id=${game.id}'));
       if (gameThingResponse.statusCode == 200) {
         final gameThingServer = GameThing.fromXml(gameThingResponse.body);
         game.minPlayers = gameThingServer.minPlayers;
@@ -98,7 +104,7 @@ Future<void> getGamesPlayersCount() async {
         print("Upadte players count of game ${game.name} id = ${game.id}");
         await GameThingSQL.updateGame(game);
         // Anti DDOS
-        await Future.delayed(const Duration(milliseconds: 1000));
+        //await Future.delayed(const Duration(milliseconds: 1000));
       } else {
         print(
             "Error while getting info about game ${game.name} id = ${game.id}");
