@@ -26,6 +26,7 @@ class LogScaffold extends StatefulWidget {
 }
 
 class _LogScaffoldState extends State<LogScaffold> {
+  bool isProgressBarVisible = false;
   late CameraController _controller;
   var recognizedImage = "No image";
   bool? flagWarranty = false;
@@ -132,8 +133,16 @@ class _LogScaffoldState extends State<LogScaffold> {
 
     GameThingSQL.initTables().then(
       (value) {
+        setState(() {
+          isProgressBarVisible = true;
+        });
         setLocationButtonName();
-        initializeBggData();
+        var initializeProgress = initializeBggData();
+        initializeProgress.then((value) {
+          setState(() {
+            isProgressBarVisible = false;
+          });
+        });
       },
     );
 
@@ -173,6 +182,22 @@ class _LogScaffoldState extends State<LogScaffold> {
             Column(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
+                Flexible(
+                    flex: 1,
+                    child: SizedBox(
+                        //color: Colors.tealAccent,
+                        width: MediaQuery.of(context).size.width,
+                        height: isProgressBarVisible
+                            ? MediaQuery.of(context).size.height
+                            : 0,
+                        child: Column(
+                          children: [
+                            if (isProgressBarVisible)
+                              const LinearProgressIndicator(),
+                            if (isProgressBarVisible)
+                              const Text("Loading BGG data")
+                          ],
+                        ))),
                 const ElevatedButton(
                   onPressed: (getAllPlaysFromServer),
                   child: Text("Load all data"),

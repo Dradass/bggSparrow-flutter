@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '../db/plays_sql.dart';
 import '../models/bgg_play_model.dart';
 
@@ -12,6 +13,9 @@ class Statistics extends StatefulWidget {
 class _StatisticsState extends State<Statistics> {
   static const int numItems = 20;
   List<BggPlay> plays = [];
+  DateTime? startDate = DateTime(2000);
+  DateTime? endDate = DateTime(3000);
+  var dateFormat = DateFormat('yyyy-MM-dd');
 
   @override
   Widget build(BuildContext context) {
@@ -25,24 +29,14 @@ class _StatisticsState extends State<Statistics> {
           Column(
             children: [
               Flexible(
-                  flex: 1,
-                  child: ElevatedButton(
-                    onPressed: () async {
-                      plays = await PlaysSQL.getAllPlays();
-                      print("all plays count = ${plays.length}");
-                      setState(() {});
-                    },
-                    child: const Text("Get plays"),
-                  )),
-              Flexible(
                   //height: MediaQuery.of(context).size.height,
-                  flex: 1,
+                  flex: 2,
                   child: SingleChildScrollView(
                       scrollDirection: Axis.vertical,
                       child: DataTable(
                         columns: const <DataColumn>[
                           DataColumn(
-                            label: Text('ID'),
+                            label: Text('Game'),
                           ),
                           DataColumn(
                             label: Text('Date'),
@@ -71,14 +65,77 @@ class _StatisticsState extends State<Statistics> {
                             }),
                             cells: <DataCell>[
                               DataCell(
-                                Text(plays[index].id.toString()),
+                                Text(plays[index].gameId.toString()),
                               ),
                               DataCell(Text(plays[index].date.toString())),
                               DataCell(Text(plays[index].quantity.toString()))
                             ],
                           ),
                         ),
-                      )))
+                      ))),
+              Flexible(
+                  flex: 1,
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      plays = await PlaysSQL.getAllPlays(startDate, endDate);
+                      print("all plays count = ${plays.length}");
+                      setState(() {});
+                    },
+                    child: const Text("Get plays"),
+                  )),
+              Flexible(
+                  flex: 1,
+                  child: Row(
+                    children: [
+                      Column(
+                        children: [
+                          ElevatedButton(
+                              onPressed: () async {
+                                var pickedDate = await showDatePicker(
+                                    context: context,
+                                    firstDate: DateTime(2000),
+                                    lastDate: DateTime(3000));
+                                if (pickedDate != null) {
+                                  setState(() {
+                                    startDate = pickedDate;
+                                  });
+                                }
+                              },
+                              child: Text("Choose period start")),
+                          Text(dateFormat.format(startDate!))
+                        ],
+                      ),
+                      Column(
+                        children: [
+                          ElevatedButton(
+                              onPressed: () async {
+                                var pickedDate = await showDatePicker(
+                                    context: context,
+                                    firstDate: DateTime(2000),
+                                    lastDate: DateTime(3000));
+                                if (pickedDate != null) {
+                                  setState(() {
+                                    endDate = pickedDate;
+                                  });
+                                }
+                              },
+                              child: Text("Choose period end")),
+                          Text(dateFormat.format(endDate!))
+                        ],
+                      )
+                    ],
+                  )),
+              Flexible(
+                  flex: 1,
+                  child: ElevatedButton(
+                    child: Text("This year"),
+                    onPressed: () {
+                      setState(() {
+                        startDate = DateTime(DateTime.now().year);
+                        endDate = DateTime.now();
+                      });
+                    },
+                  ))
             ],
           )
         ])));

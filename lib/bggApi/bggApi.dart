@@ -287,7 +287,7 @@ Future<Location?> fillLocationName() async {
 }
 
 Future<void> initializeBggData() async {
-  getGamesInfoFromBgg();
+  await getGamesInfoFromBgg();
   int maxPlayerId = await PlayersSQL.getMaxID();
   int maxLocationId = await LocationSQL.getMaxID();
   await getPlaysFromPage(1, maxPlayerId, maxLocationId);

@@ -68,7 +68,8 @@ class PlaysSQL {
     return result.length;
   }
 
-  static Future<List<BggPlay>> getAllPlays() async {
+  static Future<List<BggPlay>> getAllPlays(
+      DateTime? startDate, DateTime? endDate) async {
     final db = await _getDB();
     List<BggPlay> plays = [];
     List<Map<String, dynamic>> result =
@@ -76,17 +77,23 @@ class PlaysSQL {
     if (result.isEmpty) return plays;
     for (var playerResult in result) {
       var play = BggPlay.fromJson(playerResult);
-      plays.add(BggPlay.fromJson({
-        'id': play.id,
-        'gameId': play.gameId,
-        'date': play.date,
-        'quantity': play.quantity,
-        'comments': play.comments,
-        'location': play.location,
-        'players': play.players,
-        'winners': play.winners,
-        'duration': play.duration,
-      }));
+      if (DateTime.parse(play.date).isAfter(startDate != null
+              ? startDate.add(Duration(days: -1))
+              : DateTime(2000)) &&
+          DateTime.parse(play.date).isBefore(endDate != null
+              ? endDate.add(Duration(days: 1))
+              : DateTime(3000)))
+        plays.add(BggPlay.fromJson({
+          'id': play.id,
+          'gameId': play.gameId,
+          'date': play.date,
+          'quantity': play.quantity,
+          'comments': play.comments,
+          'location': play.location,
+          'players': play.players,
+          'winners': play.winners,
+          'duration': play.duration,
+        }));
     }
     return plays;
   }
