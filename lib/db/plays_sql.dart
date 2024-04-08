@@ -18,7 +18,7 @@ class PlaysSQL {
   static void createTable() async {
     final db = await _getDB();
     await db.execute(
-        "CREATE TABLE Plays(id INTEGER PRIMARY KEY, date DATETIME NOT NULL, quantity INTEGER, location TEXT, gameId INTEGER NOT NULL, comments TEXT, players TEXT, winners TEXT, duration INTEGER);");
+        "CREATE TABLE Plays(id INTEGER PRIMARY KEY, date DATETIME NOT NULL, quantity INTEGER, location TEXT, gameId INTEGER NOT NULL, gameName TEXT NOT NULL, comments TEXT, players TEXT, winners TEXT, duration INTEGER);");
   }
 
   static void dropTable() async {
@@ -86,6 +86,7 @@ class PlaysSQL {
         plays.add(BggPlay.fromJson({
           'id': play.id,
           'gameId': play.gameId,
+          'gameName': play.gameName,
           'date': play.date,
           'quantity': play.quantity,
           'comments': play.comments,

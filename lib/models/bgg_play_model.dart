@@ -4,6 +4,7 @@ class BggPlay {
   final int? quantity;
   final String? location;
   final int gameId;
+  final String gameName;
   final String? comments;
   final String? players;
   final String? winners;
@@ -12,6 +13,7 @@ class BggPlay {
   const BggPlay(
       {required this.id,
       required this.gameId,
+      required this.gameName,
       required this.date,
       this.quantity,
       this.comments,
@@ -24,6 +26,7 @@ class BggPlay {
         'id': id,
         'date': date,
         'gameId': gameId,
+        'gameName': gameName,
         'quantity': quantity,
         'location': location,
         'players': players,
@@ -36,6 +39,7 @@ class BggPlay {
     return BggPlay(
         id: json['id'],
         gameId: json['gameId'],
+        gameName: json['gameName'],
         date: json['date'],
         quantity: json['quantity'],
         comments: json['comments'],

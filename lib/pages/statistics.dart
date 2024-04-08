@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../db/plays_sql.dart';
 import '../models/bgg_play_model.dart';
+import '../db/game_things_sql.dart';
 
 class Statistics extends StatefulWidget {
   const Statistics({super.key});
@@ -13,6 +14,7 @@ class Statistics extends StatefulWidget {
 class _StatisticsState extends State<Statistics> {
   static const int numItems = 20;
   List<BggPlay> plays = [];
+  Map gameNames = {};
   DateTime? startDate = DateTime(2000);
   DateTime? endDate = DateTime(3000);
   var dateFormat = DateFormat('yyyy-MM-dd');
@@ -65,9 +67,9 @@ class _StatisticsState extends State<Statistics> {
                             }),
                             cells: <DataCell>[
                               DataCell(
-                                Text(plays[index].gameId.toString()),
+                                Text(plays[index].gameName),
                               ),
-                              DataCell(Text(plays[index].date.toString())),
+                              DataCell(Text(plays[index].date)),
                               DataCell(Text(plays[index].quantity.toString()))
                             ],
                           ),
@@ -78,7 +80,6 @@ class _StatisticsState extends State<Statistics> {
                   child: ElevatedButton(
                     onPressed: () async {
                       plays = await PlaysSQL.getAllPlays(startDate, endDate);
-                      print("all plays count = ${plays.length}");
                       setState(() {});
                     },
                     child: const Text("Get plays"),

@@ -157,6 +157,8 @@ Future<bool> getPlaysFromPage(
         : "";
     final gameId = int.parse(
         play.findElements('item').first.getAttribute('objectid').toString());
+    final gameName =
+        play.findElements('item').first.getAttribute('name').toString();
 
     if (location.isNotEmpty) {
       if (await LocationSQL.selectLocationByName(location) == null) {
@@ -199,6 +201,7 @@ Future<bool> getPlaysFromPage(
     var bggPlay = BggPlay(
         id: objectId,
         gameId: gameId,
+        gameName: gameName,
         date: date,
         comments: comments,
         duration: duration,
