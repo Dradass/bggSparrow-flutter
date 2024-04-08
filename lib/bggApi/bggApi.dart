@@ -129,6 +129,7 @@ Future<bool> getPlaysFromPage(
   const userName = 'dradass';
 
   List<Player> uniquePlayers = [];
+  List<Player> currentPlayers = [];
   List<int> winnersId = [];
   List<Location> uniqueLocations = [];
   List<BggPlay> bggPlays = [];
@@ -172,6 +173,7 @@ Future<bool> getPlaysFromPage(
     final playersRoot = play.findElements('players').firstOrNull;
     if (playersRoot != null) {
       final players = playersRoot.findElements('player');
+      currentPlayers.clear();
       for (var player in players) {
         if (player.getAttribute('name') == null) continue;
         var newPlayer = Player(
@@ -181,6 +183,7 @@ Future<bool> getPlaysFromPage(
           username: player.getAttribute('username').toString(),
         );
         var win = player.getAttribute('win').toString();
+        currentPlayers.add(newPlayer);
 
         if (!uniquePlayers.map((e) => e.name).contains(newPlayer.name)) {
           if ((newPlayer.userid != 0 &&
@@ -208,7 +211,9 @@ Future<bool> getPlaysFromPage(
         quantity: quantity,
         location: location,
         winners: winnersId.join(';'),
-        players: uniquePlayers.map((e) => e.id).join(';'));
+        players: currentPlayers
+            .map((e) => '${e.userid.toString()}|${e.name}')
+            .join(';'));
     if (await PlaysSQL.selectPlayByID(bggPlay.id) == null) {
       bggPlays.add(bggPlay);
     }

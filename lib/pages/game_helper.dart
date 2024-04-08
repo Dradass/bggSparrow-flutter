@@ -83,7 +83,7 @@ class _GameHelperState extends State<GameHelper> {
               },
             ),
             ElevatedButton(
-              child: const Text("Chose game"),
+              child: const Text("Choose random game"),
               onPressed: () async {
                 var allGames = await GameThingSQL.getAllGames();
                 List<GameThing> filteredGames = [];
