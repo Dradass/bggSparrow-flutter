@@ -242,12 +242,14 @@ class _LogScaffoldState extends State<LogScaffold> {
                     child: SizedBox(
                         //color: Colors.lime,
                         width: MediaQuery.of(context).size.width,
-                        child: imageFromCamera.isNotEmpty
-                            ? Image.memory(
-                                imageFromCamera,
-                                height: MediaQuery.of(context).size.height,
-                              )
-                            : Image.asset('assets/not_bad.png'))),
+                        child: FittedBox(
+                            child: imageFromCamera.isNotEmpty
+                                ? Image.memory(
+                                    imageFromCamera,
+                                    height: MediaQuery.of(context).size.height,
+                                  )
+                                : //Image.asset('assets/not_bad.png')
+                                Icon(Icons.image)))),
                 Flexible(
                     flex: 2,
                     child: SizedBox(

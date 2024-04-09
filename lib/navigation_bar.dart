@@ -46,8 +46,8 @@ class _NavigationExampleState extends State<NavigationExample> {
             label: 'Play helper',
           ),
           NavigationDestination(
-            selectedIcon: Icon(Icons.smart_toy),
-            icon: Icon(Icons.casino_outlined),
+            selectedIcon: Icon(Icons.insert_emoticon),
+            icon: Icon(Icons.sentiment_satisfied_alt),
             label: 'First player',
           ),
         ],
