@@ -35,6 +35,12 @@ class _LogScaffoldState extends State<LogScaffold> {
   Uint8List imageFromCamera = Uint8List.fromList(List.empty());
   List<Map> players = [];
   List<Map> locations = [];
+
+  var allItems = []; // List.generate(50, (index) => 'item $index');
+  var items = [];
+  var searchHistory = [];
+  final TextEditingController searchController = TextEditingController();
+  final SearchController controller = SearchController();
   // String defaultLocation = LocationSQL.getDefaultLocationSync() != null
   //     ? LocationSQL.getDefaultLocationSync()!.name
   //     : "";
@@ -64,6 +70,24 @@ class _LogScaffoldState extends State<LogScaffold> {
     'foo': true,
     'bar': false,
   };
+
+  void queryListener() {
+    search(controller.text);
+  }
+
+  void search(String query) {
+    if (query.isEmpty) {
+      setState(() {
+        items = allItems;
+      });
+    } else {
+      setState(() {
+        items = allItems
+            .where((e) => e.toLowerCase().contains(query.toLowerCase()))
+            .toList();
+      });
+    }
+  }
 
   Future<int?> TakePhoto() async {
     var result = 0;
@@ -114,6 +138,9 @@ class _LogScaffoldState extends State<LogScaffold> {
     // Clean up the controller when the widget is disposed.
     commentsController.dispose();
     super.dispose();
+
+    controller.removeListener(queryListener);
+    controller.dispose();
   }
 
   void setLocationButtonName() {
@@ -130,6 +157,7 @@ class _LogScaffoldState extends State<LogScaffold> {
   @override
   void initState() {
     super.initState();
+    controller.addListener(queryListener);
 
     GameThingSQL.initTables().then(
       (value) {
@@ -202,17 +230,6 @@ class _LogScaffoldState extends State<LogScaffold> {
                   onPressed: (getAllPlaysFromServer),
                   child: Text("Load all data"),
                 ),
-                // ElevatedButton(
-                //   child: const Text("show games"),
-                //   onPressed: () async {
-                //     var allGames = await GameThingSQL.getAllGames();
-                //     if (allGames == null) return;
-                //     for (var game in allGames) {
-                //       print(
-                //           "Game = ${game.name}, min = ${game.minPlayers}, max = ${game.maxPlayers}");
-                //     }
-                //   },
-                // ),
                 ElevatedButton(
                   child: const Text("del tables"),
                   onPressed: () {
@@ -250,6 +267,57 @@ class _LogScaffoldState extends State<LogScaffold> {
                                   )
                                 : //Image.asset('assets/not_bad.png')
                                 Icon(Icons.image)))),
+                Flexible(
+                    flex: 2,
+                    child: SizedBox(
+                      //color: Colors.tealAccent,
+                      width: MediaQuery.of(context).size.width,
+                      height: MediaQuery.of(context).size.height,
+                      child: SearchAnchor(
+                          searchController: controller,
+                          builder: (context, controller) {
+                            return SearchBar(
+                              controller: controller,
+                              leading: IconButton(
+                                  onPressed: () {}, icon: Icon(Icons.search)),
+                              trailing: [
+                                IconButton(
+                                    onPressed: () {}, icon: Icon(Icons.mic)),
+                              ],
+                              onTap: () async {
+                                var actualGames =
+                                    await GameThingSQL.getAllGames();
+                                allItems = actualGames == null
+                                    ? []
+                                    : actualGames.map((e) => e.name).toList();
+                                controller.text = "";
+                                controller.openView();
+                              },
+                              onChanged: (_) {
+                                controller.openView();
+                              },
+                              padding:
+                                  const MaterialStatePropertyAll<EdgeInsets>(
+                                      EdgeInsets.symmetric(horizontal: 16.0)),
+                            );
+                          },
+                          suggestionsBuilder: (context, controller) {
+                            return List<ListTile>.generate(
+                                items.isEmpty ? allItems.length : items.length,
+                                (int index) {
+                              final item = items.isEmpty
+                                  ? allItems[index]
+                                  : items[index];
+                              return ListTile(
+                                  title: Text(item),
+                                  onTap: () {
+                                    setState(() {
+                                      controller.closeView(item);
+                                    });
+                                  });
+                            });
+                          }),
+                    )),
                 Flexible(
                     flex: 2,
                     child: SizedBox(
