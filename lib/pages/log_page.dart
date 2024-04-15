@@ -38,14 +38,11 @@ class _LogScaffoldState extends State<LogScaffold> {
   List<Map> locations = [];
   final _focusNode = FocusNode();
 
-  List<GameThing> allItems = []; // List.generate(50, (index) => 'item $index');
+  List<GameThing> allItems = [];
   List<GameThing> items = [];
   var searchHistory = [];
-  //final TextEditingController searchController = TextEditingController();
   final SearchController searchController = SearchController();
-  // String defaultLocation = LocationSQL.getDefaultLocationSync() != null
-  //     ? LocationSQL.getDefaultLocationSync()!.name
-  //     : "";
+
   String selectedLocation = "";
   final TextEditingController commentsController =
       TextEditingController(text: "#bggSparrow");
@@ -118,13 +115,10 @@ class _LogScaffoldState extends State<LogScaffold> {
 
       if (getGamesWithThumb == null) return 0;
       print("recognizedImage = $recognizedImage");
-      Map<int, double> compareResults = {};
 
       int bestGameID = 0;
       bestGameID = await getSimilarGameID(imgBytes, getGamesWithThumb);
-      // bestGameID = await Isolate.run(() async {
-      //   return getSimilarGameID(imgBytes, getGamesWithThumb);
-      // });
+
       print(bestGameID);
       result = bestGameID;
       return result;
@@ -729,19 +723,6 @@ class _LogScaffoldState extends State<LogScaffold> {
   }
 }
 
-// A screen that allows users to take a picture using a given camera.
-class TakePictureScreen extends StatefulWidget {
-  const TakePictureScreen({
-    super.key,
-    required this.camera,
-  });
-
-  final CameraDescription camera;
-
-  @override
-  TakePictureScreenState createState() => TakePictureScreenState();
-}
-
 Future<int> getSimilarGameID(
     Uint8List bytes, List<GameThing> getGamesWithThumb) async {
   final matching = PixelMatching();
@@ -769,12 +750,6 @@ Future<int> getSimilarGameID(
   }
   matching.dispose();
   return bestSimilarGameID;
-}
-
-Future<int?> testIsolate(Uint8List bytes) async {
-  int result = 0;
-  result = 25;
-  return result;
 }
 
 Future<int> sendLogRequest(String logData) async {
