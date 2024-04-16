@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 
@@ -18,6 +20,14 @@ class _FirstPlayerChoserState extends State<FirstPlayerChoser> {
   var counter = "";
   double indicatorSize = 120;
   var indicatorColor = const Color.fromARGB(255, 32, 184, 19);
+  final List<Color> colors = <Color>[
+    Colors.red,
+    Colors.blue,
+    Colors.green,
+    Colors.yellow,
+    Colors.orange,
+    Colors.black
+  ];
 
   Iterable<Widget> buildTouchIndicators() sync* {
     if (touchPositions.isNotEmpty) {
@@ -31,12 +41,13 @@ class _FirstPlayerChoserState extends State<FirstPlayerChoser> {
               : Container(
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: indicatorColor.withOpacity(0.3),
+                    //color: colors[1], // indicatorColor.withOpacity(0.3),
                   ),
                   child: Icon(
                     Icons.fingerprint,
                     size: indicatorSize,
-                    color: indicatorColor.withOpacity(0.9),
+                    color: colors[Random()
+                        .nextInt(5)], // indicatorColor.withOpacity(0.9),
                   ),
                 ),
         );
