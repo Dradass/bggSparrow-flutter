@@ -16,6 +16,7 @@ class Statistics extends StatefulWidget {
 }
 
 class _StatisticsState extends State<Statistics> {
+  double firstGamesCount = 10;
   List<BggPlay> plays = [];
   Map<int, int> gameThingPlays = {};
   DateTime? startDate = DateTime(2000);
@@ -147,6 +148,9 @@ class _StatisticsState extends State<Statistics> {
                                     }
                                     return null; // Use default value for other states and odd rows.
                                   }),
+                                  onLongPress: () {
+                                    print("Long press");
+                                  },
                                   onSelectChanged: (selected) {
                                     if (selected!) {
                                       print(
@@ -168,6 +172,7 @@ class _StatisticsState extends State<Statistics> {
                     SafeArea(
                       child: SfCartesianChart(
                         title: ChartTitle(text: "Games stats"),
+
                         primaryXAxis: const CategoryAxis(
                           labelRotation: 270,
                           // labelIntersectAction:
@@ -198,8 +203,8 @@ class _StatisticsState extends State<Statistics> {
                       child: SfCircularChart(
                         title: ChartTitle(text: "Games stats"),
                         margin: EdgeInsets.all(0),
-                        // legend: Legend(
-                        //     isVisible: true, position: LegendPosition.bottom),
+                        legend: Legend(
+                            isVisible: true, position: LegendPosition.bottom),
                         tooltipBehavior: TooltipBehavior(enable: true),
                         series: <PieSeries<_GamePlaysCount, String>>[
                           PieSeries(
@@ -225,97 +230,163 @@ class _StatisticsState extends State<Statistics> {
                   ]),
                 );
               })),
-              Flexible(
-                  flex: 1,
+              SizedBox(
+                  width: MediaQuery.of(context).size.width,
+                  height: MediaQuery.of(context).size.height * 0.05,
+                  child: Row(children: [
+                    SizedBox(
+                        width: MediaQuery.of(context).size.width * 0.66,
+                        child: Slider(
+                          value: firstGamesCount,
+                          min: 0,
+                          max: 25,
+                          divisions: 26,
+                          label: firstGamesCount.round().toString(),
+                          onChanged: (double value) {
+                            setState(() {
+                              firstGamesCount = value;
+                            });
+                          },
+                        )),
+                    const Text(
+                      "Top N games",
+                      overflow: TextOverflow.ellipsis,
+                    )
+                  ])),
+              SizedBox(
+                  width: MediaQuery.of(context).size.width,
+                  height: MediaQuery.of(context).size.height * 0.084,
                   child: ElevatedButton(
                     onPressed: () async {
                       plays = await PlaysSQL.getAllPlays(startDate, endDate);
 
-                      gamePlays.clear();
-                      gameThingPlays.clear();
-                      for (var play in plays) {
-                        if (gameThingPlays.keys.contains(play.gameId)) {
-                          gameThingPlays.update(
-                              play.gameId, (value) => value + play.quantity!);
-                        } else {
-                          gameThingPlays[play.gameId] = play.quantity!;
-                        }
+                      // TODO Top N plays \ games
 
-                        if (gamePlays
+                      gamePlays.clear();
+                      List<_GamePlaysCount> allGames = [];
+                      for (var play in plays) {
+                        if (allGames
                             .map((e) => e.gameName)
                             .contains(play.gameName)) {
-                          var gamePlay = gamePlays
+                          var gamePlay = allGames
                               .where((element) =>
                                   element.gameName == play.gameName)
                               .first;
                           gamePlay.count = gamePlay.count! + play.quantity!;
                         } else {
-                          gamePlays.add(_GamePlaysCount(
+                          allGames.add(_GamePlaysCount(
                               play.gameName, play.quantity, play.gameId));
                         }
                       }
-                      gamePlays.forEach((e) => e.gameName.length > 20
-                          ? e.gameName = e.gameName.substring(0, 18) + "..."
+                      allGames.forEach((e) => e.gameName.length > 20
+                          ? e.gameName = "${e.gameName.substring(0, 18)}..."
                           : e.gameName);
-                      gamePlays.sort((a, b) => b.count!.compareTo(a.count!));
+                      allGames.sort((a, b) => b.count!.compareTo(a.count!));
+                      if (firstGamesCount != 0) {
+                        gamePlays =
+                            allGames.take(firstGamesCount.round()).toList();
+                      } else {
+                        gamePlays = allGames;
+                      }
 
                       setState(() {});
                     },
                     child: const Text("Get plays"),
                   )),
-              Flexible(
-                  flex: 1,
+              SizedBox(
+                  width: MediaQuery.of(context).size.width,
+                  height: MediaQuery.of(context).size.height * 0.125,
                   child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       Column(
                         children: [
-                          ElevatedButton(
-                              onPressed: () async {
-                                var pickedDate = await showDatePicker(
-                                    context: context,
-                                    firstDate: DateTime(2000),
-                                    lastDate: DateTime(3000));
-                                if (pickedDate != null) {
-                                  setState(() {
-                                    startDate = pickedDate;
-                                  });
-                                }
-                              },
-                              child: Text("Choose period start")),
-                          Text(dateFormat.format(startDate!))
+                          SizedBox(
+                            //color: Colors.tealAccent,
+                            width: MediaQuery.of(context).size.width * 0.3,
+                            height: MediaQuery.of(context).size.height * 0.125,
+                            child: ElevatedButton(
+                                onPressed: () async {
+                                  var pickedDate = await showDatePicker(
+                                      context: context,
+                                      firstDate: DateTime(2000),
+                                      lastDate: DateTime(3000));
+                                  if (pickedDate != null) {
+                                    setState(() {
+                                      startDate = pickedDate;
+                                    });
+                                  }
+                                },
+                                child: Text(
+                                    "Period start ${dateFormat.format(startDate!)}")),
+                          ),
                         ],
                       ),
                       Column(
                         children: [
-                          ElevatedButton(
-                              onPressed: () async {
-                                var pickedDate = await showDatePicker(
-                                    context: context,
-                                    firstDate: DateTime(2000),
-                                    lastDate: DateTime(3000));
-                                if (pickedDate != null) {
+                          SizedBox(
+                              //color: Colors.tealAccent,
+                              width: MediaQuery.of(context).size.width * 0.4,
+                              height:
+                                  MediaQuery.of(context).size.height * 0.0625,
+                              child: ElevatedButton(
+                                child: Text("This year"),
+                                onPressed: () {
                                   setState(() {
-                                    endDate = pickedDate;
+                                    startDate = DateTime(DateTime.now().year);
+                                    endDate = DateTime.now();
                                   });
-                                }
-                              },
-                              child: Text("Choose period end")),
-                          Text(dateFormat.format(endDate!))
+                                },
+                              )),
+                          SizedBox(
+                              //color: Colors.tealAccent,
+                              width: MediaQuery.of(context).size.width * 0.4,
+                              height:
+                                  MediaQuery.of(context).size.height * 0.0625,
+                              child: ElevatedButton(
+                                child: Text("Last year"),
+                                onPressed: () {
+                                  setState(() {
+                                    startDate = DateTime(DateTime.now()
+                                        .add(Duration(days: -365))
+                                        .year);
+                                    endDate = DateTime(
+                                        DateTime.now()
+                                            .add(Duration(days: -365))
+                                            .year,
+                                        12,
+                                        31);
+                                  });
+                                },
+                              ))
+                        ],
+                      ),
+                      Column(
+                        children: [
+                          SizedBox(
+                              //color: Colors.tealAccent,
+                              width: MediaQuery.of(context).size.width * 0.3,
+                              height:
+                                  MediaQuery.of(context).size.height * 0.125,
+                              child: ElevatedButton(
+                                  onPressed: () async {
+                                    var pickedDate = await showDatePicker(
+                                        context: context,
+                                        firstDate: DateTime(2000),
+                                        lastDate: DateTime(3000));
+                                    if (pickedDate != null) {
+                                      setState(() {
+                                        endDate = pickedDate;
+                                      });
+                                    }
+                                  },
+                                  child: Text(
+                                    "Period end ${dateFormat.format(endDate!)}",
+                                  ))),
                         ],
                       )
                     ],
                   )),
-              Flexible(
-                  flex: 1,
-                  child: ElevatedButton(
-                    child: Text("This year"),
-                    onPressed: () {
-                      setState(() {
-                        startDate = DateTime(DateTime.now().year);
-                        endDate = DateTime.now();
-                      });
-                    },
-                  ))
             ],
           ),
         )));

@@ -27,7 +27,14 @@ Future<void> main() async {
             onError: primaryTextColor,
             surface: Color.fromARGB(255, 148, 226, 181),
             onSurface: primaryTextColor),
-        secondaryHeaderColor: const Color.fromARGB(255, 43, 132, 190)),
+        secondaryHeaderColor: const Color.fromARGB(255, 43, 132, 190),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ButtonStyle(
+              shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                  const RoundedRectangleBorder(
+                      borderRadius: BorderRadius.zero,
+                      side: BorderSide(color: Colors.black12)))),
+        )),
     home: const NavigationExample(),
   ));
 }
