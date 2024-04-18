@@ -45,74 +45,71 @@ class _StatisticsState extends State<Statistics> {
                 Tab(text: "Piechart"),
               ])),
               LayoutBuilder(builder: ((context, constraints) {
-                return Container(
+                return SizedBox(
                   //Add this to give height
                   height: MediaQuery.of(context).size.height * 0.50,
                   child: TabBarView(children: [
-                    Container(
-                        child: SingleChildScrollView(
-                            scrollDirection: Axis.vertical,
-                            child: DataTable(
-                              headingRowHeight: 0,
-                              showCheckboxColumn: false,
-                              dataRowMaxHeight: double.infinity,
-                              columns: const <DataColumn>[
-                                DataColumn(
-                                  label: Text('Game'),
+                    SingleChildScrollView(
+                        scrollDirection: Axis.vertical,
+                        child: DataTable(
+                          headingRowHeight: 0,
+                          showCheckboxColumn: false,
+                          dataRowMaxHeight: double.infinity,
+                          columns: const <DataColumn>[
+                            DataColumn(
+                              label: Text('Game'),
+                            ),
+                            DataColumn(
+                              label: Text('Date'),
+                            ),
+                            DataColumn(
+                              label: Text('Quantity'),
+                            ),
+                          ],
+                          rows: List<DataRow>.generate(
+                            plays.length,
+                            (int index) => DataRow(
+                              color: MaterialStateProperty.resolveWith<Color?>(
+                                  (Set<MaterialState> states) {
+                                // All rows will have the same selected color.
+                                if (states.contains(MaterialState.selected)) {
+                                  return Theme.of(context)
+                                      .colorScheme
+                                      .primary
+                                      .withOpacity(0.08);
+                                }
+                                // Even rows will have a grey color.
+                                if (index.isEven) {
+                                  return Colors.grey.withOpacity(0.3);
+                                }
+                                return null; // Use default value for other states and odd rows.
+                              }),
+                              onSelectChanged: (selected) {
+                                if (selected!) {
+                                  print(
+                                      'row-selected: ${plays[index].id}, playes = ${plays[index].players}');
+                                }
+                              },
+                              cells: <DataCell>[
+                                DataCell(
+                                  Text(plays[index].gameName),
                                 ),
-                                DataColumn(
-                                  label: Text('Date'),
-                                ),
-                                DataColumn(
-                                  label: Text('Quantity'),
-                                ),
+                                DataCell(Text(plays[index].date)),
+                                DataCell(Text(
+                                  plays[index].players != null
+                                      ? plays[index]
+                                          .players!
+                                          .split(';')
+                                          .map((e) => e.split('|').last)
+                                          .join('\n')
+                                          .toString()
+                                      : "",
+                                  overflow: TextOverflow.ellipsis,
+                                )),
                               ],
-                              rows: List<DataRow>.generate(
-                                plays.length,
-                                (int index) => DataRow(
-                                  color:
-                                      MaterialStateProperty.resolveWith<Color?>(
-                                          (Set<MaterialState> states) {
-                                    // All rows will have the same selected color.
-                                    if (states
-                                        .contains(MaterialState.selected)) {
-                                      return Theme.of(context)
-                                          .colorScheme
-                                          .primary
-                                          .withOpacity(0.08);
-                                    }
-                                    // Even rows will have a grey color.
-                                    if (index.isEven) {
-                                      return Colors.grey.withOpacity(0.3);
-                                    }
-                                    return null; // Use default value for other states and odd rows.
-                                  }),
-                                  onSelectChanged: (selected) {
-                                    if (selected!) {
-                                      print(
-                                          'row-selected: ${plays[index].id}, playes = ${plays[index].players}');
-                                    }
-                                  },
-                                  cells: <DataCell>[
-                                    DataCell(
-                                      Text(plays[index].gameName),
-                                    ),
-                                    DataCell(Text(plays[index].date)),
-                                    DataCell(Text(
-                                      plays[index].players != null
-                                          ? plays[index]
-                                              .players!
-                                              .split(';')
-                                              .map((e) => e.split('|').last)
-                                              .join('\n')
-                                              .toString()
-                                          : "",
-                                      overflow: TextOverflow.ellipsis,
-                                    )),
-                                  ],
-                                ),
-                              ),
-                            ))),
+                            ),
+                          ),
+                        )),
                     Container(
                         child: SingleChildScrollView(
                             scrollDirection: Axis.vertical,
@@ -253,14 +250,13 @@ class _StatisticsState extends State<Statistics> {
                       overflow: TextOverflow.ellipsis,
                     )
                   ])),
-              SizedBox(
+              Container(
+                  color: Colors.brown,
                   width: MediaQuery.of(context).size.width,
-                  height: MediaQuery.of(context).size.height * 0.084,
+                  height: MediaQuery.of(context).size.height * 0.075,
                   child: ElevatedButton(
                     onPressed: () async {
                       plays = await PlaysSQL.getAllPlays(startDate, endDate);
-
-                      // TODO Top N plays \ games
 
                       gamePlays.clear();
                       List<_GamePlaysCount> allGames = [];
@@ -293,57 +289,57 @@ class _StatisticsState extends State<Statistics> {
                     },
                     child: const Text("Get plays"),
                   )),
-              SizedBox(
-                  width: MediaQuery.of(context).size.width,
-                  height: MediaQuery.of(context).size.height * 0.125,
+              Flexible(
+                  flex: 1,
+                  // color: Colors.amberAccent,
+                  // width: MediaQuery.of(context).size.width,
+                  //height: MediaQuery.of(context).size.height * 0.125,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      Column(
-                        children: [
-                          SizedBox(
-                            //color: Colors.tealAccent,
-                            width: MediaQuery.of(context).size.width * 0.3,
-                            height: MediaQuery.of(context).size.height * 0.125,
-                            child: ElevatedButton(
-                                onPressed: () async {
-                                  var pickedDate = await showDatePicker(
-                                      context: context,
-                                      firstDate: DateTime(2000),
-                                      lastDate: DateTime(3000));
-                                  if (pickedDate != null) {
-                                    setState(() {
-                                      startDate = pickedDate;
-                                    });
-                                  }
-                                },
-                                child: Text(
-                                    "Period start ${dateFormat.format(startDate!)}")),
-                          ),
-                        ],
+                      Container(
+                        color: Colors.tealAccent,
+                        width: MediaQuery.of(context).size.width * 0.3,
+                        height: double.maxFinite,
+                        //height: MediaQuery.of(context).size.height * 0.125,
+                        child: ElevatedButton(
+                            onPressed: () async {
+                              var pickedDate = await showDatePicker(
+                                  context: context,
+                                  firstDate: DateTime(2000),
+                                  lastDate: DateTime(3000));
+                              if (pickedDate != null) {
+                                setState(() {
+                                  startDate = pickedDate;
+                                });
+                              }
+                            },
+                            child: Text(
+                              "Period start ${dateFormat.format(startDate!)}",
+                              textAlign: TextAlign.center,
+                            )),
                       ),
-                      Column(
-                        children: [
-                          SizedBox(
-                              //color: Colors.tealAccent,
-                              width: MediaQuery.of(context).size.width * 0.4,
-                              height:
-                                  MediaQuery.of(context).size.height * 0.0625,
-                              child: ElevatedButton(
-                                child: Text("This year"),
-                                onPressed: () {
-                                  setState(() {
-                                    startDate = DateTime(DateTime.now().year);
-                                    endDate = DateTime.now();
-                                  });
-                                },
-                              )),
-                          SizedBox(
-                              //color: Colors.tealAccent,
-                              width: MediaQuery.of(context).size.width * 0.4,
-                              height:
-                                  MediaQuery.of(context).size.height * 0.0625,
-                              child: ElevatedButton(
+                      Container(
+                          color: Colors.tealAccent,
+                          width: MediaQuery.of(context).size.width * 0.4,
+                          height: double.maxFinite,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.max,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              Expanded(
+                                  child: ElevatedButton(
+                                      child: Text("This year"),
+                                      onPressed: () {
+                                        setState(() {
+                                          startDate =
+                                              DateTime(DateTime.now().year);
+                                          endDate = DateTime.now();
+                                        });
+                                      })),
+                              Expanded(
+                                  child: ElevatedButton(
                                 child: Text("Last year"),
                                 onPressed: () {
                                   setState(() {
@@ -359,31 +355,27 @@ class _StatisticsState extends State<Statistics> {
                                   });
                                 },
                               ))
-                        ],
-                      ),
-                      Column(
-                        children: [
-                          SizedBox(
-                              //color: Colors.tealAccent,
-                              width: MediaQuery.of(context).size.width * 0.3,
-                              height:
-                                  MediaQuery.of(context).size.height * 0.125,
-                              child: ElevatedButton(
-                                  onPressed: () async {
-                                    var pickedDate = await showDatePicker(
-                                        context: context,
-                                        firstDate: DateTime(2000),
-                                        lastDate: DateTime(3000));
-                                    if (pickedDate != null) {
-                                      setState(() {
-                                        endDate = pickedDate;
-                                      });
-                                    }
-                                  },
-                                  child: Text(
-                                    "Period end ${dateFormat.format(endDate!)}",
-                                  ))),
-                        ],
+                            ],
+                          )),
+                      SizedBox(
+                        width: MediaQuery.of(context).size.width * 0.3,
+                        height: double.maxFinite,
+                        child: ElevatedButton(
+                            onPressed: () async {
+                              var pickedDate = await showDatePicker(
+                                  context: context,
+                                  firstDate: DateTime(2000),
+                                  lastDate: DateTime(3000));
+                              if (pickedDate != null) {
+                                setState(() {
+                                  endDate = pickedDate;
+                                });
+                              }
+                            },
+                            child: Text(
+                              "Period end ${dateFormat.format(endDate!)}",
+                              textAlign: TextAlign.center,
+                            )),
                       )
                     ],
                   )),

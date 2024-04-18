@@ -30,6 +30,8 @@ Future<void> main() async {
         secondaryHeaderColor: const Color.fromARGB(255, 43, 132, 190),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ButtonStyle(
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              padding: MaterialStateProperty.all<EdgeInsets>(EdgeInsets.zero),
               shape: MaterialStateProperty.all<RoundedRectangleBorder>(
                   const RoundedRectangleBorder(
                       borderRadius: BorderRadius.zero,

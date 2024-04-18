@@ -228,16 +228,16 @@ class _LogScaffoldState extends State<LogScaffold> {
                                   const Text("Loading BGG data")
                               ],
                             ))),
-                    const ElevatedButton(
-                      onPressed: (getAllPlaysFromServer),
-                      child: Text("Load all data"),
-                    ),
-                    ElevatedButton(
-                      child: const Text("del tables"),
-                      onPressed: () {
-                        GameThingSQL.deleteDB();
-                      },
-                    ),
+                    // const ElevatedButton(
+                    //   onPressed: (getAllPlaysFromServer),
+                    //   child: Text("Load all data"),
+                    // ),
+                    // ElevatedButton(
+                    //   child: const Text("del tables"),
+                    //   onPressed: () {
+                    //     GameThingSQL.deleteDB();
+                    //   },
+                    // ),
                     // ElevatedButton(
                     //   child: const Text("create tables"),
                     //   onPressed: () {
