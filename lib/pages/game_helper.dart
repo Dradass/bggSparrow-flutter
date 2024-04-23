@@ -13,7 +13,7 @@ class _GameHelperState extends State<GameHelper> {
   double minPlayersValue = 1;
   double maxPlayersValue = 4;
   double chosenPlayersCount = 4;
-  String chosenGame = "No game was chosen";
+  String chosenGame = "Get some random game";
   RangeValues minRangeValues = const RangeValues(1, 4);
   RangeValues maxRangeValues = const RangeValues(0, 0);
   bool? onlyOwnedGames = true;

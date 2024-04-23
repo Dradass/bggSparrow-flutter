@@ -214,12 +214,12 @@ class _LogScaffoldState extends State<LogScaffold> {
                   children: [
                     Flexible(
                         flex: 1,
-                        child: SizedBox(
-                            //color: Colors.tealAccent,
+                        child: Container(
+                            color: Theme.of(context).colorScheme.surface,
                             width: MediaQuery.of(context).size.width,
-                            height: isProgressBarVisible
-                                ? MediaQuery.of(context).size.height
-                                : 0,
+                            // height: isProgressBarVisible
+                            //     ? MediaQuery.of(context).size.height
+                            //     : MediaQuery.of(context).size.height,
                             child: Column(
                               children: [
                                 if (isProgressBarVisible)
@@ -479,6 +479,7 @@ class _LogScaffoldState extends State<LogScaffold> {
                                 icon: const Icon(Icons.send_and_archive)))),
                     Flexible(
                         flex: 3,
+                        fit: FlexFit.tight,
                         child: SizedBox(
                             //color: Colors.tealAccent,
                             width: MediaQuery.of(context).size.width,
@@ -501,25 +502,43 @@ class _LogScaffoldState extends State<LogScaffold> {
                                                       children:
                                                           players.map((player) {
                                                 return CheckboxListTile(
-                                                  title: Row(children: [
-                                                    ChoiceChip(
-                                                        label:
-                                                            const Text("Win?"),
-                                                        selected: player['win'],
-                                                        onSelected:
-                                                            (bool? value) {
-                                                          setState(() {
-                                                            player['win'] =
-                                                                value;
-                                                          });
-                                                        }),
-                                                    Expanded(
-                                                        child: Text(
-                                                      player['name'],
-                                                      overflow:
-                                                          TextOverflow.ellipsis,
-                                                    ))
-                                                  ]),
+                                                  contentPadding:
+                                                      EdgeInsets.zero,
+                                                  title: Row(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .spaceEvenly,
+                                                      children: [
+                                                        ChoiceChip(
+                                                          label: const Text(
+                                                              "Win?"),
+                                                          selected:
+                                                              player['win'],
+                                                          onSelected:
+                                                              (bool? value) {
+                                                            setState(() {
+                                                              player['win'] =
+                                                                  value;
+                                                            });
+                                                          },
+                                                          shape:
+                                                              RoundedRectangleBorder(
+                                                            side: BorderSide(
+                                                                color: Colors
+                                                                    .black12),
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .zero,
+                                                          ),
+                                                        ),
+                                                        SizedBox(width: 10),
+                                                        Expanded(
+                                                            child: Text(
+                                                          player['name'],
+                                                          overflow: TextOverflow
+                                                              .ellipsis,
+                                                        ))
+                                                      ]),
                                                   value: player['isChecked'],
                                                   onChanged: (bool? value) {
                                                     setState(() {
@@ -657,50 +676,70 @@ class _LogScaffoldState extends State<LogScaffold> {
                                 onPressed: () {
                                   showDialog(
                                       context: context,
-                                      builder: (BuildContext) {
+                                      builder: (dialogBuilder) {
                                         return AlertDialog(
                                           title: const Text('Take photo'),
                                           content: Column(children: [
                                             //Text(recognizedImage),
                                             SizedBox(
-                                              height: 300,
+                                              width: MediaQuery.of(context)
+                                                      .size
+                                                      .width *
+                                                  0.8,
+                                              height: MediaQuery.of(context)
+                                                      .size
+                                                      .height *
+                                                  0.5,
                                               child: CameraPreview(_controller),
                                             ),
-                                            ElevatedButton(
-                                              onPressed: () async {
-                                                recognizedGameId = 0;
-                                                Navigator.of(context,
-                                                        rootNavigator: true)
-                                                    .pop();
-                                                setState(() {
-                                                  searchController.text =
-                                                      "Game recognizing";
-                                                });
-                                                var gameId = await TakePhoto();
-                                                var recognizedGameName =
-                                                    "Cant find similar game";
+                                            Container(
+                                                width: MediaQuery.of(context)
+                                                    .size
+                                                    .width,
+                                                height: MediaQuery.of(context)
+                                                        .size
+                                                        .height *
+                                                    0.3,
+                                                child: Expanded(
+                                                    child: ElevatedButton(
+                                                  onPressed: () async {
+                                                    recognizedGameId = 0;
+                                                    Navigator.of(context,
+                                                            rootNavigator: true)
+                                                        .pop();
+                                                    setState(() {
+                                                      searchController.text =
+                                                          "Game recognizing";
+                                                    });
+                                                    var gameId =
+                                                        await TakePhoto();
+                                                    var recognizedGameName =
+                                                        "Cant find similar game";
 
-                                                if (gameId != null) {
-                                                  recognizedGame =
-                                                      await GameThingSQL
-                                                          .selectGameByID(
-                                                              gameId);
-                                                  if (recognizedGame != null) {
-                                                    recognizedGameId =
-                                                        recognizedGame!.id;
+                                                    if (gameId != null) {
+                                                      recognizedGame =
+                                                          await GameThingSQL
+                                                              .selectGameByID(
+                                                                  gameId);
+                                                      if (recognizedGame !=
+                                                          null) {
+                                                        recognizedGameId =
+                                                            recognizedGame!.id;
 
-                                                    recognizedGameName =
-                                                        recognizedGame!.name;
-                                                  }
-                                                }
+                                                        recognizedGameName =
+                                                            recognizedGame!
+                                                                .name;
+                                                      }
+                                                    }
 
-                                                setState(() {
-                                                  searchController.text =
-                                                      recognizedGameName;
-                                                });
-                                              },
-                                              child: const Text('Take a photo'),
-                                            )
+                                                    setState(() {
+                                                      searchController.text =
+                                                          recognizedGameName;
+                                                    });
+                                                  },
+                                                  child: const Text(
+                                                      'Take a photo'),
+                                                )))
                                           ]),
                                         );
                                       });

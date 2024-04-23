@@ -22,6 +22,7 @@ class _StatisticsState extends State<Statistics> {
   DateTime? startDate = DateTime(2000);
   DateTime? endDate = DateTime(3000);
   var dateFormat = DateFormat('yyyy-MM-dd');
+  String statsSummary = "";
   List<_GamePlaysCount> gamePlays = [];
 
   @override
@@ -228,6 +229,11 @@ class _StatisticsState extends State<Statistics> {
                 );
               })),
               SizedBox(
+                  child: Text(
+                statsSummary,
+                textAlign: TextAlign.center,
+              )),
+              SizedBox(
                   width: MediaQuery.of(context).size.width,
                   height: MediaQuery.of(context).size.height * 0.05,
                   child: Row(children: [
@@ -274,6 +280,7 @@ class _StatisticsState extends State<Statistics> {
                               play.gameName, play.quantity, play.gameId));
                         }
                       }
+
                       allGames.forEach((e) => e.gameName.length > 20
                           ? e.gameName = "${e.gameName.substring(0, 18)}..."
                           : e.gameName);
@@ -285,7 +292,10 @@ class _StatisticsState extends State<Statistics> {
                         gamePlays = allGames;
                       }
 
-                      setState(() {});
+                      setState(() {
+                        statsSummary =
+                            "Total plays: ${allGames.fold(0, (sum, item) => sum + item.count!)} total games: ${allGames.length}";
+                      });
                     },
                     child: const Text("Get plays"),
                   )),
