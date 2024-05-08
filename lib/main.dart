@@ -36,7 +36,9 @@ Future<void> main() async {
                   const RoundedRectangleBorder(
                       borderRadius: BorderRadius.zero,
                       side: BorderSide(color: Colors.black12)))),
-        )),
+        ),
+        sliderTheme:
+            SliderThemeData(overlayShape: SliderComponentShape.noOverlay)),
     home: const NavigationExample(),
   ));
 }

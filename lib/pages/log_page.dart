@@ -1,4 +1,4 @@
-// TODO - Random game chooser
+// TODO - Login screen, win rate, history loading
 
 import 'package:flutter_application_1/models/bgg_location.dart';
 import 'package:intl/intl.dart';
@@ -17,6 +17,10 @@ import '../bggApi/bggApi.dart';
 import 'package:flutter_pixelmatching/flutter_pixelmatching.dart';
 
 import '../widgets/duration_sliders.dart';
+
+class LoadingStatus {
+  String status = "";
+}
 
 class LogScaffold extends StatefulWidget {
   const LogScaffold({super.key});
@@ -37,6 +41,8 @@ class _LogScaffoldState extends State<LogScaffold> {
   List<Map> players = [];
   List<Map> locations = [];
   final _focusNode = FocusNode();
+  //String loadingStatus = "";
+  LoadingStatus loadingStatus = LoadingStatus();
 
   List<GameThing> allItems = [];
   List<GameThing> items = [];
@@ -163,7 +169,7 @@ class _LogScaffoldState extends State<LogScaffold> {
           isProgressBarVisible = true;
         });
         setLocationButtonName();
-        var initializeProgress = initializeBggData();
+        var initializeProgress = initializeBggData(loadingStatus);
         initializeProgress.then((value) {
           setState(() {
             isProgressBarVisible = false;
@@ -225,19 +231,19 @@ class _LogScaffoldState extends State<LogScaffold> {
                                 if (isProgressBarVisible)
                                   const LinearProgressIndicator(),
                                 if (isProgressBarVisible)
-                                  const Text("Loading BGG data")
+                                  Text("Loading. ${loadingStatus.status}")
                               ],
                             ))),
-                    // const ElevatedButton(
-                    //   onPressed: (getAllPlaysFromServer),
-                    //   child: Text("Load all data"),
-                    // ),
-                    // ElevatedButton(
-                    //   child: const Text("del tables"),
-                    //   onPressed: () {
-                    //     GameThingSQL.deleteDB();
-                    //   },
-                    // ),
+                    const ElevatedButton(
+                      onPressed: (getAllPlaysFromServer),
+                      child: Text("Load all data"),
+                    ),
+                    ElevatedButton(
+                      child: const Text("del tables"),
+                      onPressed: () {
+                        GameThingSQL.deleteDB();
+                      },
+                    ),
                     // ElevatedButton(
                     //   child: const Text("create tables"),
                     //   onPressed: () {
@@ -246,31 +252,6 @@ class _LogScaffoldState extends State<LogScaffold> {
                     //     LocationSQL.createTable();
                     //   },
                     // ),
-                    // Flexible(
-                    //     flex: 1,
-                    //     child: SizedBox(
-                    //       //color: Colors.tealAccent,
-                    //       width: MediaQuery.of(context).size.width,
-                    //       height: MediaQuery.of(context).size.height,
-                    //       child: Center(
-                    //           child: Text(recognizedImage,
-                    //               textAlign: TextAlign.center)),
-                    //     )),
-                    // Flexible(
-                    //     flex: 3,
-                    //     child: SizedBox(
-                    //         //color: Colors.lime,
-                    //         width: MediaQuery.of(context).size.width,
-                    //         //child: FittedBox(
-                    //         child: imageFromCamera.isNotEmpty
-                    //             ? Image.memory(
-                    //                 imageFromCamera,
-                    //                 height: MediaQuery.of(context).size.height,
-                    //               )
-                    //             : //Image.asset('assets/not_bad.png')
-                    //             Icon(Icons.image)
-                    //         //)
-                    //         )),
                     Flexible(
                         flex: 3,
                         child: SizedBox(
@@ -298,39 +279,49 @@ class _LogScaffoldState extends State<LogScaffold> {
                                                 return ElevatedButton(
                                                   child: Row(children: [
                                                     ChoiceChip(
-                                                        label: const Text(
-                                                            "Default"),
-                                                        selected: location[
-                                                                'isDefault'] ==
-                                                            1,
-                                                        onSelected:
-                                                            (bool value) {
-                                                          setState(() {
-                                                            for (var location
-                                                                in locations) {
-                                                              location[
-                                                                  'isDefault'] = 0;
-                                                            }
-
+                                                      label:
+                                                          const Text("Default"),
+                                                      selected: location[
+                                                              'isDefault'] ==
+                                                          1,
+                                                      onSelected: (bool value) {
+                                                        setState(() {
+                                                          for (var location
+                                                              in locations) {
                                                             location[
-                                                                    'isDefault'] =
-                                                                value ? 1 : 0;
-                                                            print(value);
-                                                            var locationObject =
-                                                                Location(
-                                                                    id: location[
-                                                                        'id'],
-                                                                    name: location[
-                                                                        'name'],
-                                                                    isDefault:
-                                                                        value
-                                                                            ? 1
-                                                                            : 0);
-                                                            LocationSQL
-                                                                .updateDefaultLocation(
-                                                                    locationObject);
-                                                          });
-                                                        }),
+                                                                'isDefault'] = 0;
+                                                          }
+
+                                                          location[
+                                                                  'isDefault'] =
+                                                              value ? 1 : 0;
+                                                          print(value);
+                                                          var locationObject =
+                                                              Location(
+                                                                  id:
+                                                                      location[
+                                                                          'id'],
+                                                                  name: location[
+                                                                      'name'],
+                                                                  isDefault:
+                                                                      value
+                                                                          ? 1
+                                                                          : 0);
+                                                          LocationSQL
+                                                              .updateDefaultLocation(
+                                                                  locationObject);
+                                                        });
+                                                      },
+                                                      shape:
+                                                          RoundedRectangleBorder(
+                                                        side: BorderSide(
+                                                            color:
+                                                                Colors.black12),
+                                                        borderRadius:
+                                                            BorderRadius.zero,
+                                                      ),
+                                                    ),
+                                                    SizedBox(width: 10),
                                                     Expanded(
                                                         child: Text(
                                                       location['name'],
@@ -401,7 +392,9 @@ class _LogScaffoldState extends State<LogScaffold> {
                             width: MediaQuery.of(context).size.width,
                             height: MediaQuery.of(context).size.height,
                             child: Column(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                               children: [
+                                //SizedBox(height: 10),
                                 //const Text("Duration"),
                                 Slider(
                                   value: durationCurrentValue,

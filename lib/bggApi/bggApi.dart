@@ -1,4 +1,5 @@
 import 'package:flutter_application_1/models/game_thing.dart';
+import 'package:flutter_application_1/pages/log_page.dart';
 import 'package:http/retry.dart';
 import '../db/game_things_sql.dart';
 import '../db/players_sql.dart';
@@ -294,7 +295,8 @@ Future<Location?> fillLocationName() async {
   return await LocationSQL.getDefaultLocation();
 }
 
-Future<void> initializeBggData() async {
+Future<void> initializeBggData(LoadingStatus loadingStatus) async {
+  loadingStatus.status = "Import collection from server";
   await getGamesInfoFromBgg();
   int maxPlayerId = await PlayersSQL.getMaxID();
   int maxLocationId = await LocationSQL.getMaxID();
