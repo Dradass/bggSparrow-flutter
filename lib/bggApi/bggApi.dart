@@ -131,7 +131,7 @@ Future<bool> getPlaysFromPage(
 
   List<Player> uniquePlayers = [];
   List<Player> currentPlayers = [];
-  List<int> winnersId = [];
+  List<String> winnersNames = [];
   List<Location> uniqueLocations = [];
   List<BggPlay> bggPlays = [];
 
@@ -148,7 +148,7 @@ Future<bool> getPlaysFromPage(
   print("plays count = ${plays.length}");
 
   for (var play in plays) {
-    winnersId = [];
+    winnersNames = [];
     final objectId = int.parse(play.getAttribute('id').toString());
     final date = play.getAttribute('date').toString();
     final location = play.getAttribute('location').toString();
@@ -175,6 +175,7 @@ Future<bool> getPlaysFromPage(
     if (playersRoot != null) {
       final players = playersRoot.findElements('player');
       currentPlayers.clear();
+      print(players);
       for (var player in players) {
         if (player.getAttribute('name') == null) continue;
         var newPlayer = Player(
@@ -186,6 +187,10 @@ Future<bool> getPlaysFromPage(
         var win = player.getAttribute('win').toString();
         currentPlayers.add(newPlayer);
 
+        if (win == '1') {
+          winnersNames.add(newPlayer.name);
+        }
+
         if (!uniquePlayers.map((e) => e.name).contains(newPlayer.name)) {
           if ((newPlayer.userid != 0 &&
                   await PlayersSQL.selectPlayerByUserID(newPlayer.userid!) ==
@@ -194,14 +199,15 @@ Future<bool> getPlaysFromPage(
             if (await PlayersSQL.selectPlayerByName(newPlayer.name) == null) {
               uniquePlayers.add(newPlayer);
 
-              if (win == '1') {
-                winnersId.add(maxPlayerId);
-              }
+              // if (win == '1') {
+              //   winnersNames.add(newPlayer.name);
+              // }
             }
           }
         }
       }
     }
+    print('winners = {$winnersNames}');
     var bggPlay = BggPlay(
         id: objectId,
         gameId: gameId,
@@ -211,7 +217,7 @@ Future<bool> getPlaysFromPage(
         duration: duration,
         quantity: quantity,
         location: location,
-        winners: winnersId.join(';'),
+        winners: winnersNames.join(';'),
         players: currentPlayers
             .map((e) => '${e.userid.toString()}|${e.name}')
             .join(';'));

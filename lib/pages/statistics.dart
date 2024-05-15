@@ -1,6 +1,8 @@
 import 'dart:ffi';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/db/players_sql.dart';
+import 'package:flutter_application_1/models/bgg_player_model.dart';
 import 'package:flutter_application_1/models/game_thing.dart';
 import 'package:intl/intl.dart';
 import '../db/plays_sql.dart';
@@ -395,25 +397,118 @@ class _StatisticsState extends State<Statistics> {
                             height: double.maxFinite,
                             child: ElevatedButton.icon(
                               onPressed: () async {
-                                plays = await PlaysSQL.getAllPlays(
+                                List<BggPlay> allPlays = [];
+                                plays.clear();
+                                allPlays = await PlaysSQL.getAllPlays(
                                     startDate, endDate);
+
+                                var chosenPlayers = players
+                                    .where((element) => element['isChecked']);
+
+                                if (chosenPlayers.isEmpty) {
+                                  plays = allPlays;
+                                } else {
+                                  for (var allPlay in allPlays) {
+                                    if (allPlay.players == null) continue;
+                                    print(allPlay.winners);
+                                    print(allPlay.players);
+
+                                    print(chosenPlayers);
+                                    var chosenMathces = 0;
+                                    for (var chosenPlayer in chosenPlayers) {
+                                      if (allPlay.players!
+                                          .split(";")
+                                          .join("|")
+                                          .contains(chosenPlayer['name'])) {
+                                        chosenMathces++;
+                                      }
+                                    }
+                                    if (chosenMathces >= chosenPlayers.length) {
+                                      plays.add(allPlay);
+                                    }
+                                  }
+                                }
 
                                 gamePlays.clear();
                                 List<_GamePlaysCount> allGames = [];
-                                for (var play in plays) {
-                                  if (allGames
-                                      .map((e) => e.gameName)
-                                      .contains(play.gameName)) {
-                                    var gamePlay = allGames
-                                        .where((element) =>
-                                            element.gameName == play.gameName)
-                                        .first;
-                                    gamePlay.count =
-                                        gamePlay.count! + play.quantity!;
-                                  } else {
-                                    allGames.add(_GamePlaysCount(play.gameName,
-                                        play.quantity, play.gameId));
+                                List<_GamePlaysCount> allWinners = [];
+                                var allPlayers =
+                                    (await PlayersSQL.getAllPlayers());
+                                if (!winRate) {
+                                  for (var play in plays) {
+                                    if (allGames
+                                        .map((e) => e.gameName)
+                                        .contains(play.gameName)) {
+                                      var gamePlay = allGames
+                                          .where((element) =>
+                                              element.gameName == play.gameName)
+                                          .first;
+                                      gamePlay.count =
+                                          gamePlay.count! + play.quantity!;
+                                    } else {
+                                      allGames.add(_GamePlaysCount(
+                                          play.gameName,
+                                          play.quantity,
+                                          play.gameId));
+                                    }
                                   }
+                                  // Winrate
+                                } else {
+                                  for (var play in plays) {
+                                    // if (play.players == null) continue;
+                                    // print(play.winners);
+                                    // print(play.players);
+                                    // var chosenPlayers = players.where(
+                                    //     (element) => element['isChecked']);
+                                    // print(chosenPlayers);
+                                    // var chosenMathces = 0;
+                                    // for (var chosenPlayer in chosenPlayers) {
+                                    //   if (play.players!
+                                    //       .split(";")
+                                    //       .join("|")
+                                    //       .contains(chosenPlayer['name'])) {
+                                    //     chosenMathces++;
+                                    //   }
+                                    // }
+                                    // if (chosenMathces < chosenPlayers.length)
+                                    //   continue;
+
+                                    if (play.winners != null &&
+                                        play.winners!.isNotEmpty) {
+                                      var winners = play.winners!.split(';');
+                                      print(winners);
+
+                                      for (var winner in winners) {
+                                        if (winner == '0') {
+                                          continue;
+                                        }
+                                        if (allWinners
+                                            .map((e) => e.gameName)
+                                            .contains(winner)) {
+                                          var existingWinner = allWinners
+                                              .where((element) =>
+                                                  element.gameName == winner)
+                                              .first;
+                                          existingWinner.count =
+                                              existingWinner.count! + 1;
+                                        } else {
+                                          var winnerFromDb = allPlayers.where(
+                                              (e) => e['name'] == (winner));
+                                          if (winnerFromDb.isEmpty) {
+                                            continue;
+                                          }
+
+                                          allWinners.add(_GamePlaysCount(winner,
+                                              1, winnerFromDb.first['id']));
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                                print(allWinners);
+
+                                if (winRate) {
+                                  allGames = allWinners;
                                 }
 
                                 allGames.forEach((e) => e.gameName.length > 20
