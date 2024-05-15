@@ -110,7 +110,16 @@ class _StatisticsState extends State<Statistics> {
                                       ? plays[index]
                                           .players!
                                           .split(';')
-                                          .map((e) => e.split('|').last)
+                                          .map((e) =>
+                                              e.split('|').last +
+                                              (plays[index].winners != null &&
+                                                      plays[index]
+                                                          .winners!
+                                                          .split(";")
+                                                          .contains(
+                                                              e.split('|').last)
+                                                  ? ' (win)'
+                                                  : ''))
                                           .join('\n')
                                           .toString()
                                       : "",
