@@ -1,6 +1,9 @@
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/game_thing.dart';
 import '../db/game_things_sql.dart';
+import 'dart:convert';
 
 class GameHelper extends StatefulWidget {
   const GameHelper({super.key});
@@ -16,7 +19,32 @@ class _GameHelperState extends State<GameHelper> {
   String chosenGame = "Get some random game";
   RangeValues minRangeValues = const RangeValues(1, 4);
   RangeValues maxRangeValues = const RangeValues(0, 0);
-  bool? onlyOwnedGames = true;
+  bool onlyOwnedGames = true;
+  bool gamesFilterNeedClear = false;
+  List<Map<GameThing, bool>> gamesFromFilter = [];
+  List<Map<GameThing, bool>> allItems = [];
+  List<Map<GameThing, bool>> items = [];
+  final SearchController searchController = SearchController();
+
+  void queryListener() {
+    search(searchController.text);
+  }
+
+  void search(String query) {
+    if (query.isEmpty) {
+      setState(() {
+        items = allItems;
+      });
+    } else {
+      setState(() {
+        items = allItems
+            .where((e) =>
+                e.keys.first.name.toLowerCase().contains(query.toLowerCase()))
+            .toList();
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -77,15 +105,127 @@ class _GameHelperState extends State<GameHelper> {
             SizedBox(
                 width: MediaQuery.of(context).size.width,
                 height: MediaQuery.of(context).size.height * 0.05,
-                child: CheckboxListTile(
-                  title: Text("Only owned games"),
-                  value: onlyOwnedGames,
-                  onChanged: (bool? value) {
-                    setState(() {
-                      onlyOwnedGames = value;
-                    });
-                  },
-                )),
+                child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Container(
+                          //color: Colors.brown,
+                          width: MediaQuery.of(context).size.width * 0.5,
+                          height: double.maxFinite,
+                          child: ChoiceChip(
+                            label: Container(
+                                width: double.infinity,
+                                height:
+                                    MediaQuery.of(context).size.height * 0.03,
+                                child: Text("Only owned games")),
+                            selected: onlyOwnedGames,
+                            onSelected: (bool value) {
+                              setState(() {
+                                onlyOwnedGames = value;
+                              });
+                            },
+                          )),
+                      Container(
+                          color: Colors.brown,
+                          width: MediaQuery.of(context).size.width * 0.5,
+                          height: double.maxFinite,
+                          child: ElevatedButton.icon(
+                            onPressed: () async {
+                              //games = ;
+                              var allGames = await GameThingSQL.getAllGames();
+                              if (allGames == null) {
+                                print("No games");
+                                return;
+                              }
+                              allGames.sort((a, b) => a.name.compareTo(b.name));
+                              if (gamesFromFilter.isEmpty) {
+                                for (var game in allGames) {
+                                  gamesFromFilter.add({game: game.owned == 1});
+                                }
+                              }
+                              print(gamesFromFilter);
+                              print('filter');
+                              showDialog(
+                                  context: context,
+                                  builder: (BuildContext) {
+                                    return StatefulBuilder(
+                                        builder: (context, setState) {
+                                      return AlertDialog(
+                                          content: Column(children: [
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Text('Game'),
+                                            Checkbox(
+                                                value: gamesFilterNeedClear,
+                                                onChanged: ((value) {
+                                                  print('value = $value');
+                                                  for (var gameFromFilter
+                                                      in gamesFromFilter) {
+                                                    print(
+                                                        'updated ${gameFromFilter.keys.first.name}');
+                                                    print(gameFromFilter
+                                                        .values.first);
+                                                    gameFromFilter.update(
+                                                        gameFromFilter
+                                                            .keys.first,
+                                                        (value2) =>
+                                                            value2 = value!);
+                                                    print(gameFromFilter
+                                                        .values.first);
+                                                  }
+                                                  setState(
+                                                    () {
+                                                      print(value);
+                                                      gamesFilterNeedClear =
+                                                          value!;
+                                                    },
+                                                  );
+                                                })),
+                                          ],
+                                        ),
+                                        Divider(),
+                                        Expanded(
+                                            child: SingleChildScrollView(
+                                                child: Column(
+                                                    children: gamesFromFilter
+                                                        .map((game) {
+                                          return CheckboxListTile(
+                                            contentPadding: EdgeInsets.zero,
+                                            title: Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceBetween,
+                                                children: [
+                                                  //SizedBox(width: 10),
+                                                  Expanded(
+                                                      child: Text(
+                                                    (game.keys.first
+                                                            as GameThing)
+                                                        .name,
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                  ))
+                                                ]),
+                                            value: game.values.first,
+                                            onChanged: (bool? value) {
+                                              setState(() {
+                                                gamesFromFilter[gamesFromFilter
+                                                        .indexOf(game)]
+                                                    [game.keys.first] = value!;
+                                              });
+                                            },
+                                          );
+                                        }).toList())))
+                                      ]));
+                                    });
+                                  });
+                            },
+                            label: Text('Filter'),
+                            icon: Icon(Icons.filter_alt),
+                          ))
+                    ])),
             Flexible(
                 flex: 1,
                 child: SizedBox(
@@ -95,7 +235,16 @@ class _GameHelperState extends State<GameHelper> {
                     child: ElevatedButton(
                       child: const Text("Choose random game"),
                       onPressed: () async {
-                        var allGames = await GameThingSQL.getAllGames();
+                        List<GameThing>? allGames = [];
+                        if (gamesFromFilter.isNotEmpty) {
+                          allGames = gamesFromFilter
+                              .where((element) => element.values.first == true)
+                              .map((e) => e.keys.first)
+                              .toList();
+                        } else {
+                          allGames = await GameThingSQL.getAllGames();
+                        }
+                        print(allGames!.length);
                         List<GameThing> filteredGames = [];
                         if (allGames == null) return;
                         print(allGames.length);
@@ -113,6 +262,10 @@ class _GameHelperState extends State<GameHelper> {
                             if (onlyOwnedGames!) {
                               if (game.owned == 0) continue;
                             }
+                            // if (gamesFromFilter
+                            //     .where(
+                            //         (element) => element.values.first == true)
+                            //     .contains(game))
                             filteredGames.add(game);
                           }
                         }

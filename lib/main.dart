@@ -28,6 +28,12 @@ Future<void> main() async {
             surface: Color.fromARGB(255, 148, 226, 181),
             onSurface: primaryTextColor),
         secondaryHeaderColor: const Color.fromARGB(255, 43, 132, 190),
+        chipTheme: ChipThemeData(
+          shape: RoundedRectangleBorder(
+            side: BorderSide(color: Colors.black12),
+            borderRadius: BorderRadius.zero,
+          ),
+        ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ButtonStyle(
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,

@@ -1,4 +1,4 @@
-// TODO - Login screen, win rate, history loading
+// TODO - Login screen, history loading, games search from net
 
 import 'package:flutter_application_1/models/bgg_location.dart';
 import 'package:intl/intl.dart';
@@ -9,7 +9,6 @@ import 'package:image/image.dart' as imageDart;
 import 'package:flutter_application_1/main.dart';
 import 'package:camera/camera.dart';
 import '../db/game_things_sql.dart';
-import '../db/players_sql.dart';
 import '../db/location_sql.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
@@ -462,6 +461,10 @@ class _LogScaffoldState extends State<LogScaffold> {
                                   ));
                                 },
                                 style: ButtonStyle(
+                                    backgroundColor: MaterialStateProperty.all(
+                                        Theme.of(context)
+                                            .colorScheme
+                                            .secondary),
                                     shape: MaterialStateProperty.all<
                                             RoundedRectangleBorder>(
                                         const RoundedRectangleBorder(

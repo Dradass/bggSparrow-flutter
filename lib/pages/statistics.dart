@@ -414,30 +414,58 @@ class _StatisticsState extends State<Statistics> {
                                 var chosenPlayers = players
                                     .where((element) => element['isChecked']);
 
+                                // Get plays with chosen players
                                 if (chosenPlayers.isEmpty) {
                                   plays = allPlays;
                                 } else {
                                   for (var allPlay in allPlays) {
                                     if (allPlay.players == null) continue;
-                                    print(allPlay.winners);
-                                    print(allPlay.players);
-
-                                    print(chosenPlayers);
-                                    var chosenMathces = 0;
+                                    var chosenMatches = 0;
+                                    var winnerAmongThisPlay = false;
                                     for (var chosenPlayer in chosenPlayers) {
                                       if (allPlay.players!
                                           .split(";")
                                           .join("|")
                                           .contains(chosenPlayer['name'])) {
-                                        chosenMathces++;
+                                        chosenMatches++;
                                       }
                                     }
-                                    if (chosenMathces >= chosenPlayers.length) {
-                                      plays.add(allPlay);
+
+                                    // Check winner among chosen players
+                                    for (var chosenPlayer in chosenPlayers) {
+                                      print('Play = ${allPlay.id}');
+                                      print(allPlay.winners!.split(";"));
+                                      if (allPlay.winners!
+                                          .split(";")
+                                          .contains(chosenPlayer['name'])) {
+                                        winnerAmongThisPlay = true;
+                                        break;
+                                      }
+                                    }
+
+                                    if (onlyChosenPlayers) {
+                                      if (chosenMatches ==
+                                              allPlay.players!
+                                                  .split(";")
+                                                  .length &&
+                                          chosenMatches ==
+                                              chosenPlayers.length) {
+                                        if (winnerAmongChosenPlayers &&
+                                            !winnerAmongThisPlay) continue;
+                                        plays.add(allPlay);
+                                      }
+                                    } else {
+                                      if (chosenMatches >=
+                                          chosenPlayers.length) {
+                                        if (winnerAmongChosenPlayers &&
+                                            !winnerAmongThisPlay) continue;
+                                        plays.add(allPlay);
+                                      }
                                     }
                                   }
                                 }
 
+                                // Get all plays and plays count for each game
                                 gamePlays.clear();
                                 List<_GamePlaysCount> allGames = [];
                                 List<_GamePlaysCount> allWinners = [];
@@ -464,28 +492,9 @@ class _StatisticsState extends State<Statistics> {
                                   // Winrate
                                 } else {
                                   for (var play in plays) {
-                                    // if (play.players == null) continue;
-                                    // print(play.winners);
-                                    // print(play.players);
-                                    // var chosenPlayers = players.where(
-                                    //     (element) => element['isChecked']);
-                                    // print(chosenPlayers);
-                                    // var chosenMathces = 0;
-                                    // for (var chosenPlayer in chosenPlayers) {
-                                    //   if (play.players!
-                                    //       .split(";")
-                                    //       .join("|")
-                                    //       .contains(chosenPlayer['name'])) {
-                                    //     chosenMathces++;
-                                    //   }
-                                    // }
-                                    // if (chosenMathces < chosenPlayers.length)
-                                    //   continue;
-
                                     if (play.winners != null &&
                                         play.winners!.isNotEmpty) {
                                       var winners = play.winners!.split(';');
-                                      print(winners);
 
                                       for (var winner in winners) {
                                         if (winner == '0') {
@@ -514,7 +523,6 @@ class _StatisticsState extends State<Statistics> {
                                     }
                                   }
                                 }
-                                print(allWinners);
 
                                 if (winRate) {
                                   allGames = allWinners;
