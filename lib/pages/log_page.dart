@@ -1,4 +1,4 @@
-// TODO - Login screen, history loading, games search from net
+// TODO - Login screen, games search from net
 
 import 'package:flutter_application_1/models/bgg_location.dart';
 import 'package:intl/intl.dart';
@@ -10,10 +10,12 @@ import 'package:flutter_application_1/main.dart';
 import 'package:camera/camera.dart';
 import '../db/game_things_sql.dart';
 import '../db/location_sql.dart';
+import '../db/system_table.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../bggApi/bggApi.dart';
 import 'package:flutter_pixelmatching/flutter_pixelmatching.dart';
+import '../models/system_parameters.dart';
 
 import '../widgets/duration_sliders.dart';
 
@@ -168,6 +170,24 @@ class _LogScaffoldState extends State<LogScaffold> {
           isProgressBarVisible = true;
         });
         setLocationButtonName();
+
+        // Check "first time" system param
+        SystemParameterSQL.selectSystemParameterByName("firstLaunch")
+            .then((firstLaunchParam) {
+          if (firstLaunchParam == null) {
+            print("no param");
+            SystemParameterSQL.addSystemParameter(
+                    SystemParameter(id: 1, name: "firstLaunch", value: "1"))
+                .then((value) {
+              if (value == 0) print("Cant insert param");
+            });
+          } else {
+            print("Last launch = ${firstLaunchParam.value}");
+            // TODO full history loading there
+            // getAllPlaysFromServer();
+          }
+        });
+
         var initializeProgress = initializeBggData(loadingStatus);
         initializeProgress.then((value) {
           setState(() {

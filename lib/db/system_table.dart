@@ -26,7 +26,7 @@ class SystemParameterSQL {
 
   static Future<int> addSystemParameter(SystemParameter systemParameter) async {
     print(
-        "Adding location ${systemParameter.name}, id = ${systemParameter.id}");
+        "Adding system param ${systemParameter.name}, id = ${systemParameter.id}");
     final db = await _getDB();
     return await db.insert("SystemParameters", systemParameter.toJson(),
         conflictAlgorithm: ConflictAlgorithm.replace);

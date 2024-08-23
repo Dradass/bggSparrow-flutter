@@ -131,7 +131,6 @@ class _GameHelperState extends State<GameHelper> {
                           height: double.maxFinite,
                           child: ElevatedButton.icon(
                             onPressed: () async {
-                              //games = ;
                               var allGames = await GameThingSQL.getAllGames();
                               if (allGames == null) {
                                 print("No games");
@@ -143,8 +142,6 @@ class _GameHelperState extends State<GameHelper> {
                                   gamesFromFilter.add({game: game.owned == 1});
                                 }
                               }
-                              print(gamesFromFilter);
-                              print('filter');
                               showDialog(
                                   context: context,
                                   builder: (BuildContext) {
@@ -160,24 +157,16 @@ class _GameHelperState extends State<GameHelper> {
                                             Checkbox(
                                                 value: gamesFilterNeedClear,
                                                 onChanged: ((value) {
-                                                  print('value = $value');
                                                   for (var gameFromFilter
                                                       in gamesFromFilter) {
-                                                    print(
-                                                        'updated ${gameFromFilter.keys.first.name}');
-                                                    print(gameFromFilter
-                                                        .values.first);
                                                     gameFromFilter.update(
                                                         gameFromFilter
                                                             .keys.first,
                                                         (value2) =>
                                                             value2 = value!);
-                                                    print(gameFromFilter
-                                                        .values.first);
                                                   }
                                                   setState(
                                                     () {
-                                                      print(value);
                                                       gamesFilterNeedClear =
                                                           value!;
                                                     },
@@ -244,11 +233,8 @@ class _GameHelperState extends State<GameHelper> {
                         } else {
                           allGames = await GameThingSQL.getAllGames();
                         }
-                        print(allGames!.length);
                         List<GameThing> filteredGames = [];
                         if (allGames == null) return;
-                        print(allGames.length);
-                        print(chosenPlayersCount);
                         for (var game in allGames) {
                           // print(
                           //     "Game = ${game.name}, min = ${game.minPlayers}, max = ${game.maxPlayers}");

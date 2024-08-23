@@ -85,6 +85,7 @@ class PlayersSQL {
     if (result.isEmpty) return players;
     for (var playerResult in result) {
       var player = Player.fromJson(playerResult);
+      if (player.name.isEmpty) continue;
       players.add({
         'name': player.name,
         'id': player.id,
@@ -94,6 +95,8 @@ class PlayersSQL {
         'userid': player.userid
       });
     }
+    players
+        .sort(((a, b) => a['name'].toString().compareTo(b['name'].toString())));
     return players;
   }
 }

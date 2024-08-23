@@ -79,7 +79,7 @@ Future<void> getGamesThumbnail() async {
       if (game.thumbBinary == null) {
         game.CreateBinaryThumb();
         // Anti DDOS
-        //await Future.delayed(const Duration(milliseconds: 1000));
+        await Future.delayed(const Duration(milliseconds: 2000));
       }
     }
   }
@@ -105,7 +105,7 @@ Future<void> getGamesPlayersCount() async {
         print("Upadte players count of game ${game.name} id = ${game.id}");
         await GameThingSQL.updateGame(game);
         // Anti DDOS
-        //await Future.delayed(const Duration(milliseconds: 1000));
+        await Future.delayed(const Duration(milliseconds: 2000));
       } else {
         print(
             "Error while getting info about game ${game.name} id = ${game.id}");
