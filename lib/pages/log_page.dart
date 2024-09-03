@@ -41,6 +41,7 @@ class _LogScaffoldState extends State<LogScaffold> {
   Uint8List imageFromCamera = Uint8List.fromList(List.empty());
   List<Map> players = [];
   List<Map> locations = [];
+  DateTime? playDate = DateTime.now();
   final _focusNode = FocusNode();
   //String loadingStatus = "";
   LoadingStatus loadingStatus = LoadingStatus();
@@ -279,6 +280,27 @@ class _LogScaffoldState extends State<LogScaffold> {
                             height: MediaQuery.of(context).size.height,
                             child: ElevatedButton.icon(
                                 onPressed: () async {
+                                  var pickedDate = await showDatePicker(
+                                      context: context,
+                                      firstDate: DateTime(2000),
+                                      lastDate: DateTime(3000));
+                                  if (pickedDate != null) {
+                                    setState(() {
+                                      playDate = pickedDate;
+                                    });
+                                  }
+                                },
+                                label: Text(
+                                    "Playdate: ${DateFormat('yyyy-MM-dd').format(playDate!)}"),
+                                icon: const Icon(Icons.calendar_today)))),
+                    Flexible(
+                        flex: 3,
+                        child: SizedBox(
+                            //color: Colors.tealAccent,
+                            width: MediaQuery.of(context).size.width,
+                            height: MediaQuery.of(context).size.height,
+                            child: ElevatedButton.icon(
+                                onPressed: () async {
                                   if (locations.isEmpty) {
                                     locations = await getLocalLocations();
                                   }
@@ -461,8 +483,10 @@ class _LogScaffoldState extends State<LogScaffold> {
                                   logData['players'] = bggPlayers;
                                   logData['objectid'] = recognizedGameId;
                                   logData['length'] = durationCurrentValue;
-                                  logData['playdate'] = nowData;
-                                  logData['date'] = "${nowData}T05:00:00.000Z";
+                                  logData['playdate'] = DateFormat('yyyy-MM-dd')
+                                      .format(playDate!);
+                                  logData['date'] =
+                                      "${DateFormat('yyyy-MM-dd').format(playDate!)}T05:00:00.000Z";
                                   logData['comments'] = commentsController.text;
 
                                   var chosenLocation =
