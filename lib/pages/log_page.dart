@@ -18,6 +18,7 @@ import 'package:flutter_pixelmatching/flutter_pixelmatching.dart';
 import '../models/system_parameters.dart';
 
 import '../widgets/duration_sliders.dart';
+import '../widgets/log_page_widgets.dart';
 
 class LoadingStatus {
   String status = "";
@@ -272,27 +273,7 @@ class _LogScaffoldState extends State<LogScaffold> {
                     //     LocationSQL.createTable();
                     //   },
                     // ),
-                    Flexible(
-                        flex: 3,
-                        child: SizedBox(
-                            //color: Colors.tealAccent,
-                            width: MediaQuery.of(context).size.width,
-                            height: MediaQuery.of(context).size.height,
-                            child: ElevatedButton.icon(
-                                onPressed: () async {
-                                  var pickedDate = await showDatePicker(
-                                      context: context,
-                                      firstDate: DateTime(2000),
-                                      lastDate: DateTime(3000));
-                                  if (pickedDate != null) {
-                                    setState(() {
-                                      playDate = pickedDate;
-                                    });
-                                  }
-                                },
-                                label: Text(
-                                    "Playdate: ${DateFormat('yyyy-MM-dd').format(playDate!)}"),
-                                icon: const Icon(Icons.calendar_today)))),
+                    FlexButton(PlayDatePicker()),
                     Flexible(
                         flex: 3,
                         child: SizedBox(
@@ -484,9 +465,9 @@ class _LogScaffoldState extends State<LogScaffold> {
                                   logData['objectid'] = recognizedGameId;
                                   logData['length'] = durationCurrentValue;
                                   logData['playdate'] = DateFormat('yyyy-MM-dd')
-                                      .format(playDate!);
+                                      .format(PlayDatePicker().playDate);
                                   logData['date'] =
-                                      "${DateFormat('yyyy-MM-dd').format(playDate!)}T05:00:00.000Z";
+                                      "${DateFormat('yyyy-MM-dd').format(PlayDatePicker().playDate)}T05:00:00.000Z";
                                   logData['comments'] = commentsController.text;
 
                                   var chosenLocation =
