@@ -5,8 +5,17 @@ import '../db/location_sql.dart';
 import '../db/game_things_sql.dart';
 import 'package:flutter_application_1/models/bgg_location.dart';
 import 'package:flutter_application_1/models/game_thing.dart';
+
+import 'package:flutter/material.dart';
+import '../db/game_things_sql.dart';
+import 'package:flutter_application_1/models/game_thing.dart';
 import 'package:camera/camera.dart';
 import 'package:image/image.dart' as imageDart;
+
+import 'package:flutter/services.dart';
+import 'package:flutter_pixelmatching/flutter_pixelmatching.dart';
+import 'dart:convert';
+import '../widgets/camera_handler.dart';
 
 class FlexButton extends StatelessWidget {
   Widget childWidget;
@@ -80,6 +89,19 @@ class LocationPicker extends StatefulWidget {
 }
 
 class _LocationPickerState extends State<LocationPicker> {
+  @override
+  void initState() {
+    super.initState();
+    var defaultLocationRes = fillLocationName();
+    defaultLocationRes.then((defaultLocationValue) {
+      if (defaultLocationValue != null) {
+        setState(() {
+          LocationPicker().selectedLocation = defaultLocationValue.name;
+        });
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return ElevatedButton.icon(
@@ -175,6 +197,13 @@ class Comments extends StatefulWidget {
 }
 
 class _CommentsState extends State<Comments> {
+  @override
+  void dispose() {
+    // Clean up the controller when the widget is disposed.
+    widget.commentsController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return TextField(
@@ -433,3 +462,151 @@ class _PlayersPickerState extends State<PlayersPicker> {
 //                             );
 //   }
 // }
+
+class GamePicker extends StatefulWidget {
+  static GamePicker? _singleton;
+
+  factory GamePicker(
+      SearchController searchController, List<CameraDescription> cameras) {
+    _singleton ??= GamePicker._internal(searchController, cameras);
+    return _singleton!;
+  }
+
+  GamePicker._internal(this.searchController, this.cameras);
+
+  SearchController searchController;
+  late CameraController _controller;
+  List<CameraDescription> cameras;
+  List<GameThing> allItems = [];
+  List<GameThing> items = [];
+
+  @override
+  State<GamePicker> createState() => _GamePickerState();
+}
+
+class _GamePickerState extends State<GamePicker> {
+  void queryListener() {
+    search(widget.searchController.text);
+  }
+
+  void search(String query) {
+    if (query.isEmpty) {
+      setState(() {
+        widget.items = widget.allItems;
+      });
+    } else {
+      setState(() {
+        widget.items = widget.allItems
+            .where((e) => e.name.toLowerCase().contains(query.toLowerCase()))
+            .toList();
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    // Clean up the controller when the widget is disposed.
+    widget.searchController.removeListener(queryListener);
+    widget.searchController.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    widget.searchController.addListener(queryListener);
+
+    widget.searchController.text = "Select game";
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Container(
+            padding: EdgeInsets.only(right: 0),
+            width: MediaQuery.of(context).size.width * 0.2,
+            child: CameraHandler(widget.searchController, widget.cameras)
+                            .recognizedGame !=
+                        null &&
+                    CameraHandler(widget.searchController, widget.cameras)
+                            .recognizedGame!
+                            .thumbBinary !=
+                        null
+                ? Image.memory(base64Decode(
+                    CameraHandler(widget.searchController, widget.cameras)
+                        .recognizedGame!
+                        .thumbBinary!))
+                : Icon(Icons.image)),
+        Container(
+          padding: EdgeInsets.only(right: 0),
+          width: MediaQuery.of(context).size.width * 0.8,
+          height: MediaQuery.of(context).size.height,
+          // height: MediaQuery.of(context).size.height *
+          //     0.5,
+          child: SearchAnchor(
+              searchController: widget.searchController,
+              builder: (context, searchController) {
+                return SearchBar(
+                  shape: MaterialStateProperty.all(const RoundedRectangleBorder(
+                      borderRadius: BorderRadius.zero,
+                      side: BorderSide(color: Colors.black12))),
+                  controller: searchController,
+                  leading:
+                      IconButton(onPressed: () {}, icon: Icon(Icons.search)),
+                  onTap: () async {
+                    var actualGames = await GameThingSQL.getAllGames();
+                    widget.allItems = actualGames ?? [];
+                    searchController.text = "";
+                    searchController.openView();
+                  },
+                  onChanged: (_) {
+                    searchController.openView();
+                  },
+                  padding: const MaterialStatePropertyAll<EdgeInsets>(
+                      EdgeInsets.symmetric(horizontal: 16.0)),
+                );
+              },
+              suggestionsBuilder: (context, searchController) {
+                return List<Column>.generate(
+                    widget.items.isEmpty
+                        ? widget.allItems.length
+                        : widget.items.length, (int index) {
+                  final item = widget.items.isEmpty
+                      ? widget.allItems[index]
+                      : widget.items[index];
+                  return Column(children: [
+                    ListTile(
+                        title: Text(item.name),
+                        leading: ConstrainedBox(
+                            constraints: BoxConstraints(
+                                maxHeight: MediaQuery.of(context).size.height,
+                                maxWidth:
+                                    MediaQuery.of(context).size.width / 10),
+                            child: item.thumbBinary != null
+                                ? Image.memory(base64Decode(item.thumbBinary!))
+                                : Icon(Icons.broken_image)),
+                        onTap: () {
+                          setState(() {
+                            searchController.closeView(item.name);
+                            FocusScope.of(context).unfocus();
+                            CameraHandler(searchController, widget.cameras)
+                                .recognizedGameId = item.id;
+                            CameraHandler(searchController, widget.cameras)
+                                .recognizedGame = item;
+                          });
+                        }),
+                    const Divider(
+                      height: 0,
+                      color: Colors.black12,
+                    ),
+                  ]);
+                });
+              }),
+        ),
+      ],
+    );
+  }
+}
