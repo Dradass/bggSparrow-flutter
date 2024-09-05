@@ -19,6 +19,7 @@ import '../models/system_parameters.dart';
 
 import '../widgets/duration_sliders.dart';
 import '../widgets/log_page_widgets.dart';
+import '../widgets/camera_handler.dart';
 
 class LoadingStatus {
   String status = "";
@@ -33,17 +34,9 @@ class LogScaffold extends StatefulWidget {
 
 class _LogScaffoldState extends State<LogScaffold> {
   bool isProgressBarVisible = false;
-  late CameraController _controller;
-  var recognizedImage = "No image";
   bool? flagWarranty = false;
-  var recognizedGameId = 0;
-  GameThing? recognizedGame;
-  double durationCurrentValue = 60;
-  Uint8List imageFromCamera = Uint8List.fromList(List.empty());
-  List<Map> players = [];
-  List<Map> locations = [];
+
   DateTime? playDate = DateTime.now();
-  final _focusNode = FocusNode();
   //String loadingStatus = "";
   LoadingStatus loadingStatus = LoadingStatus();
 
@@ -52,9 +45,6 @@ class _LogScaffoldState extends State<LogScaffold> {
   var searchHistory = [];
   final SearchController searchController = SearchController();
 
-  String selectedLocation = "";
-  final TextEditingController commentsController =
-      TextEditingController(text: "#bggSparrow");
   DurationSlider durationSlider = const DurationSlider();
 
   var logData = {
@@ -97,51 +87,10 @@ class _LogScaffoldState extends State<LogScaffold> {
     }
   }
 
-  Future<int?> TakePhoto() async {
-    var result = 0;
-
-    print("---------------Got photo");
-    try {
-      var capturedImage = await _controller.takePicture();
-      var bytes = await capturedImage.readAsBytes();
-
-      imageDart.Image? img = imageDart.decodeImage(bytes);
-      if (img == null) return 0;
-
-      //print("Height = ${WidgetsBinding.instance.window.physicalSize.height}");
-      var ratio = img.height / 150;
-      imageDart.Image resizedImg = imageDart.copyResize(img,
-          width: (img.width / ratio).round(),
-          height: (img.height / ratio).round());
-
-      var imgBytes = imageDart.encodeJpg(resizedImg);
-
-      var getGamesWithThumb = await GameThingSQL.getAllGames();
-
-      setState(() {
-        imageFromCamera = imgBytes;
-      });
-
-      if (getGamesWithThumb == null) return 0;
-      print("recognizedImage = $recognizedImage");
-
-      int bestGameID = 0;
-      bestGameID = await getSimilarGameID(imgBytes, getGamesWithThumb);
-
-      print(bestGameID);
-      result = bestGameID;
-      return result;
-    } catch (e) {
-      // If an error occurs, log the error to the console.
-      print(e);
-      return 0;
-    }
-  }
-
   @override
   void dispose() {
     // Clean up the controller when the widget is disposed.
-    commentsController.dispose();
+    Comments().commentsController.dispose();
     super.dispose();
 
     searchController.removeListener(queryListener);
@@ -153,7 +102,7 @@ class _LogScaffoldState extends State<LogScaffold> {
     defaultLocationRes.then((defaultLocationValue) {
       if (defaultLocationValue != null) {
         setState(() {
-          selectedLocation = defaultLocationValue.name;
+          LocationPicker().selectedLocation = defaultLocationValue.name;
         });
       }
     });
@@ -198,26 +147,6 @@ class _LogScaffoldState extends State<LogScaffold> {
         });
       },
     );
-
-    _controller = CameraController(cameras.first, ResolutionPreset.max,
-        enableAudio: false);
-    _controller.initialize().then((_) {
-      if (!mounted) {
-        return;
-      }
-      setState(() {});
-    }).catchError((Object e) {
-      if (e is CameraException) {
-        switch (e.code) {
-          case 'CameraAccessDenied':
-            print("access was denied");
-            break;
-          default:
-            print(e.description);
-            break;
-        }
-      }
-    });
   }
 
   @override
@@ -273,167 +202,10 @@ class _LogScaffoldState extends State<LogScaffold> {
                     //     LocationSQL.createTable();
                     //   },
                     // ),
-                    FlexButton(PlayDatePicker()),
-                    Flexible(
-                        flex: 3,
-                        child: SizedBox(
-                            //color: Colors.tealAccent,
-                            width: MediaQuery.of(context).size.width,
-                            height: MediaQuery.of(context).size.height,
-                            child: ElevatedButton.icon(
-                                onPressed: () async {
-                                  if (locations.isEmpty) {
-                                    locations = await getLocalLocations();
-                                  }
-                                  showDialog(
-                                      context: context,
-                                      builder: (BuildContext) {
-                                        return StatefulBuilder(
-                                            builder: (context, setState) {
-                                          return AlertDialog(
-                                              //insetPadding: EdgeInsets.zero,
-                                              title:
-                                                  const Text("Your locations"),
-                                              content: SingleChildScrollView(
-                                                  child: Column(
-                                                      children: locations
-                                                          .map((location) {
-                                                return ElevatedButton(
-                                                  child: Row(children: [
-                                                    ChoiceChip(
-                                                      label:
-                                                          const Text("Default"),
-                                                      selected: location[
-                                                              'isDefault'] ==
-                                                          1,
-                                                      onSelected: (bool value) {
-                                                        setState(() {
-                                                          for (var location
-                                                              in locations) {
-                                                            location[
-                                                                'isDefault'] = 0;
-                                                          }
-
-                                                          location[
-                                                                  'isDefault'] =
-                                                              value ? 1 : 0;
-                                                          print(value);
-                                                          var locationObject =
-                                                              Location(
-                                                                  id:
-                                                                      location[
-                                                                          'id'],
-                                                                  name: location[
-                                                                      'name'],
-                                                                  isDefault:
-                                                                      value
-                                                                          ? 1
-                                                                          : 0);
-                                                          LocationSQL
-                                                              .updateDefaultLocation(
-                                                                  locationObject);
-                                                        });
-                                                      },
-                                                      shape:
-                                                          RoundedRectangleBorder(
-                                                        side: BorderSide(
-                                                            color:
-                                                                Colors.black12),
-                                                        borderRadius:
-                                                            BorderRadius.zero,
-                                                      ),
-                                                    ),
-                                                    SizedBox(width: 10),
-                                                    Expanded(
-                                                        child: Text(
-                                                      location['name'],
-                                                      overflow:
-                                                          TextOverflow.ellipsis,
-                                                    ))
-                                                  ]),
-                                                  onPressed: () {
-                                                    Navigator.of(context,
-                                                            rootNavigator: true)
-                                                        .pop();
-                                                    for (var checkedLocation
-                                                        in locations) {
-                                                      checkedLocation[
-                                                          'isChecked'] = false;
-                                                    }
-                                                    location['isChecked'] =
-                                                        true;
-                                                    selectedLocation =
-                                                        location['name'];
-                                                  },
-                                                );
-                                              }).toList())));
-                                        });
-                                      }).then((value) {
-                                    setState(() {
-                                      //defaultLocation = '111';
-                                    });
-                                  });
-                                },
-                                style: ButtonStyle(
-                                    shape: MaterialStateProperty.all<
-                                            RoundedRectangleBorder>(
-                                        const RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.zero,
-                                            side: BorderSide(
-                                                color: Colors.black12)))),
-                                label: Text(selectedLocation.isEmpty
-                                    ? "Select location"
-                                    : selectedLocation),
-                                icon: const Icon(Icons.home)))),
-                    Flexible(
-                        flex: 4,
-                        child: SizedBox(
-                            //color: Colors.green,
-                            width: MediaQuery.of(context).size.width,
-                            height: MediaQuery.of(context).size.height,
-                            child: TextField(
-                              focusNode: _focusNode,
-                              controller: commentsController,
-                              keyboardType: TextInputType.multiline,
-                              maxLines: 5,
-                              decoration: InputDecoration(
-                                  //prefixIcon: Icon(Icons.search),
-                                  suffixIcon: IconButton(
-                                      onPressed: commentsController.clear,
-                                      icon: const Icon(Icons.clear)),
-                                  labelText: 'Comments',
-                                  hintText: 'Enter your comments',
-                                  //helperText: 'supporting text',
-                                  //border: OutlineInputBorder(),
-                                  border: UnderlineInputBorder()),
-                            ))),
-                    Flexible(
-                        flex: 3,
-                        child: SizedBox(
-                            //color: Colors.blueAccent,
-                            width: MediaQuery.of(context).size.width,
-                            height: MediaQuery.of(context).size.height,
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              children: [
-                                //SizedBox(height: 10),
-                                //const Text("Duration"),
-                                Slider(
-                                  value: durationCurrentValue,
-                                  max: 500,
-                                  divisions: 50,
-                                  label:
-                                      durationCurrentValue.round().toString(),
-                                  onChanged: (double value) {
-                                    setState(() {
-                                      durationCurrentValue = value;
-                                    });
-                                  },
-                                ),
-
-                                Text("Duration")
-                              ],
-                            ))),
+                    FlexButton(PlayDatePicker(), 3),
+                    FlexButton(LocationPicker(), 3),
+                    FlexButton(Comments(), 4),
+                    FlexButton(DurationSliderWidget(), 3),
                     Flexible(
                         flex: 3,
                         child: SizedBox(
@@ -442,7 +214,9 @@ class _LogScaffoldState extends State<LogScaffold> {
                             height: MediaQuery.of(context).size.height,
                             child: ElevatedButton.icon(
                                 onPressed: () async {
-                                  if (recognizedGameId <= 0) {
+                                  if (CameraHandler(searchController, cameras)
+                                          .recognizedGameId <=
+                                      0) {
                                     ScaffoldMessenger.of(context)
                                         .showSnackBar(const SnackBar(
                                       content: Text(
@@ -450,8 +224,10 @@ class _LogScaffoldState extends State<LogScaffold> {
                                     ));
                                   }
                                   List<Map> bggPlayers = [];
-                                  for (var player in players.where((element) =>
-                                      element['isChecked'] == true)) {
+                                  for (var player in PlayersPicker()
+                                      .players
+                                      .where((element) =>
+                                          element['isChecked'] == true)) {
                                     bggPlayers.add({
                                       'username': player['username'],
                                       'userid': player['userid'],
@@ -462,17 +238,21 @@ class _LogScaffoldState extends State<LogScaffold> {
                                   final nowData = DateFormat('yyyy-MM-dd')
                                       .format(DateTime.now());
                                   logData['players'] = bggPlayers;
-                                  logData['objectid'] = recognizedGameId;
-                                  logData['length'] = durationCurrentValue;
+                                  logData['objectid'] =
+                                      CameraHandler(searchController, cameras)
+                                          .recognizedGameId;
+                                  logData['length'] = DurationSliderWidget()
+                                      .durationCurrentValue;
                                   logData['playdate'] = DateFormat('yyyy-MM-dd')
                                       .format(PlayDatePicker().playDate);
                                   logData['date'] =
                                       "${DateFormat('yyyy-MM-dd').format(PlayDatePicker().playDate)}T05:00:00.000Z";
-                                  logData['comments'] = commentsController.text;
+                                  logData['comments'] =
+                                      Comments().commentsController.text;
 
                                   var chosenLocation =
                                       await LocationSQL.selectLocationByName(
-                                          selectedLocation);
+                                          LocationPicker().selectedLocation);
                                   print(chosenLocation);
                                   logData['location'] = chosenLocation != null
                                       ? chosenLocation.name
@@ -498,89 +278,7 @@ class _LogScaffoldState extends State<LogScaffold> {
                                                 color: Colors.black12)))),
                                 label: const Text("Log play"),
                                 icon: const Icon(Icons.send_and_archive)))),
-                    Flexible(
-                        flex: 3,
-                        fit: FlexFit.tight,
-                        child: SizedBox(
-                            //color: Colors.tealAccent,
-                            width: MediaQuery.of(context).size.width,
-                            height: MediaQuery.of(context).size.height,
-                            child: ElevatedButton.icon(
-                                onPressed: () async {
-                                  if (players.isEmpty) {
-                                    players = await getLocalPlayers();
-                                  }
-                                  showDialog(
-                                      context: context,
-                                      builder: (BuildContext) {
-                                        return StatefulBuilder(
-                                            builder: (context, setState) {
-                                          return AlertDialog(
-                                              //insetPadding: EdgeInsets.zero,
-                                              title: const Text("Your friends"),
-                                              content: SingleChildScrollView(
-                                                  child: Column(
-                                                      children:
-                                                          players.map((player) {
-                                                return CheckboxListTile(
-                                                  contentPadding:
-                                                      EdgeInsets.zero,
-                                                  title: Row(
-                                                      mainAxisAlignment:
-                                                          MainAxisAlignment
-                                                              .spaceEvenly,
-                                                      children: [
-                                                        ChoiceChip(
-                                                          label: const Text(
-                                                              "Win?"),
-                                                          selected:
-                                                              player['win'],
-                                                          onSelected:
-                                                              (bool? value) {
-                                                            setState(() {
-                                                              player['win'] =
-                                                                  value;
-                                                            });
-                                                          },
-                                                          shape:
-                                                              RoundedRectangleBorder(
-                                                            side: BorderSide(
-                                                                color: Colors
-                                                                    .black12),
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .zero,
-                                                          ),
-                                                        ),
-                                                        SizedBox(width: 10),
-                                                        Expanded(
-                                                            child: Text(
-                                                          player['name'],
-                                                          overflow: TextOverflow
-                                                              .ellipsis,
-                                                        ))
-                                                      ]),
-                                                  value: player['isChecked'],
-                                                  onChanged: (bool? value) {
-                                                    setState(() {
-                                                      player['isChecked'] =
-                                                          value;
-                                                    });
-                                                  },
-                                                );
-                                              }).toList())));
-                                        });
-                                      });
-                                },
-                                style: ButtonStyle(
-                                    shape: MaterialStateProperty.all<
-                                            RoundedRectangleBorder>(
-                                        const RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.zero,
-                                            side: BorderSide(
-                                                color: Colors.black12)))),
-                                label: const Text("Select players"),
-                                icon: const Icon(Icons.people)))),
+                    FlexButton(PlayersPicker(), 3),
                     Flexible(
                         flex: 3,
                         child: SizedBox(
@@ -594,10 +292,20 @@ class _LogScaffoldState extends State<LogScaffold> {
                                     padding: EdgeInsets.only(right: 0),
                                     width:
                                         MediaQuery.of(context).size.width * 0.2,
-                                    child: recognizedGame != null &&
-                                            recognizedGame!.thumbBinary != null
+                                    child: CameraHandler(searchController,
+                                                        cameras)
+                                                    .recognizedGame !=
+                                                null &&
+                                            CameraHandler(searchController,
+                                                        cameras)
+                                                    .recognizedGame!
+                                                    .thumbBinary !=
+                                                null
                                         ? Image.memory(base64Decode(
-                                            recognizedGame!.thumbBinary!))
+                                            CameraHandler(
+                                                    searchController, cameras)
+                                                .recognizedGame!
+                                                .thumbBinary!))
                                         : Icon(Icons.image)),
                                 Container(
                                   padding: EdgeInsets.only(right: 0),
@@ -673,8 +381,15 @@ class _LogScaffoldState extends State<LogScaffold> {
                                                         .closeView(item.name);
                                                     FocusScope.of(context)
                                                         .unfocus();
-                                                    recognizedGameId = item.id;
-                                                    recognizedGame = item;
+                                                    CameraHandler(
+                                                                searchController,
+                                                                cameras)
+                                                            .recognizedGameId =
+                                                        item.id;
+                                                    CameraHandler(
+                                                            searchController,
+                                                            cameras)
+                                                        .recognizedGame = item;
                                                   });
                                                 }),
                                             const Divider(
@@ -687,95 +402,7 @@ class _LogScaffoldState extends State<LogScaffold> {
                                 ),
                               ],
                             ))),
-                    Flexible(
-                        flex: 3,
-                        child: SizedBox(
-                            //color: Colors.tealAccent,
-                            width: MediaQuery.of(context).size.width,
-                            height: MediaQuery.of(context).size.height,
-                            child: ElevatedButton.icon(
-                                onPressed: () {
-                                  showDialog(
-                                      context: context,
-                                      builder: (dialogBuilder) {
-                                        return AlertDialog(
-                                          title: const Text('Take photo'),
-                                          content: Column(children: [
-                                            //Text(recognizedImage),
-                                            SizedBox(
-                                              width: MediaQuery.of(context)
-                                                      .size
-                                                      .width *
-                                                  0.8,
-                                              height: MediaQuery.of(context)
-                                                      .size
-                                                      .height *
-                                                  0.5,
-                                              child: CameraPreview(_controller),
-                                            ),
-                                            Container(
-                                                width: MediaQuery.of(context)
-                                                    .size
-                                                    .width,
-                                                height: MediaQuery.of(context)
-                                                        .size
-                                                        .height *
-                                                    0.3,
-                                                child: Expanded(
-                                                    child: ElevatedButton(
-                                                  onPressed: () async {
-                                                    recognizedGameId = 0;
-                                                    Navigator.of(context,
-                                                            rootNavigator: true)
-                                                        .pop();
-                                                    setState(() {
-                                                      searchController.text =
-                                                          "Game recognizing";
-                                                    });
-                                                    var gameId =
-                                                        await TakePhoto();
-                                                    var recognizedGameName =
-                                                        "Cant find similar game";
-
-                                                    if (gameId != null) {
-                                                      recognizedGame =
-                                                          await GameThingSQL
-                                                              .selectGameByID(
-                                                                  gameId);
-                                                      if (recognizedGame !=
-                                                          null) {
-                                                        recognizedGameId =
-                                                            recognizedGame!.id;
-
-                                                        recognizedGameName =
-                                                            recognizedGame!
-                                                                .name;
-                                                      }
-                                                    }
-
-                                                    setState(() {
-                                                      searchController.text =
-                                                          recognizedGameName;
-                                                    });
-                                                  },
-                                                  child: const Text(
-                                                      'Take a photo'),
-                                                )))
-                                          ]),
-                                        );
-                                      });
-                                },
-                                style: ButtonStyle(
-                                    // backgroundColor: MaterialStateProperty.all(
-                                    //     Theme.of(context).primaryColor),
-                                    shape: MaterialStateProperty.all<
-                                            RoundedRectangleBorder>(
-                                        const RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.zero,
-                                            side: BorderSide(
-                                                color: Colors.black12)))),
-                                label: const Text("Recognize game"),
-                                icon: const Icon(Icons.photo_camera))))
+                    FlexButton(CameraHandler(searchController, cameras), 3),
                   ],
                 )
               ],
