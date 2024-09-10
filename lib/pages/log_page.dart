@@ -1,4 +1,4 @@
-// TODO - Login screen, games search from net
+// TODO - Login screen, games search from net, progress bar in % or count
 
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/main.dart';
@@ -54,7 +54,8 @@ class _LogScaffoldState extends State<LogScaffold> {
           }
         });
 
-        var initializeProgress = initializeBggData(loadingStatus);
+        var initializeProgress =
+            initializeBggData(loadingStatus, refreshProgress);
         initializeProgress.then((value) {
           setState(() {
             isProgressBarVisible = false;
@@ -62,6 +63,14 @@ class _LogScaffoldState extends State<LogScaffold> {
         });
       },
     );
+  }
+
+  void refreshProgress(bool needShowProgressBar, String statusState) {
+    print("refresh proress: ${statusState}");
+    setState(() {
+      isProgressBarVisible = needShowProgressBar;
+      loadingStatus.status = statusState;
+    });
   }
 
   @override
@@ -88,9 +97,6 @@ class _LogScaffoldState extends State<LogScaffold> {
                         child: Container(
                             color: Theme.of(context).colorScheme.surface,
                             width: MediaQuery.of(context).size.width,
-                            // height: isProgressBarVisible
-                            //     ? MediaQuery.of(context).size.height
-                            //     : MediaQuery.of(context).size.height,
                             child: Column(
                               children: [
                                 if (isProgressBarVisible)
@@ -99,6 +105,7 @@ class _LogScaffoldState extends State<LogScaffold> {
                                   Text("Loading. ${loadingStatus.status}")
                               ],
                             ))),
+                    //ProgressBar(),
                     const ElevatedButton(
                       onPressed: (getAllPlaysFromServer),
                       child: Text("Load all data"),

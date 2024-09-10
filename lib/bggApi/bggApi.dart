@@ -11,13 +11,13 @@ import '../models/bgg_player_model.dart';
 import '../models/bgg_play_model.dart';
 import '../models/bgg_location.dart';
 
-Future<void> getGamesInfoFromBgg() async {
-  await ImportGameCollectionFromBGG();
-  await getGamesThumbnail();
-  await getGamesPlayersCount();
+Future<void> getGamesInfoFromBgg(refreshProgress) async {
+  await ImportGameCollectionFromBGG(refreshProgress);
+  await getGamesThumbnail(refreshProgress);
+  await getGamesPlayersCount(refreshProgress);
 }
 
-Future<void> ImportGameCollectionFromBGG() async {
+Future<void> ImportGameCollectionFromBGG(refreshProgress) async {
   await GameThingSQL.createTable();
   final collectionResponse = await http.get(Uri.parse(
       'https://boardgamegeek.com/xmlapi2/collection?username=dradass'));
@@ -37,6 +37,7 @@ Future<void> ImportGameCollectionFromBGG() async {
       var minPlayers = 0;
       var maxPlayers = 0;
       print("Importing game $objectName");
+      refreshProgress(true, "Importing game $objectName");
 
       // Anti DDOS
       // await Future.delayed(const Duration(milliseconds: 1000));
@@ -72,12 +73,18 @@ Future<void> ImportGameCollectionFromBGG() async {
   // }
 }
 
-Future<void> getGamesThumbnail() async {
+Future<void> getGamesThumbnail(refreshProgress) async {
   final gettingAllGames = await GameThingSQL.getAllGames();
   if (gettingAllGames != null) {
+    int gamesWithThumbCount = gettingAllGames
+        .where((e) => e.thumbBinary != null && e.thumbBinary!.isNotEmpty)
+        .length;
     for (var game in gettingAllGames) {
       if (game.thumbBinary == null) {
         game.CreateBinaryThumb();
+        refreshProgress(true,
+            "Creating thumbnails. $gamesWithThumbCount / ${gettingAllGames.length - 1}");
+        gamesWithThumbCount += 1;
         // Anti DDOS
         await Future.delayed(const Duration(milliseconds: 2000));
       }
@@ -85,9 +92,12 @@ Future<void> getGamesThumbnail() async {
   }
 }
 
-Future<void> getGamesPlayersCount() async {
+Future<void> getGamesPlayersCount(refreshProgress) async {
   final gettingAllGames = await GameThingSQL.getAllGames();
   if (gettingAllGames != null) {
+    int gamesWithPlayerInfo = gettingAllGames
+        .where((e) => e.minPlayers != 0 && e.maxPlayers != 0)
+        .length;
     for (var game in gettingAllGames) {
       if (game.minPlayers != 0 && game.maxPlayers != 0) continue;
 
@@ -103,6 +113,9 @@ Future<void> getGamesPlayersCount() async {
         game.minPlayers = gameThingServer.minPlayers;
         game.maxPlayers = gameThingServer.maxPlayers;
         print("Upadte players count of game ${game.name} id = ${game.id}");
+        refreshProgress(true,
+            "Upadte players game info. $gamesWithPlayerInfo / ${gettingAllGames.length - 1}");
+        gamesWithPlayerInfo += 1;
         await GameThingSQL.updateGame(game);
         // Anti DDOS
         await Future.delayed(const Duration(milliseconds: 2000));
@@ -135,7 +148,7 @@ Future<bool> getPlaysFromPage(
   List<Location> uniqueLocations = [];
   List<BggPlay> bggPlays = [];
 
-  print("create players, iteration = $pageNumber");
+  print("getPlaysFromPage. create players, iteration = $pageNumber");
   final collectionResponse = await http.get(Uri.parse(
       'https://boardgamegeek.com/xmlapi2/plays?username=$userName&page=$pageNumber'));
   final rootNode = xml.XmlDocument.parse(collectionResponse.body);
@@ -145,7 +158,7 @@ Future<bool> getPlaysFromPage(
 
   if (plays.isEmpty) return false;
 
-  print("plays count = ${plays.length}");
+  print("getPlaysFromPage. plays count = ${plays.length}");
 
   for (var play in plays) {
     winnersNames = [];
@@ -175,7 +188,6 @@ Future<bool> getPlaysFromPage(
     if (playersRoot != null) {
       final players = playersRoot.findElements('player');
       currentPlayers.clear();
-      print(players);
       for (var player in players) {
         if (player.getAttribute('name') == null) continue;
         var newPlayer = Player(
@@ -301,10 +313,19 @@ Future<Location?> fillLocationName() async {
   return await LocationSQL.getDefaultLocation();
 }
 
-Future<void> initializeBggData(LoadingStatus loadingStatus) async {
-  loadingStatus.status = "Import collection from server";
-  await getGamesInfoFromBgg();
+Future<void> initializeBggData(
+    LoadingStatus loadingStatus, refreshProgress) async {
+  loadingStatus.status = "Starting to import collection from server.";
+
+  //await getGamesInfoFromBgg(refreshProgress);
+  await ImportGameCollectionFromBGG(refreshProgress);
+
+  refreshProgress(true, "New state");
   int maxPlayerId = await PlayersSQL.getMaxID();
   int maxLocationId = await LocationSQL.getMaxID();
   await getPlaysFromPage(1, maxPlayerId, maxLocationId);
+
+  await getGamesThumbnail(refreshProgress);
+  await getGamesPlayersCount(refreshProgress);
+  refreshProgress(true, "End");
 }
