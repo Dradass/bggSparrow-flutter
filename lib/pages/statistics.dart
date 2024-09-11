@@ -32,6 +32,7 @@ class _StatisticsState extends State<Statistics> {
   bool winRate = false;
   bool onlyChosenPlayers = false;
   bool winnerAmongChosenPlayers = false;
+  RangeValues maxRangeValues = const RangeValues(4, 10);
   List<Map> players = [];
 
   @override
@@ -277,129 +278,6 @@ class _StatisticsState extends State<Statistics> {
                   child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
-                        // Container(
-                        //     color: Colors.brown,
-                        //     width: MediaQuery.of(context).size.width * 0.3,
-                        //     height: double.maxFinite,
-                        //     child: ElevatedButton.icon(
-                        //         onPressed: () {
-                        //           showModalBottomSheet<void>(
-                        //               enableDrag: false,
-                        //               context: context,
-                        //               builder: (BuildContext context) {
-                        //                 return StatefulBuilder(
-                        //                   builder: (context, setState) {
-                        //                     return Container(
-                        //                       height: MediaQuery.of(context)
-                        //                               .size
-                        //                               .height *
-                        //                           0.5,
-                        //                       //color: Colors.amber,
-                        //                       child: Center(
-                        //                         child: Column(
-                        //                           mainAxisAlignment:
-                        //                               MainAxisAlignment
-                        //                                   .spaceAround,
-                        //                           children: <Widget>[
-                        //                             Container(
-                        //                               child: Row(
-                        //                                   mainAxisAlignment:
-                        //                                       MainAxisAlignment
-                        //                                           .spaceBetween,
-                        //                                   children: [
-                        //                                     ChoiceChip(
-                        //                                       label: const Text(
-                        //                                           "Winrate"),
-                        //                                       selected: winRate,
-                        //                                       onSelected:
-                        //                                           (bool value) {
-                        //                                         setState(() {
-                        //                                           winRate =
-                        //                                               value;
-                        //                                         });
-                        //                                       },
-                        //                                       shape:
-                        //                                           RoundedRectangleBorder(
-                        //                                         side: BorderSide(
-                        //                                             color: Colors
-                        //                                                 .black12),
-                        //                                         borderRadius:
-                        //                                             BorderRadius
-                        //                                                 .zero,
-                        //                                       ),
-                        //                                     ),
-                        //                                     ChoiceChip(
-                        //                                       label: const Text(
-                        //                                           "Only chosen players"),
-                        //                                       selected:
-                        //                                           onlyChosenPlayers,
-                        //                                       onSelected:
-                        //                                           (bool value) {
-                        //                                         setState(() {
-                        //                                           onlyChosenPlayers =
-                        //                                               value;
-                        //                                         });
-                        //                                       },
-                        //                                       shape:
-                        //                                           RoundedRectangleBorder(
-                        //                                         side: BorderSide(
-                        //                                             color: Colors
-                        //                                                 .black12),
-                        //                                         borderRadius:
-                        //                                             BorderRadius
-                        //                                                 .zero,
-                        //                                       ),
-                        //                                     ),
-                        //                                   ]),
-                        //                             ),
-                        //                             Container(
-                        //                                 child: Column(
-                        //                               mainAxisAlignment:
-                        //                                   MainAxisAlignment
-                        //                                       .spaceBetween,
-                        //                               children: [
-                        //                                 SizedBox(
-                        //                                     child: Slider(
-                        //                                   value:
-                        //                                       firstGamesCount,
-                        //                                   min: 0,
-                        //                                   max: 25,
-                        //                                   divisions: 26,
-                        //                                   label: firstGamesCount
-                        //                                       .round()
-                        //                                       .toString(),
-                        //                                   onChanged:
-                        //                                       (double value) {
-                        //                                     setState(() {
-                        //                                       firstGamesCount =
-                        //                                           value;
-                        //                                     });
-                        //                                   },
-                        //                                 )),
-                        //                                 const Text(
-                        //                                   "Games limit",
-                        //                                   overflow: TextOverflow
-                        //                                       .ellipsis,
-                        //                                 ),
-                        //                               ],
-                        //                             )),
-                        //                             ElevatedButton(
-                        //                               child: const Text(
-                        //                                   'Close BottomSheet'),
-                        //                               onPressed: () =>
-                        //                                   Navigator.pop(
-                        //                                       context),
-                        //                             ),
-                        //                           ],
-                        //                         ),
-                        //                       ),
-                        //                     );
-                        //                   },
-                        //                 );
-                        //               });
-                        //         },
-                        //         label: const Text("More filters"),
-                        //         icon: const Icon(Icons.filter_alt))),
                         Container(
                             color: Colors.brown,
                             width: MediaQuery.of(context).size.width * 0.5,
@@ -414,12 +292,30 @@ class _StatisticsState extends State<Statistics> {
                                 var chosenPlayers = players
                                     .where((element) => element['isChecked']);
 
+                                var excludedPlayers = players
+                                    .where((element) => element['excluded']);
+
                                 // Get plays with chosen players
                                 if (chosenPlayers.isEmpty) {
                                   plays = allPlays;
                                 } else {
                                   for (var allPlay in allPlays) {
                                     if (allPlay.players == null) continue;
+
+                                    // Exclude players
+                                    var haveExcludedPlayer = false;
+                                    for (var excludedPlayer
+                                        in excludedPlayers) {
+                                      if (allPlay.players!
+                                          .split(";")
+                                          .join("|")
+                                          .contains(excludedPlayer['name'])) {
+                                        haveExcludedPlayer = true;
+                                        break;
+                                      }
+                                    }
+                                    if (haveExcludedPlayer) continue;
+
                                     var chosenMatches = 0;
                                     var winnerAmongThisPlay = false;
                                     for (var chosenPlayer in chosenPlayers) {
@@ -433,8 +329,6 @@ class _StatisticsState extends State<Statistics> {
 
                                     // Check winner among chosen players
                                     for (var chosenPlayer in chosenPlayers) {
-                                      print('Play = ${allPlay.id}');
-                                      print(allPlay.winners!.split(";"));
                                       if (allPlay.winners!
                                           .split(";")
                                           .contains(chosenPlayer['name'])) {
@@ -464,6 +358,14 @@ class _StatisticsState extends State<Statistics> {
                                     }
                                   }
                                 }
+
+                                plays = plays
+                                    .where((e) =>
+                                        e.players!.split(';').length <=
+                                            maxRangeValues.end &&
+                                        e.players!.split(';').length >=
+                                            maxRangeValues.start)
+                                    .toList();
 
                                 // Get all plays and plays count for each game
                                 gamePlays.clear();
@@ -592,6 +494,30 @@ class _StatisticsState extends State<Statistics> {
                                                   });
                                                 },
                                               )),
+                                              const Text(
+                                                "Players count",
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                              SizedBox(
+                                                child: RangeSlider(
+                                                  values: maxRangeValues,
+                                                  max: 10,
+                                                  divisions: 10,
+                                                  labels: RangeLabels(
+                                                      maxRangeValues.start
+                                                          .round()
+                                                          .toString(),
+                                                      maxRangeValues.end
+                                                          .round()
+                                                          .toString()),
+                                                  onChanged:
+                                                      (RangeValues values) {
+                                                    setState(() {
+                                                      maxRangeValues = values;
+                                                    });
+                                                  },
+                                                ),
+                                              ),
                                             ],
                                           )),
                                           Column(
@@ -663,12 +589,15 @@ class _StatisticsState extends State<Statistics> {
                                                           .spaceEvenly,
                                                   children: [
                                                     ChoiceChip(
-                                                      label: const Text("Win?"),
-                                                      selected: player['win'],
+                                                      label: const Text(
+                                                          "exclude?"),
+                                                      selected:
+                                                          player['excluded'],
                                                       onSelected:
                                                           (bool? value) {
                                                         setState(() {
-                                                          player['win'] = value;
+                                                          player['excluded'] =
+                                                              value;
                                                         });
                                                       },
                                                       shape:
