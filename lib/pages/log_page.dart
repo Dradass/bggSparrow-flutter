@@ -81,10 +81,6 @@ class _LogScaffoldState extends State<LogScaffold> {
         },
         child: Scaffold(
             resizeToAvoidBottomInset: false,
-            appBar: AppBar(
-              title: const Text("Log play screen"),
-              centerTitle: true,
-            ),
             body: SafeArea(
                 child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -95,35 +91,32 @@ class _LogScaffoldState extends State<LogScaffold> {
                     Flexible(
                         flex: 1,
                         child: Container(
-                            color: Theme.of(context).colorScheme.surface,
+                            color: Theme.of(context).colorScheme.background,
                             width: MediaQuery.of(context).size.width,
                             child: Column(
                               children: [
                                 if (isProgressBarVisible)
-                                  const LinearProgressIndicator(),
+                                  LinearProgressIndicator(
+                                    backgroundColor: Theme.of(context)
+                                        .colorScheme
+                                        .background,
+                                  ),
                                 if (isProgressBarVisible)
-                                  Text("Loading. ${loadingStatus.status}")
+                                  Text("Loading. ${loadingStatus.status}",
+                                      overflow: TextOverflow.ellipsis)
                               ],
                             ))),
                     //ProgressBar(),
-                    const ElevatedButton(
-                      onPressed: (getAllPlaysFromServer),
-                      child: Text("Load all data"),
-                    ),
+                    // const ElevatedButton(
+                    //   onPressed: (getAllPlaysFromServer),
+                    //   child: Text("Load all data"),
+                    // ),
                     ElevatedButton(
                       child: const Text("del tables"),
                       onPressed: () {
                         GameThingSQL.deleteDB();
                       },
                     ),
-                    // ElevatedButton(
-                    //   child: const Text("create tables"),
-                    //   onPressed: () {
-                    //     GameThingSQL.createTable();
-                    //     PlayersSQL.createTable();
-                    //     LocationSQL.createTable();
-                    //   },
-                    // ),
                     FlexButton(PlayDatePicker(), 3),
                     FlexButton(LocationPicker(), 3),
                     FlexButton(Comments(), 4),

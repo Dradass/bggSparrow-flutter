@@ -17,7 +17,7 @@ class _FirstPlayerChoserState extends State<FirstPlayerChoser> {
   var indicator = null;
   bool forceInReleaseMode = true;
   bool enabled = true;
-  var counter = "";
+  var counter = "Touch the screen";
   double indicatorSize = 120;
   var indicatorColor = const Color.fromARGB(255, 32, 184, 19);
   final List<Color> colors = <Color>[
@@ -64,14 +64,14 @@ class _FirstPlayerChoserState extends State<FirstPlayerChoser> {
   void clearPointerPosition(int index) {
     setState(() {
       touchPositions.remove(index);
-      counter = "";
+      counter = "Touch the screen";
     });
   }
 
   @override
   Widget build(BuildContext context) {
     var child = Scaffold(
-      appBar: AppBar(title: const Text("Touch the screen")),
+      // appBar: AppBar(title: const Text("Touch the screen")),
       body: SizedBox(
           width: MediaQuery.of(context).size.width,
           height: MediaQuery.of(context).size.height,
@@ -148,7 +148,7 @@ class _FirstPlayerChoserState extends State<FirstPlayerChoser> {
           }
         }
         setState(() {
-          counter = "";
+          counter = "Touch the screen";
         });
       }
     } else
