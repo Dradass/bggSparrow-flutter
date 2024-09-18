@@ -54,6 +54,12 @@ class _GameHelperState extends State<GameHelper> {
         Flexible(
             flex: 1,
             child: SizedBox(
+                width: MediaQuery.of(context).size.width,
+                height: MediaQuery.of(context).size.height,
+                child: const Text(" "))),
+        Flexible(
+            flex: 1,
+            child: SizedBox(
                 //color: Colors.blueAccent,
                 width: MediaQuery.of(context).size.width,
                 height: MediaQuery.of(context).size.height,

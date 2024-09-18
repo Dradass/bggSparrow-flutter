@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/db/players_sql.dart';
 import 'package:flutter_application_1/models/bgg_player_model.dart';
 import 'package:flutter_application_1/models/game_thing.dart';
+import 'package:flutter_application_1/widgets/log_page_widgets.dart';
 import 'package:intl/intl.dart';
+import 'package:path/path.dart';
 import '../db/plays_sql.dart';
 import '../models/bgg_play_model.dart';
 import '../db/game_things_sql.dart';
@@ -62,6 +64,7 @@ class _StatisticsState extends State<Statistics> {
                     scrollDirection: Axis.vertical,
                     child: DataTable(
                       headingRowHeight: 0,
+                      columnSpacing: 20,
                       showCheckboxColumn: false,
                       dataRowMaxHeight: double.infinity,
                       columns: const <DataColumn>[
@@ -100,30 +103,15 @@ class _StatisticsState extends State<Statistics> {
                             }
                           },
                           cells: <DataCell>[
-                            DataCell(
-                              Text(plays[index].gameName),
-                            ),
-                            DataCell(Text(plays[index].date)),
-                            DataCell(Text(
-                              plays[index].players != null
-                                  ? plays[index]
-                                      .players!
-                                      .split(';')
-                                      .map((e) =>
-                                          e.split('|').last +
-                                          (plays[index].winners != null &&
-                                                  plays[index]
-                                                      .winners!
-                                                      .split(";")
-                                                      .contains(
-                                                          e.split('|').last)
-                                              ? ' (win)'
-                                              : ''))
-                                      .join('\n')
-                                      .toString()
-                                  : "",
-                              overflow: TextOverflow.ellipsis,
+                            DataCell(Container(
+                              width: MediaQuery.of(context).size.width * 0.4,
+                              child: Text(plays[index].gameName),
                             )),
+                            DataCell(Text(
+                              plays[index].date,
+                              textAlign: TextAlign.left,
+                            )),
+                            DataCell(getPlayersColumn(plays[index])),
                           ],
                         ),
                       ),
@@ -131,12 +119,13 @@ class _StatisticsState extends State<Statistics> {
                 Container(
                     child: SingleChildScrollView(
                         scrollDirection: Axis.vertical,
-                        child:
-                            //StatsTable(),
-                            DataTable(
+                        child: FittedBox(
+                            child:
+                                //StatsTable(),
+                                DataTable(
+                          columnSpacing: 20,
                           headingRowHeight: 0,
                           showCheckboxColumn: false,
-                          dataRowMaxHeight: double.infinity,
                           columns: const <DataColumn>[
                             DataColumn(
                               label: Text('Game'),
@@ -173,17 +162,23 @@ class _StatisticsState extends State<Statistics> {
                                 }
                               },
                               cells: <DataCell>[
-                                DataCell(
-                                  Text(gamePlays[index].gameName),
-                                ),
+                                DataCell(Container(
+                                    width: MediaQuery.of(context).size.width *
+                                        0.75,
+                                    child: Text(
+                                      gamePlays[index].gameName,
+                                      overflow: TextOverflow.ellipsis,
+                                      textAlign: TextAlign.left,
+                                    ))),
                                 DataCell(Text(
                                   gamePlays[index].count.toString(),
                                   overflow: TextOverflow.ellipsis,
+                                  textAlign: TextAlign.center,
                                 )),
                               ],
                             ),
                           ),
-                        ))),
+                        )))),
                 SafeArea(
                   child: SfCartesianChart(
                     title: ChartTitle(text: "Games stats"),
@@ -205,9 +200,9 @@ class _StatisticsState extends State<Statistics> {
                         dataSource: gamePlays,
                         // name: "Games",
                         dataLabelMapper: (_GamePlaysCount data, _) =>
-                            data.gameName,
+                            data.gameNameShort,
                         xValueMapper: (_GamePlaysCount data, _) =>
-                            data.gameName,
+                            data.gameNameShort,
                         yValueMapper: (_GamePlaysCount data, _) => data.count,
                       )
                     ],
@@ -374,8 +369,11 @@ class _StatisticsState extends State<Statistics> {
                                   gamePlay.count =
                                       gamePlay.count! + play.quantity!;
                                 } else {
-                                  allGames.add(_GamePlaysCount(play.gameName,
-                                      play.quantity, play.gameId));
+                                  allGames.add(_GamePlaysCount(
+                                      play.gameName,
+                                      play.gameName,
+                                      play.quantity,
+                                      play.gameId));
                                 }
                               }
                               // Winrate
@@ -405,7 +403,7 @@ class _StatisticsState extends State<Statistics> {
                                         continue;
                                       }
 
-                                      allWinners.add(_GamePlaysCount(
+                                      allWinners.add(_GamePlaysCount(winner,
                                           winner, 1, winnerFromDb.first['id']));
                                     }
                                   }
@@ -417,10 +415,10 @@ class _StatisticsState extends State<Statistics> {
                               allGames = allWinners;
                             }
 
-                            allGames.forEach((e) => e.gameName.length > 20
-                                ? e.gameName =
-                                    "${e.gameName.substring(0, 18)}..."
-                                : e.gameName);
+                            allGames.forEach((e) => e.gameNameShort.length > 20
+                                ? e.gameNameShort =
+                                    "${e.gameNameShort.substring(0, 18)}..."
+                                : e.gameNameShort);
                             allGames
                                 .sort((a, b) => b.count!.compareTo(a.count!));
                             if (firstGamesCount != 0) {
@@ -704,10 +702,54 @@ class _StatisticsState extends State<Statistics> {
   }
 }
 
+Column getPlayersColumn(BggPlay bggPlay) {
+  var players = bggPlay.players;
+  if (players == null || players.isEmpty) {
+    return const Column(children: []);
+  } else {
+    List<Widget> columnChildren = [];
+    for (var playerInfo in players.split(';')) {
+      var playerName = limitName(playerInfo.split('|').last, 9);
+      if (bggPlay.winners != null && bggPlay.winners!.contains(playerName)) {
+        columnChildren.add(Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.emoji_events, color: Colors.amber),
+            Text(
+              playerName,
+              textAlign: TextAlign.left,
+              overflow: TextOverflow.ellipsis,
+            )
+          ],
+        ));
+      } else {
+        columnChildren.add(Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(playerName,
+                  textAlign: TextAlign.left, overflow: TextOverflow.ellipsis)
+            ]));
+      }
+    }
+    return Column(
+      children: columnChildren,
+    );
+  }
+}
+
+String limitName(String name, int limit) {
+  if (name.length <= limit) {
+    return name;
+  } else {
+    return name.substring(0, limit) + "...";
+  }
+}
+
 class _GamePlaysCount {
-  _GamePlaysCount(this.gameName, this.count, this.gameId);
+  _GamePlaysCount(this.gameName, this.gameNameShort, this.count, this.gameId);
 
   String gameName;
+  String gameNameShort;
   int? count;
   int gameId;
 }
