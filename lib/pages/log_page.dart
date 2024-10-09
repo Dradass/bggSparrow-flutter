@@ -1,4 +1,4 @@
-// TODO - Login screen, games search from net, progress bar in % or count
+// TODO - Login screen, games search from net
 
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/main.dart';
@@ -107,10 +107,10 @@ class _LogScaffoldState extends State<LogScaffold> {
                               ],
                             ))),
                     //ProgressBar(),
-                    // const ElevatedButton(
-                    //   onPressed: (getAllPlaysFromServer),
-                    //   child: Text("Load all data"),
-                    // ),
+                    const ElevatedButton(
+                      onPressed: (getAllPlaysFromServer),
+                      child: Text("Load all data"),
+                    ),
                     ElevatedButton(
                       child: const Text("del tables"),
                       onPressed: () {

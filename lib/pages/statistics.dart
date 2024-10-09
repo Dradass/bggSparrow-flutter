@@ -24,7 +24,7 @@ class Statistics extends StatefulWidget {
 }
 
 class _StatisticsState extends State<Statistics> {
-  double firstGamesCount = 10;
+  double firstGamesCount = 0;
   List<BggPlay> plays = [];
   Map<int, int> gameThingPlays = {};
   DateTime? startDate = DateTime(2000);
@@ -35,7 +35,7 @@ class _StatisticsState extends State<Statistics> {
   bool winRate = false;
   bool onlyChosenPlayers = false;
   bool winnerAmongChosenPlayers = false;
-  RangeValues maxRangeValues = const RangeValues(4, 10);
+  RangeValues maxRangeValues = const RangeValues(0, 10);
   List<Map> players = [];
 
   @override

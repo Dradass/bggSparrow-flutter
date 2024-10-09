@@ -20,30 +20,30 @@ class _GameHelperState extends State<GameHelper> {
   RangeValues minRangeValues = const RangeValues(1, 4);
   RangeValues maxRangeValues = const RangeValues(0, 0);
   bool onlyOwnedGames = true;
-  bool gamesFilterNeedClear = false;
-  List<Map<GameThing, bool>> gamesFromFilter = [];
-  List<Map<GameThing, bool>> allItems = [];
-  List<Map<GameThing, bool>> items = [];
+  int gamesFilterNeedClear = 0;
+  List<Map<GameThing, int>> gamesFromFilter = [];
+  List<Map<GameThing, int>> allItems = [];
+  // List<Map<GameThing, int>> items = [];
   final SearchController searchController = SearchController();
 
-  void queryListener() {
-    search(searchController.text);
-  }
+  // void queryListener() {
+  //   search(searchController.text);
+  // }
 
-  void search(String query) {
-    if (query.isEmpty) {
-      setState(() {
-        items = allItems;
-      });
-    } else {
-      setState(() {
-        items = allItems
-            .where((e) =>
-                e.keys.first.name.toLowerCase().contains(query.toLowerCase()))
-            .toList();
-      });
-    }
-  }
+  // void search(String query) {
+  //   if (query.isEmpty) {
+  //     setState(() {
+  //       items = allItems;
+  //     });
+  //   } else {
+  //     setState(() {
+  //       items = allItems
+  //           .where((e) =>
+  //               e.keys.first.name.toLowerCase().contains(query.toLowerCase()))
+  //           .toList();
+  //     });
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -140,7 +140,7 @@ class _GameHelperState extends State<GameHelper> {
                           allGames.sort((a, b) => a.name.compareTo(b.name));
                           if (gamesFromFilter.isEmpty) {
                             for (var game in allGames) {
-                              gamesFromFilter.add({game: game.owned == 1});
+                              gamesFromFilter.add({game: game.owned});
                             }
                           }
                           showDialog(
@@ -155,22 +155,48 @@ class _GameHelperState extends State<GameHelper> {
                                           MainAxisAlignment.spaceBetween,
                                       children: [
                                         Text('Game'),
-                                        Checkbox(
-                                            value: gamesFilterNeedClear,
-                                            onChanged: ((value) {
-                                              for (var gameFromFilter
-                                                  in gamesFromFilter) {
-                                                gameFromFilter.update(
-                                                    gameFromFilter.keys.first,
-                                                    (value2) =>
-                                                        value2 = value!);
-                                              }
-                                              setState(
-                                                () {
-                                                  gamesFilterNeedClear = value!;
+                                        Container(
+                                            color: Colors.red,
+                                            width: MediaQuery.of(context)
+                                                    .size
+                                                    .width *
+                                                0.3,
+                                            child: ElevatedButton(
+                                                onPressed: () {
+                                                  for (var gameFromFilter
+                                                      in gamesFromFilter) {
+                                                    var game = gameFromFilter
+                                                        .keys.first;
+                                                    gameFromFilter.update(
+                                                        game,
+                                                        (value2) =>
+                                                            game.owned == 1
+                                                                ? value2 = 1
+                                                                : 0);
+                                                  }
+                                                  setState(() {});
                                                 },
-                                              );
-                                            })),
+                                                child: Text("Only owned"))),
+                                        Row(children: [
+                                          Text('Votes'),
+                                          Checkbox(
+                                              value: gamesFilterNeedClear == 1,
+                                              onChanged: ((value) {
+                                                for (var gameFromFilter
+                                                    in gamesFromFilter) {
+                                                  gameFromFilter.update(
+                                                      gameFromFilter.keys.first,
+                                                      (value2) => value2 =
+                                                          value! ? 1 : 0);
+                                                }
+                                                setState(
+                                                  () {
+                                                    gamesFilterNeedClear =
+                                                        value! ? 1 : 0;
+                                                  },
+                                                );
+                                              }))
+                                        ]),
                                       ],
                                     ),
                                     Divider(),
@@ -179,7 +205,7 @@ class _GameHelperState extends State<GameHelper> {
                                             child: Column(
                                                 children:
                                                     gamesFromFilter.map((game) {
-                                      return CheckboxListTile(
+                                      return ListTile(
                                         contentPadding: EdgeInsets.zero,
                                         title: Row(
                                             mainAxisAlignment:
@@ -191,16 +217,10 @@ class _GameHelperState extends State<GameHelper> {
                                                 (game.keys.first as GameThing)
                                                     .name,
                                                 overflow: TextOverflow.ellipsis,
-                                              ))
+                                              )),
+                                              CustomCounter(
+                                                  game, gamesFromFilter)
                                             ]),
-                                        value: game.values.first,
-                                        onChanged: (bool? value) {
-                                          setState(() {
-                                            gamesFromFilter[gamesFromFilter
-                                                    .indexOf(game)]
-                                                [game.keys.first] = value!;
-                                          });
-                                        },
                                       );
                                     }).toList())))
                                   ]));
@@ -221,11 +241,17 @@ class _GameHelperState extends State<GameHelper> {
                   child: const Text("Choose random game"),
                   onPressed: () async {
                     List<GameThing>? allGames = [];
-                    if (gamesFromFilter.isNotEmpty) {
-                      allGames = gamesFromFilter
-                          .where((element) => element.values.first == true)
-                          .map((e) => e.keys.first)
-                          .toList();
+                    if (gamesFromFilter
+                        .any((element) => element.values.first > 0)) {
+                      for (var gameFromFilter in gamesFromFilter) {
+                        if (gameFromFilter.values.first > 0) {
+                          for (var i = 0;
+                              i < gameFromFilter.values.first;
+                              i++) {
+                            allGames.add(gameFromFilter.keys.first);
+                          }
+                        }
+                      }
                     } else {
                       allGames = await GameThingSQL.getAllGames();
                     }
@@ -240,13 +266,9 @@ class _GameHelperState extends State<GameHelper> {
                               (maxRangeValues.end != 0 &&
                                   game.maxPlayers <= maxRangeValues.end &&
                                   game.maxPlayers >= maxRangeValues.start))) {
-                        if (onlyOwnedGames!) {
+                        if (onlyOwnedGames) {
                           if (game.owned == 0) continue;
                         }
-                        // if (gamesFromFilter
-                        //     .where(
-                        //         (element) => element.values.first == true)
-                        //     .contains(game))
                         filteredGames.add(game);
                       }
                     }
@@ -281,5 +303,60 @@ class _GameHelperState extends State<GameHelper> {
             ))),
       ])
     ])));
+  }
+}
+
+class CustomCounter extends StatefulWidget {
+  CustomCounter(this.game, this.gamesFromFilter);
+
+  Map<GameThing, int> game;
+  List<Map<GameThing, int>> gamesFromFilter = [];
+  @override
+  State<CustomCounter> createState() => _CustomCounterState();
+}
+
+class _CustomCounterState extends State<CustomCounter> {
+  @override
+  Widget build(BuildContext context) {
+    return Row(children: [
+      RawMaterialButton(
+        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        constraints: BoxConstraints(minWidth: 32.0, minHeight: 32.0),
+        onPressed: () {
+          if (widget.game.values.first < 1) return;
+          setState(() {
+            widget.gamesFromFilter[widget.gamesFromFilter.indexOf(widget.game)]
+                [widget.game.keys.first] = widget.game.values.first - 1;
+          });
+        },
+        elevation: 2.0,
+        //fillColor: Colors.grey,
+        child: Icon(
+          Icons.remove,
+          color: Colors.black,
+          size: 12.0,
+        ),
+        shape: CircleBorder(),
+      ),
+      Text(widget.game.values.first.toString()),
+      RawMaterialButton(
+        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        constraints: BoxConstraints(minWidth: 32.0, minHeight: 32.0),
+        onPressed: () {
+          setState(() {
+            widget.gamesFromFilter[widget.gamesFromFilter.indexOf(widget.game)]
+                [widget.game.keys.first] = widget.game.values.first + 1;
+          });
+        },
+        elevation: 2.0,
+        //fillColor: Colors.grey,
+        child: Icon(
+          Icons.add,
+          color: Colors.black,
+          size: 12.0,
+        ),
+        shape: CircleBorder(),
+      ),
+    ]);
   }
 }
