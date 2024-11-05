@@ -26,7 +26,7 @@ class SystemParameterSQL {
 
   static Future<int> addSystemParameter(SystemParameter systemParameter) async {
     print(
-        "Adding system param ${systemParameter.name}, id = ${systemParameter.id}");
+        "Adding system param ${systemParameter.name}, id = ${systemParameter.id}, value = ${systemParameter.value}");
     final db = await _getDB();
     return await db.insert("SystemParameters", systemParameter.toJson(),
         conflictAlgorithm: ConflictAlgorithm.replace);
@@ -48,12 +48,11 @@ class SystemParameterSQL {
         where: 'id = ?', whereArgs: [systemParameter.id]);
   }
 
-  static Future<SystemParameter?> selectSystemParameterByName(
-      String name) async {
+  static Future<SystemParameter?> selectSystemParameterById(int id) async {
     final db = await _getDB();
 
-    List<Map<String, dynamic>> result = await db
-        .rawQuery("SELECT * FROM SystemParameters WHERE name=?", [name]);
+    List<Map<String, dynamic>> result =
+        await db.rawQuery("SELECT * FROM SystemParameters WHERE id=?", [id]);
     if (result.isEmpty) return null;
     return SystemParameter.fromJson(result.first);
   }
@@ -81,5 +80,21 @@ class SystemParameterSQL {
       });
     }
     return systemParameters;
+  }
+
+  static Future<String?> getOrSetParameterValue(
+      int id, String paramName, String value) async {
+    // Check "first time" system param
+    var param = await SystemParameterSQL.selectSystemParameterById(id);
+    if (param == null) {
+      var result = await SystemParameterSQL.addSystemParameter(
+          SystemParameter(id: id, name: paramName, value: value));
+      if (result == 0)
+        return null;
+      else
+        return value;
+    } else {
+      return param.value;
+    }
   }
 }

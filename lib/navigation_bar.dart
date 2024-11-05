@@ -1,25 +1,28 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/main.dart';
 import 'package:flutter_application_1/pages/log_page.dart';
-import 'package:flutter_application_1/pages/game_helper.dart';
+import 'package:flutter_application_1/pages/game_choose.dart';
 import 'package:flutter_application_1/pages/first_player.dart';
 import 'package:flutter_application_1/pages/statistics.dart';
 
 /// Flutter code sample for [NavigationBar].
 
-class NavigationExample extends StatefulWidget {
-  const NavigationExample({super.key});
+class NavigationScreen extends StatefulWidget {
+  const NavigationScreen({super.key});
 
   @override
-  State<NavigationExample> createState() => _NavigationExampleState();
+  State<NavigationScreen> createState() => _NavigationScreenState();
 }
 
-class _NavigationExampleState extends State<NavigationExample> {
+class _NavigationScreenState extends State<NavigationScreen> {
   int currentPageIndex = 0;
 
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     return Scaffold(
+      // appBar: AppBar(
+      //     title: Text(backgroundLoading ? "Loading" : "Loading completed")),
       bottomNavigationBar: NavigationBar(
         //backgroundColor: Colors.amber,
         onDestinationSelected: (int index) {
@@ -43,7 +46,7 @@ class _NavigationExampleState extends State<NavigationExample> {
           NavigationDestination(
             selectedIcon: Icon(Icons.smart_toy),
             icon: Icon(Icons.casino_outlined),
-            label: 'Play helper',
+            label: 'Choose a game',
           ),
           NavigationDestination(
             selectedIcon: Icon(Icons.insert_emoticon),

@@ -35,10 +35,11 @@ class _LogScaffoldState extends State<LogScaffold> {
       (value) {
         setState(() {
           isProgressBarVisible = true;
+          backgroundLoading = true;
         });
 
         // Check "first time" system param
-        SystemParameterSQL.selectSystemParameterByName("firstLaunch")
+        SystemParameterSQL.selectSystemParameterById(1)
             .then((firstLaunchParam) {
           if (firstLaunchParam == null) {
             print("no param");
@@ -59,6 +60,7 @@ class _LogScaffoldState extends State<LogScaffold> {
         initializeProgress.then((value) {
           setState(() {
             isProgressBarVisible = false;
+            backgroundLoading = false;
           });
         });
       },
@@ -117,6 +119,12 @@ class _LogScaffoldState extends State<LogScaffold> {
                         GameThingSQL.deleteDB();
                       },
                     ),
+                    ElevatedButton(
+                        onPressed: () => {
+                              Navigator.pushNamed(context, '/login')
+                              // TODO STOP Uploading
+                            },
+                        child: Text("Move to login")),
                     FlexButton(PlayDatePicker(), 3),
                     FlexButton(LocationPicker(), 3),
                     FlexButton(Comments(), 4),

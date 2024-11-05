@@ -1,9 +1,6 @@
-import 'dart:ffi';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/game_thing.dart';
 import '../db/game_things_sql.dart';
-import 'dart:convert';
 
 class GameHelper extends StatefulWidget {
   const GameHelper({super.key});
@@ -13,11 +10,8 @@ class GameHelper extends StatefulWidget {
 }
 
 class _GameHelperState extends State<GameHelper> {
-  double minPlayersValue = 1;
-  double maxPlayersValue = 4;
-  double chosenPlayersCount = 4;
+  double chosenPlayersCount = 1;
   String chosenGame = "Get some random game";
-  RangeValues minRangeValues = const RangeValues(1, 4);
   RangeValues maxRangeValues = const RangeValues(0, 0);
   bool onlyOwnedGames = true;
   int gamesFilterNeedClear = 0;
@@ -138,8 +132,13 @@ class _GameHelperState extends State<GameHelper> {
                             return;
                           }
                           allGames.sort((a, b) => a.name.compareTo(b.name));
-                          if (gamesFromFilter.isEmpty) {
-                            for (var game in allGames) {
+                          gamesFromFilter.clear();
+                          for (var game in allGames) {
+                            if (onlyOwnedGames) {
+                              if (game.owned == 0) continue;
+                            }
+                            if (isGameMatchChosenPlayersCount(
+                                game, chosenPlayersCount, maxRangeValues)) {
                               gamesFromFilter.add({game: game.owned});
                             }
                           }
@@ -260,12 +259,8 @@ class _GameHelperState extends State<GameHelper> {
                     for (var game in allGames) {
                       // print(
                       //     "Game = ${game.name}, min = ${game.minPlayers}, max = ${game.maxPlayers}");
-                      if (game.minPlayers <= chosenPlayersCount.round() &&
-                          game.maxPlayers >= chosenPlayersCount.round() &&
-                          (maxRangeValues.end == 0 ||
-                              (maxRangeValues.end != 0 &&
-                                  game.maxPlayers <= maxRangeValues.end &&
-                                  game.maxPlayers >= maxRangeValues.start))) {
+                      if (isGameMatchChosenPlayersCount(
+                          game, chosenPlayersCount, maxRangeValues)) {
                         if (onlyOwnedGames) {
                           if (game.owned == 0) continue;
                         }
@@ -304,6 +299,23 @@ class _GameHelperState extends State<GameHelper> {
       ])
     ])));
   }
+}
+
+bool isGameMatchChosenPlayersCount(
+    GameThing game, double chosenPlayersCount, RangeValues maxRangeValues) {
+  if (game.minPlayers == 0 && game.maxPlayers == 0) {
+    return true;
+  }
+
+  if (game.minPlayers <= chosenPlayersCount.round() &&
+      game.maxPlayers >= chosenPlayersCount.round() &&
+      (maxRangeValues.end == 0 ||
+          (maxRangeValues.end != 0 &&
+              game.maxPlayers <= maxRangeValues.end &&
+              game.maxPlayers >= maxRangeValues.start))) {
+    return true;
+  }
+  return false;
 }
 
 class CustomCounter extends StatefulWidget {

@@ -10,6 +10,11 @@ import 'package:xml/xml.dart' as xml;
 import '../models/bgg_player_model.dart';
 import '../models/bgg_play_model.dart';
 import '../models/bgg_location.dart';
+import '../models/system_parameters.dart';
+import 'dart:convert';
+import '../db/system_table.dart';
+import 'package:requests/requests.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 Future<void> getGamesInfoFromBgg(refreshProgress) async {
   await ImportGameCollectionFromBGG(refreshProgress);
@@ -112,9 +117,9 @@ Future<void> getGamesPlayersCount(refreshProgress) async {
         final gameThingServer = GameThing.fromXml(gameThingResponse.body);
         game.minPlayers = gameThingServer.minPlayers;
         game.maxPlayers = gameThingServer.maxPlayers;
-        print("Upadte players count of game ${game.name} id = ${game.id}");
+        print("Update players count of game ${game.name} id = ${game.id}");
         refreshProgress(true,
-            "Upadte players game info. $gamesWithPlayerInfo / ${gettingAllGames.length - 1}");
+            "Update players game info. $gamesWithPlayerInfo / ${gettingAllGames.length - 1}");
         gamesWithPlayerInfo += 1;
         await GameThingSQL.updateGame(game);
         // Anti DDOS
@@ -297,6 +302,38 @@ Future<void> fillLocalPlays(List<BggPlay> bggPlays) async {
       PlaysSQL.addPlay(bggPlay);
     }
   }
+}
+
+Future<bool> checkLoginByRequest(String username, String password) async {
+  dynamic bodyLogin = json.encode({
+    'credentials': {'username': username, 'password': password}
+  });
+
+  var response =
+      await http.post(Uri.parse("https://boardgamegeek.com/login/api/v1"),
+          headers: {
+            'Content-Type': 'application/json; charset=UTF-8',
+          },
+          body: bodyLogin);
+  if (response.hasError) {
+    print("Wrong login");
+    return false;
+  } else {
+    print("Login is correct");
+    return true;
+  }
+}
+
+Future<bool> checkLoginFromStorage() async {
+  final storage = new FlutterSecureStorage();
+  var username = await storage.read(key: "username");
+  var password = await storage.read(key: "password");
+
+  if (password == null || username == null) {
+    return false;
+  }
+
+  return await checkLoginByRequest(username, password);
 }
 
 Future<List<Map>> getLocalPlayers() async {

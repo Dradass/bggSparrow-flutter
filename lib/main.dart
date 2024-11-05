@@ -2,15 +2,30 @@ import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'dart:async';
 import '../navigation_bar.dart';
+import '../pages/login_screen.dart';
+import '../bggApi/bggApi.dart';
+import '../db/game_things_sql.dart';
 
 late List<CameraDescription> cameras;
 const primaryTextColor = Color.fromARGB(255, 85, 92, 89);
+bool backgroundLoading = false;
+bool needLogin = true;
+final loginParamName = "Login";
+final passwordParamName = "Password";
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  GameThingSQL.initTables();
   cameras = await availableCameras();
+  needLogin = !await checkLoginFromStorage();
+  print(needLogin);
 
   runApp(MaterialApp(
+    routes: {
+      '/login': (context) => LoginScreen(),
+      '/navigation': (context) => NavigationScreen(),
+    },
+    initialRoute: needLogin ? '/login' : '/navigation',
     theme: ThemeData(
         //primaryColor: Color.fromARGB(255, 219, 202, 124),
         textTheme: const TextTheme()
@@ -45,6 +60,6 @@ Future<void> main() async {
         ),
         sliderTheme:
             SliderThemeData(overlayShape: SliderComponentShape.noOverlay)),
-    home: const NavigationExample(),
+    //home: needLogin ? const LoginScreen() : const NavigationScreen(),
   ));
 }
