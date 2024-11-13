@@ -1,6 +1,7 @@
-// TODO - Login screen, games search from net
+// TODO games search from net
 
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/db/plays_sql.dart';
 import 'package:flutter_application_1/main.dart';
 import '../db/game_things_sql.dart';
 import '../db/system_table.dart';
@@ -9,6 +10,7 @@ import '../models/system_parameters.dart';
 import '../widgets/log_page_widgets.dart';
 import '../widgets/camera_handler.dart';
 import '../widgets/play_sender.dart';
+import '../widgets/common.dart';
 
 class LoadingStatus {
   String status = "";
@@ -26,45 +28,56 @@ class _LogScaffoldState extends State<LogScaffold> {
   LoadingStatus loadingStatus = LoadingStatus();
   var searchHistory = [];
   final SearchController searchController = SearchController();
+  var hasInternetConnection = false;
 
   @override
   void initState() {
     super.initState();
 
-    GameThingSQL.initTables().then(
-      (value) {
-        setState(() {
-          isProgressBarVisible = true;
-          backgroundLoading = true;
-        });
+    checkInternetConnection().then((isConnected) => {
+          if (!isConnected)
+            {
+              ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('No internet connection!')))
+            }
+          else
+            {
+              sendOfflinePlaysToBGG(),
+              GameThingSQL.initTables().then(
+                (value) {
+                  setState(() {
+                    isProgressBarVisible = true;
+                    backgroundLoading = true;
+                  });
 
-        // Check "first time" system param
-        SystemParameterSQL.selectSystemParameterById(1)
-            .then((firstLaunchParam) {
-          if (firstLaunchParam == null) {
-            print("no param");
-            SystemParameterSQL.addSystemParameter(
-                    SystemParameter(id: 1, name: "firstLaunch", value: "1"))
-                .then((value) {
-              if (value == 0) print("Cant insert param");
-            });
-          } else {
-            print("Last launch = ${firstLaunchParam.value}");
-            // TODO full history loading there
-            // getAllPlaysFromServer();
-          }
-        });
+                  // Check "first time" system param
+                  SystemParameterSQL.selectSystemParameterById(1)
+                      .then((firstLaunchParam) {
+                    if (firstLaunchParam == null) {
+                      SystemParameterSQL.addSystemParameter(SystemParameter(
+                              id: 1, name: "firstLaunch", value: "1"))
+                          .then((value) {
+                        if (value == 0) print("Cant insert param");
+                      });
+                      // TODO full history loading there
+                      getAllPlaysFromServer();
+                    } else {
+                      print("Last launch = ${firstLaunchParam.value}");
+                    }
+                  });
 
-        var initializeProgress =
-            initializeBggData(loadingStatus, refreshProgress);
-        initializeProgress.then((value) {
-          setState(() {
-            isProgressBarVisible = false;
-            backgroundLoading = false;
-          });
+                  var initializeProgress =
+                      initializeBggData(loadingStatus, refreshProgress);
+                  initializeProgress.then((value) {
+                    setState(() {
+                      isProgressBarVisible = false;
+                      backgroundLoading = false;
+                    });
+                  });
+                },
+              )
+            }
         });
-      },
-    );
   }
 
   void refreshProgress(bool needShowProgressBar, String statusState) {

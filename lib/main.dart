@@ -10,15 +10,11 @@ late List<CameraDescription> cameras;
 const primaryTextColor = Color.fromARGB(255, 85, 92, 89);
 bool backgroundLoading = false;
 bool needLogin = true;
-final loginParamName = "Login";
-final passwordParamName = "Password";
-
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   GameThingSQL.initTables();
   cameras = await availableCameras();
   needLogin = !await checkLoginFromStorage();
-  print(needLogin);
 
   runApp(MaterialApp(
     routes: {
@@ -60,6 +56,5 @@ Future<void> main() async {
         ),
         sliderTheme:
             SliderThemeData(overlayShape: SliderComponentShape.noOverlay)),
-    //home: needLogin ? const LoginScreen() : const NavigationScreen(),
   ));
 }

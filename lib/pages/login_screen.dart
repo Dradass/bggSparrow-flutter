@@ -10,6 +10,9 @@ import '../bggApi/bggApi.dart';
 import 'package:crypto/crypto.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
+const userNameParamName = "username";
+const passwordParamName = "password";
+
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -20,8 +23,6 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final loginTextController = TextEditingController();
   final passwordTextController = TextEditingController();
-  final userNameParamName = "username";
-  final passwordParamName = "password";
 
   @override
   void dispose() {
@@ -34,67 +35,86 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+        const Divider(),
         TextField(
           controller: loginTextController,
-          decoration: InputDecoration(
+          decoration: const InputDecoration(
             labelText: 'Login',
-            filled: true,
           ),
         ),
         TextField(
             controller: passwordTextController,
             obscureText: true,
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
               labelText: 'Password',
-              //filled: true,
             )),
-        ElevatedButton(
-            onPressed: () => {
-                  checkLoginByRequest(
-                          loginTextController.text, passwordTextController.text)
-                      .then((isLoginCorrent) => {
-                            if (isLoginCorrent)
-                              {
-                                Navigator.pushNamed(context, '/navigation'),
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(content: Text('Welcome!'))),
-                                UpdateLoginPassword(loginTextController.text,
-                                    passwordTextController.text, context)
-                              }
-                            else
-                              {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                        content: Text(
-                                            'Login or password is incorrect')))
-                              }
-                          })
-                },
-            child: Text("Log in"))
+        SizedBox(
+            width: MediaQuery.of(context).size.width,
+            height: MediaQuery.of(context).size.height * 0.1,
+            child: LoginButton(loginTextController, passwordTextController))
       ]),
     );
   }
+}
 
-  void UpdateLoginPassword(
-      String username, String password, BuildContext context) {
-    final storage = FlutterSecureStorage();
-    storage.read(key: userNameParamName).then((usernameStorage) {
-      if (usernameStorage == null) {
-        print("no param");
-        storage.write(key: userNameParamName, value: username);
-      } else {
-        storage.write(key: userNameParamName, value: username);
-      }
-    });
+void updateLoginPassword(
+    String username, String password, BuildContext context) {
+  const storage = FlutterSecureStorage();
+  storage.read(key: userNameParamName).then((usernameStorage) {
+    if (usernameStorage == null) {
+      print("no param");
+      storage.write(key: userNameParamName, value: username);
+    } else {
+      storage.write(key: userNameParamName, value: username);
+    }
+  });
 
-    storage.read(key: passwordParamName).then((passwordParam) {
-      if (passwordParam == null) {
-        print("no param");
-        storage.write(key: passwordParamName, value: password);
-      } else {
-        storage.write(key: passwordParamName, value: password);
-      }
-    });
-    // При запуске приложения проверять данные из БД. Отправить запрос, т.к. данные на сервер могли поменять
+  storage.read(key: passwordParamName).then((passwordParam) {
+    if (passwordParam == null) {
+      print("no param");
+      storage.write(key: passwordParamName, value: password);
+    } else {
+      storage.write(key: passwordParamName, value: password);
+    }
+  });
+}
+
+class LoginButton extends StatefulWidget {
+  LoginButton(this.loginTextController, this.paswordTextController,
+      {super.key});
+
+  TextEditingController loginTextController;
+  TextEditingController paswordTextController;
+
+  @override
+  State<LoginButton> createState() => _LoginButtonState();
+}
+
+class _LoginButtonState extends State<LoginButton> {
+  @override
+  Widget build(BuildContext context) {
+    return ElevatedButton(
+        onPressed: () => {
+              checkLoginByRequest(widget.loginTextController.text,
+                      widget.paswordTextController.text)
+                  .then((isLoginCorrent) => {
+                        if (isLoginCorrent)
+                          {
+                            Navigator.pushNamed(context, '/navigation'),
+                            ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Welcome!'))),
+                            updateLoginPassword(widget.loginTextController.text,
+                                widget.paswordTextController.text, context)
+                          }
+                        else
+                          {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                    content:
+                                        Text('Login or password is incorrect')))
+                          }
+                      })
+            },
+        child: const Text("Log in"));
   }
 }

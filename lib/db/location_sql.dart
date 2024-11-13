@@ -57,9 +57,10 @@ class LocationSQL {
   static Future<int> getMaxID() async {
     final db = await _getDB();
     List<Map<String, dynamic>> result =
-        await db.rawQuery('SELECT * FROM Locations');
-    if (result.isEmpty) return 0;
-    return result.length;
+        await db.rawQuery('SELECT MAX(ID) FROM Locations');
+    var maxId = result.first.values.first;
+    if (result.isEmpty || maxId == null) return 0;
+    return maxId;
   }
 
   static Future<List<Map>> getAllLocations() async {

@@ -82,19 +82,16 @@ class SystemParameterSQL {
     return systemParameters;
   }
 
-  static Future<String?> getOrSetParameterValue(
+  static Future<int> addOrEditParameter(
       int id, String paramName, String value) async {
     // Check "first time" system param
     var param = await SystemParameterSQL.selectSystemParameterById(id);
     if (param == null) {
-      var result = await SystemParameterSQL.addSystemParameter(
+      return await SystemParameterSQL.addSystemParameter(
           SystemParameter(id: id, name: paramName, value: value));
-      if (result == 0)
-        return null;
-      else
-        return value;
     } else {
-      return param.value;
+      return await SystemParameterSQL.updateSystemParameter(
+          SystemParameter(id: id, name: paramName, value: value));
     }
   }
 }

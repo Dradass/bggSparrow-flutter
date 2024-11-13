@@ -272,10 +272,10 @@ class _GameHelperState extends State<GameHelper> {
                         chosenGame = "No game with chosen players count";
                       });
                     } else {
-                      for (var game in filteredGames) {
-                        print(
-                            "Game = ${game.name}, min = ${game.minPlayers}, max = ${game.maxPlayers}");
-                      }
+                      // for (var game in filteredGames) {
+                      //   print(
+                      //       "Game = ${game.name}, min = ${game.minPlayers}, max = ${game.maxPlayers}");
+                      // }
                       setState(() {
                         chosenGame = ((filteredGames..shuffle()).first).name;
                       });

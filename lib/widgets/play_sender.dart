@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/db/game_things_sql.dart';
+import 'package:flutter_application_1/db/plays_sql.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_application_1/main.dart';
 import '../db/location_sql.dart';
+import '../db/system_table.dart';
+import '../models/bgg_play_model.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import '../bggApi/bggApi.dart';
 
 import '../widgets/log_page_widgets.dart';
 import '../widgets/camera_handler.dart';
@@ -37,6 +42,19 @@ class PlaySender extends StatefulWidget {
 
   @override
   State<PlaySender> createState() => _PlaySenderState();
+
+  Future<int> sendLogRequestByPlay(BggPlay bggPlay) async {
+    logData['players'] = bggPlay.players ?? "";
+    logData['objectid'] = bggPlay.gameId;
+    logData['length'] = bggPlay.duration ?? 0;
+    logData['playdate'] = bggPlay.date;
+    logData['date'] = "${bggPlay.date}T05:00:00.000Z";
+    logData['comments'] = bggPlay.comments ?? "";
+    logData['location'] = bggPlay.location ?? "";
+    String stringData = json.encode(logData);
+
+    return await sendLogRequest(stringData);
+  }
 }
 
 class _PlaySenderState extends State<PlaySender> {
@@ -44,6 +62,11 @@ class _PlaySenderState extends State<PlaySender> {
   Widget build(BuildContext context) {
     return ElevatedButton.icon(
         onPressed: () async {
+          var hasInternetConnection = false;
+          checkInternetConnection().then((isConnected) => {
+                if (isConnected) {hasInternetConnection = true}
+              });
+
           if (CameraHandler(widget.searchController, cameras)
                   .recognizedGameId <=
               0) {
@@ -62,15 +85,16 @@ class _PlaySenderState extends State<PlaySender> {
               'win': player['win'] ? 1 : 0
             });
           }
-          widget.logData['players'] = bggPlayers;
-          widget.logData['objectid'] =
+          final gameId =
               CameraHandler(widget.searchController, cameras).recognizedGameId;
-          widget.logData['length'] =
-              DurationSliderWidget().durationCurrentValue;
-          widget.logData['playdate'] =
+          final dateShort =
               DateFormat('yyyy-MM-dd').format(PlayDatePicker().playDate);
-          widget.logData['date'] =
-              "${DateFormat('yyyy-MM-dd').format(PlayDatePicker().playDate)}T05:00:00.000Z";
+          final duration = DurationSliderWidget().durationCurrentValue.round();
+          widget.logData['players'] = bggPlayers;
+          widget.logData['objectid'] = gameId;
+          widget.logData['length'] = duration;
+          widget.logData['playdate'] = dateShort;
+          widget.logData['date'] = "${dateShort}T05:00:00.000Z";
           widget.logData['comments'] = Comments().commentsController.text;
 
           var chosenLocation = await LocationSQL.selectLocationByName(
@@ -80,6 +104,33 @@ class _PlaySenderState extends State<PlaySender> {
               chosenLocation != null ? chosenLocation.name : "";
           String stringData = json.encode(widget.logData);
           print(stringData);
+          if (!hasInternetConnection) {
+            // TODO сохранять данные локально в БД, если нет сети. Отправлять их при старте приложения и наличии сети.
+            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                content: Text(
+                    'Play has been saved locally and will be sent when the internet is available.')));
+            //SystemParameterSQL.addOrUpdateLoggedOfflinePlays();
+            final gameThing = await GameThingSQL.selectGameByID(gameId);
+            final minFreeId = await PlaysSQL.getMinFreeOfflinePlayId();
+            if (minFreeId == null) {
+              return;
+            }
+            print("MIN FREE ID = ${minFreeId}");
+
+            var play = BggPlay(
+                id: minFreeId,
+                offline: 1,
+                gameId: gameId,
+                gameName: gameThing?.name ?? "",
+                date: dateShort,
+                comments: Comments().commentsController.text,
+                location: chosenLocation != null ? chosenLocation.name : "",
+                players: json.encode(bggPlayers),
+                winners: "",
+                duration: duration);
+            PlaysSQL.addPlay(play);
+            return;
+          }
           await sendLogRequest(stringData);
           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
             content: Text('Request was sent'),

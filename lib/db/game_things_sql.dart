@@ -21,7 +21,7 @@ class GameThingSQL {
     await db.execute(
         "CREATE TABLE Locations(id INTEGER PRIMARY KEY, name TEXT NOT NULL, isDefault INTEGER);");
     await db.execute(
-        "CREATE TABLE Plays(id INTEGER PRIMARY KEY, date DATETIME NOT NULL, quantity INTEGER, location TEXT, gameId INTEGER NOT NULL, gameName TEXT NOT NULL, comments TEXT, players TEXT, winners TEXT, duration INTEGER);");
+        "CREATE TABLE Plays(id INTEGER PRIMARY KEY, date DATETIME NOT NULL, quantity INTEGER, location TEXT, gameId INTEGER NOT NULL, gameName TEXT NOT NULL, comments TEXT, players TEXT, winners TEXT, duration INTEGER, offline INTEGER);");
     await db.execute(
         "CREATE TABLE SystemParameters(id INTEGER PRIMARY KEY, name TEXT NOT NULL, value TEXT);");
     print('TABLES WERE CREATED');

@@ -13,27 +13,25 @@ import 'package:camera/camera.dart';
 import 'package:image/image.dart' as imageDart;
 
 import 'package:flutter/services.dart';
-import 'package:flutter_pixelmatching/flutter_pixelmatching.dart';
 import 'dart:convert';
 import '../widgets/camera_handler.dart';
 
-class FlexButton extends StatelessWidget {
-  Widget childWidget;
-  int flexValue = 3;
+// class FlexButton extends StatelessWidget {
+//   Widget childWidget;
+//   int flexValue = 3;
 
-  @override
-  Widget build(BuildContext context) {
-    return Flexible(
-        flex: flexValue,
-        child: SizedBox(
-            //color: Colors.tealAccent,
-            width: MediaQuery.of(context).size.width,
-            height: MediaQuery.of(context).size.height,
-            child: childWidget));
-  }
+//   @override
+//   Widget build(BuildContext context) {
+//     return Flexible(
+//         flex: flexValue,
+//         child: SizedBox(
+//             width: MediaQuery.of(context).size.width,
+//             height: MediaQuery.of(context).size.height,
+//             child: childWidget));
+//   }
 
-  FlexButton(this.childWidget, this.flexValue, {super.key});
-}
+//   FlexButton(this.childWidget, this.flexValue, {super.key});
+// }
 
 class PlayDatePicker extends StatefulWidget {
   static final PlayDatePicker _singleton = PlayDatePicker._internal();

@@ -10,11 +10,11 @@ import 'package:xml/xml.dart' as xml;
 import '../models/bgg_player_model.dart';
 import '../models/bgg_play_model.dart';
 import '../models/bgg_location.dart';
-import '../models/system_parameters.dart';
 import 'dart:convert';
-import '../db/system_table.dart';
 import 'package:requests/requests.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
+import '../widgets/play_sender.dart';
 
 Future<void> getGamesInfoFromBgg(refreshProgress) async {
   await ImportGameCollectionFromBGG(refreshProgress);
@@ -134,10 +134,10 @@ Future<void> getGamesPlayersCount(refreshProgress) async {
 
 Future<void> getAllPlaysFromServer() async {
   const maxPagesCount = 1000;
-  int maxPlayerId = await PlayersSQL.getMaxID();
-  int maxLocationId = await LocationSQL.getMaxID();
 
   for (var i = 1; i < maxPagesCount; i++) {
+    int maxPlayerId = await PlayersSQL.getMaxID();
+    int maxLocationId = await LocationSQL.getMaxID();
     var stillHavePlays = await getPlaysFromPage(i, maxPlayerId, maxLocationId);
     if (!stillHavePlays) break;
   }
@@ -215,10 +215,6 @@ Future<bool> getPlaysFromPage(
               newPlayer.userid == 0) {
             if (await PlayersSQL.selectPlayerByName(newPlayer.name) == null) {
               uniquePlayers.add(newPlayer);
-
-              // if (win == '1') {
-              //   winnersNames.add(newPlayer.name);
-              // }
             }
           }
         }
@@ -350,6 +346,21 @@ Future<Location?> fillLocationName() async {
   return await LocationSQL.getDefaultLocation();
 }
 
+Future<void> sendOfflinePlaysToBGG() async {
+  print("start sendOfflinePlaysToBGG");
+  var offlinePlays = await PlaysSQL.selectOfflineLoggedPlays();
+  if (offlinePlays.isEmpty) {
+    return;
+  }
+  print("OFF plays count =${offlinePlays.length}");
+  for (var offlinePlay in offlinePlays) {
+    await sendLogPlayToBGG(offlinePlay);
+    await PlaysSQL.deletePlay(offlinePlay);
+    // ANTI DDOS
+    await Future.delayed(const Duration(milliseconds: 2000));
+  }
+}
+
 Future<void> initializeBggData(
     LoadingStatus loadingStatus, refreshProgress) async {
   loadingStatus.status = "Starting to import collection from server.";
@@ -365,4 +376,93 @@ Future<void> initializeBggData(
   await getGamesThumbnail(refreshProgress);
   await getGamesPlayersCount(refreshProgress);
   refreshProgress(true, "End");
+}
+
+Future<int> sendLogPlayToBGG(BggPlay bggPlay) async {
+  var logData = {
+    "playdate": "2024-03-15",
+    "comments": "#bggSparrow",
+    "length": 60,
+    "twitter": "false",
+    "minutes": 60,
+    "location": "Home",
+    "objectid": "158899",
+    "hours": 0,
+    "quantity": "1",
+    "action": "save",
+    "date": "2024-02-28T05:00:00.000Z",
+    "players": [],
+    "objecttype": "thing",
+    "ajax": 1
+  };
+
+  logData['players'] = bggPlay.players ?? "";
+  logData['objectid'] = bggPlay.gameId;
+  logData['length'] = bggPlay.duration ?? 0;
+  logData['playdate'] = bggPlay.date;
+  logData['date'] = "${bggPlay.date}T05:00:00.000Z";
+  logData['comments'] = bggPlay.comments ?? "";
+  logData['location'] = bggPlay.location ?? "";
+  String stringData = json.encode(logData);
+
+  return await sendLogRequest(stringData);
+}
+
+Future<int> sendLogRequest(String logData) async {
+  print("-----start sending");
+  dynamic bodyLogin = json.encode({
+    'credentials': {'username': 'dradass', 'password': '1414141414'}
+  });
+
+  http
+      .post(Uri.parse("https://boardgamegeek.com/login/api/v1"),
+          headers: {
+            'Content-Type': 'application/json; charset=UTF-8',
+          },
+          body: bodyLogin)
+      .then((response) {
+    String sessionCookie = '';
+    for (final cookie in response.headers['set-cookie']!.split(';')) {
+      if (cookie.startsWith('bggusername')) {
+        sessionCookie += '${cookie.isNotEmpty ? ' ' : ''}$cookie;';
+        continue;
+      }
+      var idx = cookie.indexOf('bggpassword=');
+      if (idx != -1) {
+        sessionCookie +=
+            '${cookie.isNotEmpty ? ' ' : ''}bggpassword=${cookie.substring(idx + 12)};';
+        continue;
+      }
+      idx = cookie.indexOf('SessionID=');
+      if (idx != -1) {
+        sessionCookie +=
+            '${cookie.isNotEmpty ? ' ' : ''}SessionID=${cookie.substring(idx + 10)};';
+        continue;
+      }
+    }
+
+    http
+        .post(Uri.parse("https://boardgamegeek.com/geekplay.php"),
+            headers: {
+              'Content-Type': 'application/json; charset=UTF-8',
+              'cookie': sessionCookie,
+            },
+            body: logData)
+        .then((response2) {});
+  });
+
+  return 1;
+}
+
+Future<bool> checkInternetConnection() async {
+  var connectivityResult = await (Connectivity().checkConnectivity());
+  // return false;
+  if (connectivityResult.contains(ConnectivityResult.mobile)) {
+    return true;
+  } else if (connectivityResult.contains(ConnectivityResult.wifi)) {
+    return true;
+  } else if (connectivityResult.contains(ConnectivityResult.ethernet)) {
+    return true;
+  }
+  return false;
 }

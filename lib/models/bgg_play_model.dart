@@ -9,6 +9,7 @@ class BggPlay {
   final String? players;
   final String? winners;
   final int? duration;
+  final int? offline;
 
   const BggPlay(
       {required this.id,
@@ -20,7 +21,8 @@ class BggPlay {
       this.location,
       this.players,
       this.winners,
-      this.duration});
+      this.duration,
+      this.offline});
 
   Map<String, dynamic> toJson() => {
         'id': id,
@@ -32,7 +34,8 @@ class BggPlay {
         'players': players,
         'winners': winners,
         'comments': comments,
-        'duration': duration
+        'duration': duration,
+        'offline': offline
       };
 
   factory BggPlay.fromJson(Map<String, dynamic> json) {
@@ -46,6 +49,7 @@ class BggPlay {
         location: json['location'],
         players: json['players'],
         winners: json['winners'],
-        duration: json['duration']);
+        duration: json['duration'],
+        offline: json['offline']);
   }
 }
