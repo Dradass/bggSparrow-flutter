@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/main.dart';
 import 'package:flutter_application_1/pages/log_page.dart';
 import 'package:flutter_application_1/pages/game_choose.dart';
 import 'package:flutter_application_1/pages/first_player.dart';

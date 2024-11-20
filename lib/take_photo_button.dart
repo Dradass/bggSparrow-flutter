@@ -4,7 +4,6 @@ import '../db/game_things_sql.dart';
 
 import 'package:flutter/services.dart';
 import 'package:flutter_application_1/models/game_thing.dart';
-import 'package:image/image.dart' as imageDart;
 import 'package:flutter_application_1/main.dart';
 
 import 'dart:convert';
@@ -65,6 +64,7 @@ class _TakePhotoButtonState extends State<TakePhotoButton> {
     var result = 0;
 
     print("---------------Got photo");
+    return null;
     // try {
     //   //var capturedImage = await _controller.takePicture();
     //   //var bytes = await capturedImage.readAsBytes();

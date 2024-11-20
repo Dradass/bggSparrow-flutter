@@ -14,12 +14,13 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   GameThingSQL.initTables();
   cameras = await availableCameras();
+  // TODO Проверять только при наличии сети, и если логин и пароль пустые
   needLogin = !await checkLoginFromStorage();
 
   runApp(MaterialApp(
     routes: {
-      '/login': (context) => LoginScreen(),
-      '/navigation': (context) => NavigationScreen(),
+      '/login': (context) => const LoginScreen(),
+      '/navigation': (context) => const NavigationScreen(),
     },
     initialRoute: needLogin ? '/login' : '/navigation',
     theme: ThemeData(
@@ -39,7 +40,7 @@ Future<void> main() async {
             surface: Color.fromARGB(255, 148, 226, 181),
             onSurface: primaryTextColor),
         secondaryHeaderColor: const Color.fromARGB(255, 43, 132, 190),
-        chipTheme: ChipThemeData(
+        chipTheme: const ChipThemeData(
           shape: RoundedRectangleBorder(
             side: BorderSide(color: Colors.black12),
             borderRadius: BorderRadius.zero,

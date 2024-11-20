@@ -99,7 +99,6 @@ class PlaysSQL {
     for (var bggPlay in result) {
       foundPlayers.add(BggPlay.fromJson(bggPlay));
     }
-    ;
     return foundPlayers;
   }
 
@@ -121,11 +120,11 @@ class PlaysSQL {
     for (var playerResult in result) {
       var play = BggPlay.fromJson(playerResult);
       if (DateTime.parse(play.date).isAfter(startDate != null
-              ? startDate.add(Duration(days: -1))
+              ? startDate.add(const Duration(days: -1))
               : DateTime(2000)) &&
           DateTime.parse(play.date).isBefore(endDate != null
-              ? endDate.add(Duration(days: 1))
-              : DateTime(3000)))
+              ? endDate.add(const Duration(days: 1))
+              : DateTime(3000))) {
         plays.add(BggPlay.fromJson({
           'id': play.id,
           'gameId': play.gameId,
@@ -138,6 +137,7 @@ class PlaysSQL {
           'winners': play.winners,
           'duration': play.duration,
         }));
+      }
     }
     return plays;
   }

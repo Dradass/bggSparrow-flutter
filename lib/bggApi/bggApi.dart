@@ -14,7 +14,6 @@ import 'dart:convert';
 import 'package:requests/requests.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
-import '../widgets/play_sender.dart';
 
 Future<void> getGamesInfoFromBgg(refreshProgress) async {
   await ImportGameCollectionFromBGG(refreshProgress);
@@ -321,12 +320,18 @@ Future<bool> checkLoginByRequest(String username, String password) async {
 }
 
 Future<bool> checkLoginFromStorage() async {
-  final storage = new FlutterSecureStorage();
+  const storage = FlutterSecureStorage();
   var username = await storage.read(key: "username");
   var password = await storage.read(key: "password");
 
   if (password == null || username == null) {
     return false;
+  }
+
+  // Offline mode
+  final hasConnection = await checkInternetConnection();
+  if (!hasConnection) {
+    return true;
   }
 
   return await checkLoginByRequest(username, password);
@@ -365,7 +370,7 @@ Future<void> initializeBggData(
     LoadingStatus loadingStatus, refreshProgress) async {
   loadingStatus.status = "Starting to import collection from server.";
 
-  //await getGamesInfoFromBgg(refreshProgress);
+  await getGamesInfoFromBgg(refreshProgress);
   await ImportGameCollectionFromBGG(refreshProgress);
 
   refreshProgress(true, "New state");
@@ -453,6 +458,20 @@ Future<int> sendLogRequest(String logData) async {
 
   return 1;
 }
+
+// Future<List<GameThing>> searchGamesFromBGG(String pattern) async {
+//   var games = List<GameThing>;
+
+//   ///xmlapi2/search?parameters
+//   var response =
+//       await http.post(Uri.parse("https://boardgamegeek.com/login/api/v1"),
+//           headers: {
+//             'Content-Type': 'application/json; charset=UTF-8',
+//           },
+//           body: bodyLogin);
+
+//   return games;
+// }
 
 Future<bool> checkInternetConnection() async {
   var connectivityResult = await (Connectivity().checkConnectivity());

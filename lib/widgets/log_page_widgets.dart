@@ -6,32 +6,10 @@ import '../db/game_things_sql.dart';
 import 'package:flutter_application_1/models/bgg_location.dart';
 import 'package:flutter_application_1/models/game_thing.dart';
 
-import 'package:flutter/material.dart';
-import '../db/game_things_sql.dart';
-import 'package:flutter_application_1/models/game_thing.dart';
 import 'package:camera/camera.dart';
-import 'package:image/image.dart' as imageDart;
 
-import 'package:flutter/services.dart';
 import 'dart:convert';
 import '../widgets/camera_handler.dart';
-
-// class FlexButton extends StatelessWidget {
-//   Widget childWidget;
-//   int flexValue = 3;
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Flexible(
-//         flex: flexValue,
-//         child: SizedBox(
-//             width: MediaQuery.of(context).size.width,
-//             height: MediaQuery.of(context).size.height,
-//             child: childWidget));
-//   }
-
-//   FlexButton(this.childWidget, this.flexValue, {super.key});
-// }
 
 class PlayDatePicker extends StatefulWidget {
   static final PlayDatePicker _singleton = PlayDatePicker._internal();
@@ -138,12 +116,12 @@ class _LocationPickerState extends State<LocationPicker> {
                                       locationObject);
                                 });
                               },
-                              shape: RoundedRectangleBorder(
+                              shape: const RoundedRectangleBorder(
                                 side: BorderSide(color: Colors.black12),
                                 borderRadius: BorderRadius.zero,
                               ),
                             ),
-                            SizedBox(width: 10),
+                            const SizedBox(width: 10),
                             Expanded(
                                 child: Text(
                               location['name'],
@@ -307,12 +285,12 @@ class _PlayersPickerState extends State<PlayersPicker> {
                                       player['win'] = value;
                                     });
                                   },
-                                  shape: RoundedRectangleBorder(
+                                  shape: const RoundedRectangleBorder(
                                     side: BorderSide(color: Colors.black12),
                                     borderRadius: BorderRadius.zero,
                                   ),
                                 ),
-                                SizedBox(width: 10),
+                                const SizedBox(width: 10),
                                 Expanded(
                                     child: Text(
                                   player['name'],
@@ -354,8 +332,8 @@ class GamePicker extends StatefulWidget {
   SearchController searchController;
   late CameraController _controller;
   List<CameraDescription> cameras;
-  List<GameThing> allItems = [];
-  List<GameThing> items = [];
+  List<GameThing> allGames = [];
+  List<GameThing> filteredGames = [];
 
   @override
   State<GamePicker> createState() => _GamePickerState();
@@ -369,11 +347,11 @@ class _GamePickerState extends State<GamePicker> {
   void search(String query) {
     if (query.isEmpty) {
       setState(() {
-        widget.items = widget.allItems;
+        widget.filteredGames = widget.allGames;
       });
     } else {
       setState(() {
-        widget.items = widget.allItems
+        widget.filteredGames = widget.allGames
             .where((e) => e.name.toLowerCase().contains(query.toLowerCase()))
             .toList();
       });
@@ -403,7 +381,7 @@ class _GamePickerState extends State<GamePicker> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Container(
-            padding: EdgeInsets.only(right: 0),
+            padding: const EdgeInsets.only(right: 0),
             width: MediaQuery.of(context).size.width * 0.2,
             child: CameraHandler(widget.searchController, widget.cameras)
                             .recognizedGame !=
@@ -416,9 +394,9 @@ class _GamePickerState extends State<GamePicker> {
                     CameraHandler(widget.searchController, widget.cameras)
                         .recognizedGame!
                         .thumbBinary!))
-                : Icon(Icons.image)),
+                : const Icon(Icons.image)),
         Container(
-          padding: EdgeInsets.only(right: 0),
+          padding: const EdgeInsets.only(right: 0),
           width: MediaQuery.of(context).size.width * 0.8,
           height: MediaQuery.of(context).size.height,
           // height: MediaQuery.of(context).size.height *
@@ -432,10 +410,11 @@ class _GamePickerState extends State<GamePicker> {
                       side: BorderSide(color: Colors.black12))),
                   controller: searchController,
                   leading:
-                      IconButton(onPressed: () {}, icon: Icon(Icons.search)),
+                      IconButton(onPressed: () {}, icon: const Icon(Icons.search)),
                   onTap: () async {
+                    // TODO Проверять наличие сети и загружать данные из сети
                     var actualGames = await GameThingSQL.getAllGames();
-                    widget.allItems = actualGames ?? [];
+                    widget.allGames = actualGames ?? [];
                     searchController.text = "";
                     searchController.openView();
                   },
@@ -448,12 +427,12 @@ class _GamePickerState extends State<GamePicker> {
               },
               suggestionsBuilder: (context, searchController) {
                 return List<Column>.generate(
-                    widget.items.isEmpty
-                        ? widget.allItems.length
-                        : widget.items.length, (int index) {
-                  final item = widget.items.isEmpty
-                      ? widget.allItems[index]
-                      : widget.items[index];
+                    widget.filteredGames.isEmpty
+                        ? widget.allGames.length
+                        : widget.filteredGames.length, (int index) {
+                  final item = widget.filteredGames.isEmpty
+                      ? widget.allGames[index]
+                      : widget.filteredGames[index];
                   return Column(children: [
                     ListTile(
                         title: Text(item.name),
@@ -464,7 +443,7 @@ class _GamePickerState extends State<GamePicker> {
                                     MediaQuery.of(context).size.width / 10),
                             child: item.thumbBinary != null
                                 ? Image.memory(base64Decode(item.thumbBinary!))
-                                : Icon(Icons.broken_image)),
+                                : const Icon(Icons.broken_image)),
                         onTap: () {
                           setState(() {
                             searchController.closeView(item.name);

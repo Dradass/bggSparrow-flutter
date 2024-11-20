@@ -1,17 +1,10 @@
-import 'dart:ffi';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/db/players_sql.dart';
-import 'package:flutter_application_1/models/bgg_player_model.dart';
-import 'package:flutter_application_1/models/game_thing.dart';
-import 'package:flutter_application_1/widgets/log_page_widgets.dart';
 import 'package:intl/intl.dart';
-import 'package:path/path.dart';
 import '../db/plays_sql.dart';
 import '../models/bgg_play_model.dart';
-import '../db/game_things_sql.dart';
 import '../bggApi/bggApi.dart';
-import '../widgets/statistics/results.dart';
 
 // Free licence for small companies <5 developers and 1 millions $
 import 'package:syncfusion_flutter_charts/charts.dart';
@@ -103,7 +96,7 @@ class _StatisticsState extends State<Statistics> {
                             }
                           },
                           cells: <DataCell>[
-                            DataCell(Container(
+                            DataCell(SizedBox(
                               width: MediaQuery.of(context).size.width * 0.4,
                               child: Text(plays[index].gameName),
                             )),
@@ -162,7 +155,7 @@ class _StatisticsState extends State<Statistics> {
                                 }
                               },
                               cells: <DataCell>[
-                                DataCell(Container(
+                                DataCell(SizedBox(
                                     width: MediaQuery.of(context).size.width *
                                         0.75,
                                     child: Text(
@@ -181,7 +174,7 @@ class _StatisticsState extends State<Statistics> {
                         )))),
                 SafeArea(
                   child: SfCartesianChart(
-                    title: ChartTitle(text: "Games stats"),
+                    title: const ChartTitle(text: "Games stats"),
 
                     primaryXAxis: const CategoryAxis(
                       labelRotation: 270,
@@ -210,15 +203,15 @@ class _StatisticsState extends State<Statistics> {
                 ),
                 SafeArea(
                   child: SfCircularChart(
-                    title: ChartTitle(text: "Games stats"),
-                    margin: EdgeInsets.all(0),
-                    legend: Legend(
+                    title: const ChartTitle(text: "Games stats"),
+                    margin: const EdgeInsets.all(0),
+                    legend: const Legend(
                         isVisible: true, position: LegendPosition.bottom),
                     tooltipBehavior: TooltipBehavior(enable: true),
                     series: <PieSeries<_GamePlaysCount, String>>[
                       PieSeries(
                         explode: true,
-                        dataLabelSettings: DataLabelSettings(
+                        dataLabelSettings: const DataLabelSettings(
                             isVisible: true,
                             labelIntersectAction: LabelIntersectAction.shift,
                             labelPosition: ChartDataLabelPosition.outside,
@@ -262,7 +255,7 @@ class _StatisticsState extends State<Statistics> {
               overflow: TextOverflow.ellipsis,
             )
           ]),
-          Container(
+          SizedBox(
               width: MediaQuery.of(context).size.width,
               height: MediaQuery.of(context).size.height * 0.075,
               child: Row(
@@ -415,10 +408,12 @@ class _StatisticsState extends State<Statistics> {
                               allGames = allWinners;
                             }
 
-                            allGames.forEach((e) => e.gameNameShort.length > 20
+                            for (var e in allGames) {
+                              e.gameNameShort.length > 20
                                 ? e.gameNameShort =
                                     "${e.gameNameShort.substring(0, 18)}..."
-                                : e.gameNameShort);
+                                : e.gameNameShort;
+                            }
                             allGames
                                 .sort((a, b) => b.count!.compareTo(a.count!));
                             if (firstGamesCount != 0) {
@@ -435,7 +430,7 @@ class _StatisticsState extends State<Statistics> {
                             });
                           },
                           label: const Text("Get plays"),
-                          icon: Icon(Icons.leaderboard),
+                          icon: const Icon(Icons.leaderboard),
                         )),
                     Container(
                         color: Colors.brown,
@@ -516,7 +511,7 @@ class _StatisticsState extends State<Statistics> {
                                                   winRate = value;
                                                 });
                                               },
-                                              shape: RoundedRectangleBorder(
+                                              shape: const RoundedRectangleBorder(
                                                 side: BorderSide(
                                                     color: Colors.black12),
                                                 borderRadius: BorderRadius.zero,
@@ -531,7 +526,7 @@ class _StatisticsState extends State<Statistics> {
                                                   onlyChosenPlayers = value;
                                                 });
                                               },
-                                              shape: RoundedRectangleBorder(
+                                              shape: const RoundedRectangleBorder(
                                                 side: BorderSide(
                                                     color: Colors.black12),
                                                 borderRadius: BorderRadius.zero,
@@ -548,14 +543,14 @@ class _StatisticsState extends State<Statistics> {
                                                       value;
                                                 });
                                               },
-                                              shape: RoundedRectangleBorder(
+                                              shape: const RoundedRectangleBorder(
                                                 side: BorderSide(
                                                     color: Colors.black12),
                                                 borderRadius: BorderRadius.zero,
                                               ),
                                             ),
                                           ]),
-                                      Text("Players"),
+                                      const Text("Players"),
                                       Expanded(
                                           child: SingleChildScrollView(
                                               child: Column(
@@ -576,14 +571,14 @@ class _StatisticsState extends State<Statistics> {
                                                           value;
                                                     });
                                                   },
-                                                  shape: RoundedRectangleBorder(
+                                                  shape: const RoundedRectangleBorder(
                                                     side: BorderSide(
                                                         color: Colors.black12),
                                                     borderRadius:
                                                         BorderRadius.zero,
                                                   ),
                                                 ),
-                                                SizedBox(width: 10),
+                                                const SizedBox(width: 10),
                                                 Expanded(
                                                     child: Text(
                                                   player['name'],
@@ -604,7 +599,7 @@ class _StatisticsState extends State<Statistics> {
                                 });
                           },
                           label: const Text("Filters"),
-                          icon: Icon(Icons.filter_alt),
+                          icon: const Icon(Icons.filter_alt),
                         ))
                   ])),
           Flexible(
@@ -648,7 +643,7 @@ class _StatisticsState extends State<Statistics> {
                         children: [
                           Expanded(
                               child: ElevatedButton(
-                                  child: Text("This year"),
+                                  child: const Text("This year"),
                                   onPressed: () {
                                     setState(() {
                                       startDate = DateTime(DateTime.now().year);
@@ -657,15 +652,15 @@ class _StatisticsState extends State<Statistics> {
                                   })),
                           Expanded(
                               child: ElevatedButton(
-                            child: Text("Last year"),
+                            child: const Text("Last year"),
                             onPressed: () {
                               setState(() {
                                 startDate = DateTime(DateTime.now()
-                                    .add(Duration(days: -365))
+                                    .add(const Duration(days: -365))
                                     .year);
                                 endDate = DateTime(
                                     DateTime.now()
-                                        .add(Duration(days: -365))
+                                        .add(const Duration(days: -365))
                                         .year,
                                     12,
                                     31);
@@ -741,7 +736,7 @@ String limitName(String name, int limit) {
   if (name.length <= limit) {
     return name;
   } else {
-    return name.substring(0, limit) + "...";
+    return "${name.substring(0, limit)}...";
   }
 }
 

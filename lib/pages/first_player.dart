@@ -14,7 +14,7 @@ class _FirstPlayerChoserState extends State<FirstPlayerChoser> {
   Map<int, Offset> touchPositions = <int, Offset>{};
   List<Widget> children = [];
   int? randomPlayer;
-  var indicator = null;
+  var indicator;
   bool forceInReleaseMode = true;
   bool enabled = true;
   var counter = "Touch the screen";
@@ -39,7 +39,7 @@ class _FirstPlayerChoserState extends State<FirstPlayerChoser> {
           child: indicator != null
               ? indicator!
               : Container(
-                  decoration: BoxDecoration(
+                  decoration: const BoxDecoration(
                     shape: BoxShape.circle,
                     //color: colors[1], // indicatorColor.withOpacity(0.3),
                   ),
@@ -127,16 +127,18 @@ class _FirstPlayerChoserState extends State<FirstPlayerChoser> {
           counter = "Waiting your friends";
         });
       }
-    } else
+    } else {
       return;
+    }
     await Future.delayed(const Duration(seconds: 1));
     if (touchPositions.length == firstPositionsCount &&
         touchPositions.length > 1) {
       setState(() {
         counter = "1";
       });
-    } else
+    } else {
       return;
+    }
     await Future.delayed(const Duration(seconds: 1));
     if (touchPositions.length == firstPositionsCount) {
       if (touchPositions.length > 1) {
@@ -151,7 +153,8 @@ class _FirstPlayerChoserState extends State<FirstPlayerChoser> {
           counter = "Touch the screen";
         });
       }
-    } else
+    } else {
       return;
+    }
   }
 }

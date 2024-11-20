@@ -4,7 +4,6 @@ import 'package:flutter_application_1/db/plays_sql.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_application_1/main.dart';
 import '../db/location_sql.dart';
-import '../db/system_table.dart';
 import '../models/bgg_play_model.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
@@ -62,10 +61,8 @@ class _PlaySenderState extends State<PlaySender> {
   Widget build(BuildContext context) {
     return ElevatedButton.icon(
         onPressed: () async {
-          var hasInternetConnection = false;
-          checkInternetConnection().then((isConnected) => {
-                if (isConnected) {hasInternetConnection = true}
-              });
+          //var hasInternetConnection = false;
+          final hasInternetConnection = await checkInternetConnection();
 
           if (CameraHandler(widget.searchController, cameras)
                   .recognizedGameId <=
@@ -115,7 +112,6 @@ class _PlaySenderState extends State<PlaySender> {
             if (minFreeId == null) {
               return;
             }
-            print("MIN FREE ID = ${minFreeId}");
 
             var play = BggPlay(
                 id: minFreeId,

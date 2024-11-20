@@ -1,7 +1,6 @@
 // TODO games search from net
 
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/db/plays_sql.dart';
 import 'package:flutter_application_1/main.dart';
 import '../db/game_things_sql.dart';
 import '../db/system_table.dart';
@@ -81,7 +80,7 @@ class _LogScaffoldState extends State<LogScaffold> {
   }
 
   void refreshProgress(bool needShowProgressBar, String statusState) {
-    print("refresh proress: ${statusState}");
+    print("refresh proress: $statusState");
     setState(() {
       isProgressBarVisible = needShowProgressBar;
       loadingStatus.status = statusState;
@@ -137,7 +136,7 @@ class _LogScaffoldState extends State<LogScaffold> {
                               Navigator.pushNamed(context, '/login')
                               // TODO STOP Uploading
                             },
-                        child: Text("Move to login")),
+                        child: const Text("Move to login")),
                     FlexButton(PlayDatePicker(), 3),
                     FlexButton(LocationPicker(), 3),
                     FlexButton(Comments(), 4),

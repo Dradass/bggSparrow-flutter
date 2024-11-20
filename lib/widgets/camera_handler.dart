@@ -141,7 +141,7 @@ class _CameraHandlerState extends State<CameraHandler> {
                       height: MediaQuery.of(context).size.height * 0.5,
                       child: CameraPreview(widget._controller),
                     ),
-                    Container(
+                    SizedBox(
                         width: MediaQuery.of(context).size.width,
                         //height: MediaQuery.of(context).size.height * 0.3,
                         // child:

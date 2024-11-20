@@ -104,15 +104,15 @@ class _GameHelperState extends State<GameHelper> {
             child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Container(
+                  SizedBox(
                       //color: Colors.brown,
                       width: MediaQuery.of(context).size.width * 0.5,
                       height: double.maxFinite,
                       child: ChoiceChip(
-                        label: Container(
+                        label: SizedBox(
                             width: double.infinity,
                             height: MediaQuery.of(context).size.height * 0.03,
-                            child: Text("Only owned games")),
+                            child: const Text("Only owned games")),
                         selected: onlyOwnedGames,
                         onSelected: (bool value) {
                           setState(() {
@@ -153,7 +153,7 @@ class _GameHelperState extends State<GameHelper> {
                                       mainAxisAlignment:
                                           MainAxisAlignment.spaceBetween,
                                       children: [
-                                        Text('Game'),
+                                        const Text('Game'),
                                         Container(
                                             color: Colors.red,
                                             width: MediaQuery.of(context)
@@ -175,9 +175,9 @@ class _GameHelperState extends State<GameHelper> {
                                                   }
                                                   setState(() {});
                                                 },
-                                                child: Text("Only owned"))),
+                                                child: const Text("Only owned"))),
                                         Row(children: [
-                                          Text('Votes'),
+                                          const Text('Votes'),
                                           Checkbox(
                                               value: gamesFilterNeedClear == 1,
                                               onChanged: ((value) {
@@ -198,7 +198,7 @@ class _GameHelperState extends State<GameHelper> {
                                         ]),
                                       ],
                                     ),
-                                    Divider(),
+                                    const Divider(),
                                     Expanded(
                                         child: SingleChildScrollView(
                                             child: Column(
@@ -213,7 +213,7 @@ class _GameHelperState extends State<GameHelper> {
                                               //SizedBox(width: 10),
                                               Expanded(
                                                   child: Text(
-                                                (game.keys.first as GameThing)
+                                                (game.keys.first)
                                                     .name,
                                                 overflow: TextOverflow.ellipsis,
                                               )),
@@ -226,8 +226,8 @@ class _GameHelperState extends State<GameHelper> {
                                 });
                               });
                         },
-                        label: Text('Filter'),
-                        icon: Icon(Icons.filter_alt),
+                        label: const Text('Filter'),
+                        icon: const Icon(Icons.filter_alt),
                       ))
                 ])),
         Flexible(
@@ -237,7 +237,6 @@ class _GameHelperState extends State<GameHelper> {
                 width: MediaQuery.of(context).size.width,
                 height: MediaQuery.of(context).size.height,
                 child: ElevatedButton(
-                  child: const Text("Choose random game"),
                   onPressed: () async {
                     List<GameThing>? allGames = [];
                     if (gamesFromFilter
@@ -286,6 +285,7 @@ class _GameHelperState extends State<GameHelper> {
                           const RoundedRectangleBorder(
                               borderRadius: BorderRadius.zero,
                               side: BorderSide(color: Colors.black12)))),
+                  child: const Text("Choose random game"),
                 ))),
         SizedBox(
             width: MediaQuery.of(context).size.width,
@@ -319,7 +319,7 @@ bool isGameMatchChosenPlayersCount(
 }
 
 class CustomCounter extends StatefulWidget {
-  CustomCounter(this.game, this.gamesFromFilter);
+  CustomCounter(this.game, this.gamesFromFilter, {super.key});
 
   Map<GameThing, int> game;
   List<Map<GameThing, int>> gamesFromFilter = [];
@@ -333,7 +333,7 @@ class _CustomCounterState extends State<CustomCounter> {
     return Row(children: [
       RawMaterialButton(
         materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-        constraints: BoxConstraints(minWidth: 32.0, minHeight: 32.0),
+        constraints: const BoxConstraints(minWidth: 32.0, minHeight: 32.0),
         onPressed: () {
           if (widget.game.values.first < 1) return;
           setState(() {
@@ -342,18 +342,18 @@ class _CustomCounterState extends State<CustomCounter> {
           });
         },
         elevation: 2.0,
+        shape: const CircleBorder(),
         //fillColor: Colors.grey,
-        child: Icon(
+        child: const Icon(
           Icons.remove,
           color: Colors.black,
           size: 12.0,
         ),
-        shape: CircleBorder(),
       ),
       Text(widget.game.values.first.toString()),
       RawMaterialButton(
         materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-        constraints: BoxConstraints(minWidth: 32.0, minHeight: 32.0),
+        constraints: const BoxConstraints(minWidth: 32.0, minHeight: 32.0),
         onPressed: () {
           setState(() {
             widget.gamesFromFilter[widget.gamesFromFilter.indexOf(widget.game)]
@@ -361,13 +361,13 @@ class _CustomCounterState extends State<CustomCounter> {
           });
         },
         elevation: 2.0,
+        shape: const CircleBorder(),
         //fillColor: Colors.grey,
-        child: Icon(
+        child: const Icon(
           Icons.add,
           color: Colors.black,
           size: 12.0,
         ),
-        shape: CircleBorder(),
       ),
     ]);
   }
