@@ -91,8 +91,11 @@ class GameThingSQL {
     if (maps.isEmpty) {
       return null;
     }
-
-    return List.generate(
-        maps.length, (index) => GameThing.fromJson(maps[index]));
+    var games = (List.generate(
+        maps.length, (index) => GameThing.fromJson(maps[index])));
+    games.sort((a, b) => a.name.compareTo(b.name));
+    return games;
+    // return (List.generate(
+    //     maps.length, (index) => GameThing.fromJson(maps[index])));
   }
 }

@@ -111,7 +111,7 @@ class _GameHelperState extends State<GameHelper> {
                       child: ChoiceChip(
                         label: SizedBox(
                             width: double.infinity,
-                            height: MediaQuery.of(context).size.height * 0.03,
+                            height: MediaQuery.of(context).size.height * 1,
                             child: const Text("Only owned games")),
                         selected: onlyOwnedGames,
                         onSelected: (bool value) {
@@ -175,7 +175,8 @@ class _GameHelperState extends State<GameHelper> {
                                                   }
                                                   setState(() {});
                                                 },
-                                                child: const Text("Only owned"))),
+                                                child:
+                                                    const Text("Only owned"))),
                                         Row(children: [
                                           const Text('Votes'),
                                           Checkbox(
@@ -213,8 +214,7 @@ class _GameHelperState extends State<GameHelper> {
                                               //SizedBox(width: 10),
                                               Expanded(
                                                   child: Text(
-                                                (game.keys.first)
-                                                    .name,
+                                                (game.keys.first).name,
                                                 overflow: TextOverflow.ellipsis,
                                               )),
                                               CustomCounter(

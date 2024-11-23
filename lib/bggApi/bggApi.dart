@@ -352,12 +352,10 @@ Future<Location?> fillLocationName() async {
 }
 
 Future<void> sendOfflinePlaysToBGG() async {
-  print("start sendOfflinePlaysToBGG");
   var offlinePlays = await PlaysSQL.selectOfflineLoggedPlays();
   if (offlinePlays.isEmpty) {
     return;
   }
-  print("OFF plays count =${offlinePlays.length}");
   for (var offlinePlay in offlinePlays) {
     await sendLogPlayToBGG(offlinePlay);
     await PlaysSQL.deletePlay(offlinePlay);
@@ -459,23 +457,73 @@ Future<int> sendLogRequest(String logData) async {
   return 1;
 }
 
-// Future<List<GameThing>> searchGamesFromBGG(String pattern) async {
-//   var games = List<GameThing>;
+Future<List<GameThing>?> searchGamesFromLocalDB(String searchString) async {
+  List<GameThing> games = [];
+  var allGames = await GameThingSQL.getAllGames();
+  if (allGames == null) {
+    return games;
+  }
 
-//   ///xmlapi2/search?parameters
-//   var response =
-//       await http.post(Uri.parse("https://boardgamegeek.com/login/api/v1"),
-//           headers: {
-//             'Content-Type': 'application/json; charset=UTF-8',
-//           },
-//           body: bodyLogin);
+  if (searchString.isEmpty) {
+    return allGames;
+  }
 
-//   return games;
-// }
+  for (var game in allGames) {
+    if (game.name
+        .toLowerCase()
+        .contains(RegExp('^${searchString.toLowerCase()}'))) {
+      games.add(game);
+    }
+  }
+  return games;
+}
+
+Future<List<GameThing>?> searchGamesFromBGG(String searchString) async {
+  List<GameThing> games = [];
+  if (searchString.isEmpty) {
+    return games;
+  }
+
+  ///xmlapi2/search?parameters
+  var response = await http.get(
+      Uri.parse(
+          "https://boardgamegeek.com/xmlapi2/search?query=${searchString}&type=boardgame"),
+      headers: {
+        'Content-Type': 'application/json; charset=UTF-8',
+      });
+
+  final rootNode = xml.XmlDocument.parse(response.body);
+  final itemsNode = rootNode.findElements('items').first;
+  final items = itemsNode.findElements('item');
+  for (final item in items) {
+    final objectId = int.parse(item.getAttribute('id').toString());
+
+    //if (await GameThingSQL.selectGameByID(objectId) != null) continue;
+    final objectNameNode = item.findElements('name').first;
+    final objectName = objectNameNode.getAttribute('value').toString();
+    final objectType = objectNameNode.getAttribute('type').toString();
+    if (objectType == 'primary') {
+      if (objectName
+          .toLowerCase()
+          .contains(RegExp('^${searchString.toLowerCase()}'))) {
+        games.add(GameThing(
+            name: objectName,
+            id: objectId,
+            thumbnail: "",
+            image: "",
+            minPlayers: 1, // doesnt matter
+            maxPlayers: 1, // doesnt matter
+            owned: 0)); // doesnt matter
+      }
+    }
+  }
+
+  return games;
+}
 
 Future<bool> checkInternetConnection() async {
   var connectivityResult = await (Connectivity().checkConnectivity());
-  // return false;
+  //return false;
   if (connectivityResult.contains(ConnectivityResult.mobile)) {
     return true;
   } else if (connectivityResult.contains(ConnectivityResult.wifi)) {

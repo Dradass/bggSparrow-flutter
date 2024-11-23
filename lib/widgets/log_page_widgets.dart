@@ -332,45 +332,28 @@ class GamePicker extends StatefulWidget {
   SearchController searchController;
   late CameraController _controller;
   List<CameraDescription> cameras;
-  List<GameThing> allGames = [];
-  List<GameThing> filteredGames = [];
+  List<GameThing>? allGames = [];
+  List<GameThing>? filteredGames = [];
 
   @override
   State<GamePicker> createState() => _GamePickerState();
 }
 
 class _GamePickerState extends State<GamePicker> {
-  void queryListener() {
-    search(widget.searchController.text);
-  }
-
-  void search(String query) {
-    if (query.isEmpty) {
-      setState(() {
-        widget.filteredGames = widget.allGames;
-      });
-    } else {
-      setState(() {
-        widget.filteredGames = widget.allGames
-            .where((e) => e.name.toLowerCase().contains(query.toLowerCase()))
-            .toList();
-      });
-    }
-  }
+  bool isSearchOnline = false;
+  bool onlineSearchMode = true;
+  String? _searchingWithQuery;
+  late Iterable<Widget> _lastOptions = <Widget>[];
 
   @override
   void dispose() {
     super.dispose();
-    // Clean up the controller when the widget is disposed.
-    widget.searchController.removeListener(queryListener);
     widget.searchController.dispose();
   }
 
   @override
   void initState() {
     super.initState();
-    widget.searchController.addListener(queryListener);
-
     widget.searchController.text = "Select game";
   }
 
@@ -397,7 +380,7 @@ class _GamePickerState extends State<GamePicker> {
                 : const Icon(Icons.image)),
         Container(
           padding: const EdgeInsets.only(right: 0),
-          width: MediaQuery.of(context).size.width * 0.8,
+          width: MediaQuery.of(context).size.width * 0.6,
           height: MediaQuery.of(context).size.height,
           // height: MediaQuery.of(context).size.height *
           //     0.5,
@@ -409,33 +392,39 @@ class _GamePickerState extends State<GamePicker> {
                       borderRadius: BorderRadius.zero,
                       side: BorderSide(color: Colors.black12))),
                   controller: searchController,
-                  leading:
-                      IconButton(onPressed: () {}, icon: const Icon(Icons.search)),
+                  leading: IconButton(
+                      onPressed: () {}, icon: const Icon(Icons.search)),
                   onTap: () async {
-                    // TODO Проверять наличие сети и загружать данные из сети
-                    var actualGames = await GameThingSQL.getAllGames();
-                    widget.allGames = actualGames ?? [];
-                    searchController.text = "";
+                    widget.searchController.text = "";
+                    isSearchOnline = await checkInternetConnection();
                     searchController.openView();
                   },
                   onChanged: (_) {
                     searchController.openView();
+                    print("change");
                   },
                   padding: const MaterialStatePropertyAll<EdgeInsets>(
                       EdgeInsets.symmetric(horizontal: 16.0)),
                 );
               },
-              suggestionsBuilder: (context, searchController) {
+              suggestionsBuilder: (context, searchController) async {
+                if (isSearchOnline && onlineSearchMode) {
+                  widget.filteredGames = await searchGamesFromBGG(
+                      widget.searchController.text.toLowerCase());
+                } else {
+                  widget.filteredGames = await searchGamesFromLocalDB(
+                      widget.searchController.text.toLowerCase());
+                }
                 return List<Column>.generate(
-                    widget.filteredGames.isEmpty
-                        ? widget.allGames.length
-                        : widget.filteredGames.length, (int index) {
-                  final item = widget.filteredGames.isEmpty
-                      ? widget.allGames[index]
-                      : widget.filteredGames[index];
+                    widget.filteredGames == null
+                        ? 0
+                        : widget.filteredGames!.length, (int index) {
+                  final item = widget.filteredGames == null
+                      ? null
+                      : widget.filteredGames![index];
                   return Column(children: [
                     ListTile(
-                        title: Text(item.name),
+                        title: Text(item!.name),
                         leading: ConstrainedBox(
                             constraints: BoxConstraints(
                                 maxHeight: MediaQuery.of(context).size.height,
@@ -462,6 +451,26 @@ class _GamePickerState extends State<GamePicker> {
                 });
               }),
         ),
+        Container(
+            padding: const EdgeInsets.only(right: 0),
+            width: MediaQuery.of(context).size.width * 0.2,
+            child: ChoiceChip(
+              //padding: const EdgeInsets.all(0),
+              showCheckmark: false,
+              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              label: SizedBox(
+                  width: MediaQuery.of(context).size.width * 0.1,
+                  //height: MediaQuery.of(context).size.height * 0.03,
+                  child: onlineSearchMode
+                      ? Icon(Icons.wifi)
+                      : Icon(Icons.wifi_off)),
+              selected: onlineSearchMode,
+              onSelected: (bool value) {
+                setState(() {
+                  onlineSearchMode = value;
+                });
+              },
+            ))
       ],
     );
   }
