@@ -502,6 +502,11 @@ Future<List<GameThing>?> searchGamesFromBGG(String searchString) async {
     final objectNameNode = item.findElements('name').first;
     final objectName = objectNameNode.getAttribute('value').toString();
     final objectType = objectNameNode.getAttribute('type').toString();
+    final yearpublishedNode = item.findElements('yearpublished').firstOrNull;
+    var yearpublished;
+    if (yearpublishedNode != null) {
+      yearpublished = yearpublishedNode.getAttribute('value').toString();
+    }
     if (objectType == 'primary') {
       if (objectName
           .toLowerCase()
@@ -513,7 +518,8 @@ Future<List<GameThing>?> searchGamesFromBGG(String searchString) async {
             image: "",
             minPlayers: 1, // doesnt matter
             maxPlayers: 1, // doesnt matter
-            owned: 0)); // doesnt matter
+            owned: 0, // doesnt matter
+            yearpublished: yearpublished));
       }
     }
   }

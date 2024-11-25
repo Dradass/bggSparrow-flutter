@@ -424,7 +424,9 @@ class _GamePickerState extends State<GamePicker> {
                       : widget.filteredGames![index];
                   return Column(children: [
                     ListTile(
-                        title: Text(item!.name),
+                        title: item?.yearpublished == null
+                            ? Text(item!.name)
+                            : Text("${item!.name} (${item.yearpublished})"),
                         leading: ConstrainedBox(
                             constraints: BoxConstraints(
                                 maxHeight: MediaQuery.of(context).size.height,
@@ -432,7 +434,7 @@ class _GamePickerState extends State<GamePicker> {
                                     MediaQuery.of(context).size.width / 10),
                             child: item.thumbBinary != null
                                 ? Image.memory(base64Decode(item.thumbBinary!))
-                                : const Icon(Icons.broken_image)),
+                                : null),
                         onTap: () {
                           setState(() {
                             searchController.closeView(item.name);

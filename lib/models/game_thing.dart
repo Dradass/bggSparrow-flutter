@@ -13,6 +13,7 @@ class GameThing {
   int minPlayers;
   int maxPlayers;
   final int owned;
+  final String? yearpublished;
 
   GameThing(
       {required this.name,
@@ -22,7 +23,8 @@ class GameThing {
       this.thumbBinary,
       required this.minPlayers,
       required this.maxPlayers,
-      required this.owned});
+      required this.owned,
+      this.yearpublished});
 
   factory GameThing.fromJson(Map<String, dynamic> json) {
     return GameThing(
@@ -33,7 +35,8 @@ class GameThing {
         thumbBinary: json['thumbbin'],
         minPlayers: json['minPlayers'],
         maxPlayers: json['maxPlayers'],
-        owned: json['owned']);
+        owned: json['owned'],
+        yearpublished: json['yearpublished']);
   }
 
   factory GameThing.fromXml(String xmlBody) {
@@ -55,6 +58,7 @@ class GameThing {
         item.findElements('maxplayers').first.getAttribute('value').toString());
     final thumbnail = item.findElements('thumbnail').first.toString();
     final image = item.findElements('image').first.toString();
+    final yearpublished = item.findElements('yearpublished').first.toString();
 
     return GameThing(
         name: itemName,
@@ -63,7 +67,8 @@ class GameThing {
         image: image,
         minPlayers: minPlayers,
         maxPlayers: maxPlayers,
-        owned: 0);
+        owned: 0,
+        yearpublished: yearpublished);
   }
 
   // factory GameThing.fromXmlCollection(String xmlBody) {
@@ -81,7 +86,7 @@ class GameThing {
   //       name: itemName, id: itemID, thumbnail: thumbnail, image: image);
   // }
 
-  void CreateBinaryThumb() async {
+  Future<void> CreateBinaryThumb() async {
     try {
       var client = RetryClient(http.Client(), retries: 5);
       var response = await client.get(Uri.parse(thumbnail));
@@ -119,6 +124,7 @@ class GameThing {
         'thumbbin': thumbBinary,
         'minPlayers': minPlayers,
         'maxPlayers': maxPlayers,
-        'owned': owned
+        'owned': owned,
+        'yearpublished': yearpublished
       };
 }
