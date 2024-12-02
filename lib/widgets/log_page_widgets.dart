@@ -357,6 +357,38 @@ class _GamePickerState extends State<GamePicker> {
     widget.searchController.text = "Select game";
   }
 
+  // Future<Widget> getGameImage() async {
+  //   Widget gameImage = Icon(Icons.image);
+  //   if (CameraHandler(widget.searchController, widget.cameras).recognizedGame !=
+  //           null &&
+  //       CameraHandler(widget.searchController, widget.cameras)
+  //               .recognizedGame!
+  //               .thumbBinary !=
+  //           null) {
+  //     gameImage = Image.memory(base64Decode(
+  //         CameraHandler(widget.searchController, widget.cameras)
+  //             .recognizedGame!
+  //             .thumbBinary!));
+  //   } else if (await checkInternetConnection()) {
+  //     final thumb = await getGameThumbFromBGG(
+  //         CameraHandler(widget.searchController, widget.cameras)
+  //             .recognizedGameId);
+  //     if (thumb.isNotEmpty) {
+  //       gameImage = Image.memory(base64Decode(thumb));
+  //     }
+  //   }
+  //   return gameImage;
+  // }
+
+  // void updateImage(GameThing gameItem) async {
+  //   if (isSearchOnline && gameItem.thumbBinary == null ||
+  //       (gameItem.thumbBinary != null && gameItem.thumbBinary!.isEmpty)) {
+  //     gameItem.thumbnail = await getGameThumbFromBGG(gameItem.id);
+  //     await gameItem.CreateBinaryThumb();
+  //   }
+  //   setState(() {});
+  // }
+
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -366,18 +398,7 @@ class _GamePickerState extends State<GamePicker> {
         Container(
             padding: const EdgeInsets.only(right: 0),
             width: MediaQuery.of(context).size.width * 0.2,
-            child: CameraHandler(widget.searchController, widget.cameras)
-                            .recognizedGame !=
-                        null &&
-                    CameraHandler(widget.searchController, widget.cameras)
-                            .recognizedGame!
-                            .thumbBinary !=
-                        null
-                ? Image.memory(base64Decode(
-                    CameraHandler(widget.searchController, widget.cameras)
-                        .recognizedGame!
-                        .thumbBinary!))
-                : const Icon(Icons.image)),
+            child: ChosenGameImage()),
         Container(
           padding: const EdgeInsets.only(right: 0),
           width: MediaQuery.of(context).size.width * 0.6,
@@ -435,14 +456,24 @@ class _GamePickerState extends State<GamePicker> {
                             child: item.thumbBinary != null
                                 ? Image.memory(base64Decode(item.thumbBinary!))
                                 : null),
-                        onTap: () {
+                        onTap: () async {
+                          var thumbnail = await getGameThumbFromBGG(item.id);
+                          ChosenGameImage().binaryImageData =
+                              await GameThing.GetBinaryThumb(thumbnail) ?? "";
                           setState(() {
                             searchController.closeView(item.name);
                             FocusScope.of(context).unfocus();
+                            // if (isSearchOnline && item.thumbBinary == null ||
+                            //     (item.thumbBinary != null &&
+                            //         item.thumbBinary!.isEmpty)) {
+                            //   item.thumbBinary =
+                            //       await getGameThumbFromBGG(item.id);
+                            // }
                             CameraHandler(searchController, widget.cameras)
                                 .recognizedGameId = item.id;
                             CameraHandler(searchController, widget.cameras)
                                 .recognizedGame = item;
+                            //updateImage(item);
                           });
                         }),
                     const Divider(
@@ -475,5 +506,31 @@ class _GamePickerState extends State<GamePicker> {
             ))
       ],
     );
+  }
+}
+
+class ChosenGameImage extends StatefulWidget {
+  static final ChosenGameImage _singleton = ChosenGameImage._internal();
+
+  factory ChosenGameImage() {
+    return _singleton;
+  }
+
+  ChosenGameImage._internal();
+
+  String binaryImageData = "";
+
+  @override
+  State<ChosenGameImage> createState() => _ChosenGameImageState();
+}
+
+class _ChosenGameImageState extends State<ChosenGameImage> {
+  @override
+  Widget build(BuildContext context) {
+    if (widget.binaryImageData.isEmpty) {
+      return Icon(Icons.image);
+    } else {
+      return Image.memory(base64Decode(widget.binaryImageData));
+    }
   }
 }

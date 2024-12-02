@@ -96,6 +96,24 @@ Future<void> getGamesThumbnail(refreshProgress) async {
   }
 }
 
+Future<String> getGameThumbFromBGG(int gameId) async {
+  var client = RetryClient(http.Client(), retries: 5);
+  var gameThingResponse = await client
+      .get(Uri.parse('https://boardgamegeek.com//xmlapi2/things?id=${gameId}'));
+  client.close();
+
+  // final gameThingResponse = await http.get(
+  //     Uri.parse('https://boardgamegeek.com//xmlapi2/things?id=${game.id}'));
+  if (gameThingResponse.statusCode == 200) {
+    final gameThingServer = GameThing.fromXml(gameThingResponse.body);
+    var thumb = gameThingServer.thumbnail;
+    return gameThingServer.thumbnail;
+  } else {
+    print("Error getting thumbnail");
+    return "";
+  }
+}
+
 Future<void> getGamesPlayersCount(refreshProgress) async {
   final gettingAllGames = await GameThingSQL.getAllGames();
   if (gettingAllGames != null) {

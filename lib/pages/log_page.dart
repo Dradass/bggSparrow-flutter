@@ -120,7 +120,6 @@ class _LogScaffoldState extends State<LogScaffold> {
                                       overflow: TextOverflow.ellipsis)
                               ],
                             ))),
-                    //ProgressBar(),
                     const ElevatedButton(
                       onPressed: (getAllPlaysFromServer),
                       child: Text("Load all data"),

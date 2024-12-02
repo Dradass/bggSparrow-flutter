@@ -86,6 +86,23 @@ class GameThing {
   //       name: itemName, id: itemID, thumbnail: thumbnail, image: image);
   // }
 
+  static Future<String?> GetBinaryThumb(String thumbnail) async {
+    try {
+      var client = RetryClient(http.Client(), retries: 5);
+      var response = await client.get(Uri.parse(thumbnail));
+      client.close();
+
+      //http.Response response = await http.get(Uri.parse(thumbnail));
+      if (response.statusCode == 200) {
+        var imageBytes = response.bodyBytes; //Uint8List
+        var bodyBytes = base64Encode(imageBytes);
+        return bodyBytes;
+      }
+    } catch (e) {
+      print("Error while creating thumb: $e");
+    }
+  }
+
   Future<void> CreateBinaryThumb() async {
     try {
       var client = RetryClient(http.Client(), retries: 5);
