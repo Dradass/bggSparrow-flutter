@@ -11,13 +11,15 @@ import 'dart:convert';
 class CameraHandler extends StatefulWidget {
   static CameraHandler? _singleton;
 
-  factory CameraHandler(
-      SearchController searchController, List<CameraDescription> cameras) {
-    _singleton ??= CameraHandler._internal(searchController, cameras);
+  factory CameraHandler(SearchController searchController,
+      List<CameraDescription> cameras, Image _imagewidget) {
+    _singleton ??=
+        CameraHandler._internal(searchController, cameras, _imagewidget);
     return _singleton!;
   }
 
-  CameraHandler._internal(this.searchController, this.cameras);
+  CameraHandler._internal(
+      this.searchController, this.cameras, this._imagewidget);
   int recognizedGameId = 0;
   GameThing? recognizedGame;
   SearchController searchController;
@@ -25,6 +27,7 @@ class CameraHandler extends StatefulWidget {
   List<CameraDescription> cameras;
   Uint8List imageFromCamera = Uint8List.fromList(List.empty());
   var recognizedImage = "No image";
+  Image _imagewidget;
   @override
   State<CameraHandler> createState() => _CameraHandlerState();
 }
@@ -170,6 +173,11 @@ class _CameraHandlerState extends State<CameraHandler> {
 
                             setState(() {
                               widget.searchController.text = recognizedGameName;
+                              if (widget.recognizedGame?.thumbBinary != null) {
+                                widget._imagewidget = Image.memory(base64Decode(
+                                    widget.recognizedGame!.thumbBinary
+                                        .toString()));
+                              }
                             });
                           },
                           child: const Text('Take a photo'),
@@ -183,7 +191,7 @@ class _CameraHandlerState extends State<CameraHandler> {
         style: ButtonStyle(
             // backgroundColor: MaterialStateProperty.all(
             //     Theme.of(context).primaryColor),
-            shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+            shape: WidgetStateProperty.all<RoundedRectangleBorder>(
                 const RoundedRectangleBorder(
                     borderRadius: BorderRadius.zero,
                     side: BorderSide(color: Colors.black12)))),

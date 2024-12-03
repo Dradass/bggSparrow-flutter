@@ -56,7 +56,8 @@ class GameThing {
         item.findElements('minplayers').first.getAttribute('value').toString());
     final maxPlayers = int.parse(
         item.findElements('maxplayers').first.getAttribute('value').toString());
-    final thumbnail = item.findElements('thumbnail').first.toString();
+    // Can be NULL
+    final thumbnail = item.findElements('thumbnail').single.innerText;
     final image = item.findElements('image').first.toString();
     final yearpublished = item.findElements('yearpublished').first.toString();
 
@@ -101,6 +102,7 @@ class GameThing {
     } catch (e) {
       print("Error while creating thumb: $e");
     }
+    return null;
   }
 
   Future<void> CreateBinaryThumb() async {

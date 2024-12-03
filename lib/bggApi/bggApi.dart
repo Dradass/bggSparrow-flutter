@@ -99,7 +99,7 @@ Future<void> getGamesThumbnail(refreshProgress) async {
 Future<String> getGameThumbFromBGG(int gameId) async {
   var client = RetryClient(http.Client(), retries: 5);
   var gameThingResponse = await client
-      .get(Uri.parse('https://boardgamegeek.com//xmlapi2/things?id=${gameId}'));
+      .get(Uri.parse('https://boardgamegeek.com//xmlapi2/things?id=$gameId'));
   client.close();
 
   // final gameThingResponse = await http.get(
@@ -505,12 +505,14 @@ Future<List<GameThing>?> searchGamesFromBGG(String searchString) async {
   ///xmlapi2/search?parameters
   var response = await http.get(
       Uri.parse(
-          "https://boardgamegeek.com/xmlapi2/search?query=${searchString}&type=boardgame"),
+          "https://boardgamegeek.com/xmlapi2/search?query=$searchString&type=boardgame"),
       headers: {
         'Content-Type': 'application/json; charset=UTF-8',
       });
 
   final rootNode = xml.XmlDocument.parse(response.body);
+
+  if (rootNode.findElements('items').isEmpty) return games;
   final itemsNode = rootNode.findElements('items').first;
   final items = itemsNode.findElements('item');
   for (final item in items) {
@@ -521,7 +523,7 @@ Future<List<GameThing>?> searchGamesFromBGG(String searchString) async {
     final objectName = objectNameNode.getAttribute('value').toString();
     final objectType = objectNameNode.getAttribute('type').toString();
     final yearpublishedNode = item.findElements('yearpublished').firstOrNull;
-    var yearpublished;
+    String? yearpublished;
     if (yearpublishedNode != null) {
       yearpublished = yearpublishedNode.getAttribute('value').toString();
     }

@@ -29,8 +29,6 @@ Future<void> main() async {
             .apply(bodyColor: primaryTextColor, displayColor: Colors.blue),
         colorScheme: const ColorScheme(
             brightness: Brightness.light,
-            background: Color.fromARGB(255, 218, 245, 234),
-            onBackground: primaryTextColor,
             primary: primaryTextColor,
             onPrimary: Color.fromARGB(255, 183, 187, 187),
             secondary: Color.fromARGB(255, 46, 207, 127),
@@ -49,8 +47,8 @@ Future<void> main() async {
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ButtonStyle(
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              padding: MaterialStateProperty.all<EdgeInsets>(EdgeInsets.zero),
-              shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+              padding: WidgetStateProperty.all<EdgeInsets>(EdgeInsets.zero),
+              shape: WidgetStateProperty.all<RoundedRectangleBorder>(
                   const RoundedRectangleBorder(
                       borderRadius: BorderRadius.zero,
                       side: BorderSide(color: Colors.black12)))),

@@ -23,8 +23,6 @@ class PlayDatePicker extends StatefulWidget {
 
   @override
   State<PlayDatePicker> createState() => _PlayDatePickerState();
-
-  //PlayDatePicker(this.playDate, {super.key});
 }
 
 class _PlayDatePickerState extends State<PlayDatePicker> {
@@ -144,7 +142,7 @@ class _LocationPickerState extends State<LocationPicker> {
           });
         },
         style: ButtonStyle(
-            shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+            shape: WidgetStateProperty.all<RoundedRectangleBorder>(
                 const RoundedRectangleBorder(
                     borderRadius: BorderRadius.zero,
                     side: BorderSide(color: Colors.black12)))),
@@ -309,7 +307,7 @@ class _PlayersPickerState extends State<PlayersPicker> {
               });
         },
         style: ButtonStyle(
-            shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+            shape: WidgetStateProperty.all<RoundedRectangleBorder>(
                 const RoundedRectangleBorder(
                     borderRadius: BorderRadius.zero,
                     side: BorderSide(color: Colors.black12)))),
@@ -321,19 +319,21 @@ class _PlayersPickerState extends State<PlayersPicker> {
 class GamePicker extends StatefulWidget {
   static GamePicker? _singleton;
 
-  factory GamePicker(
-      SearchController searchController, List<CameraDescription> cameras) {
-    _singleton ??= GamePicker._internal(searchController, cameras);
+  factory GamePicker(SearchController searchController,
+      List<CameraDescription> cameras, Image _imageWidget) {
+    _singleton ??=
+        GamePicker._internal(searchController, cameras, _imageWidget);
     return _singleton!;
   }
 
-  GamePicker._internal(this.searchController, this.cameras);
+  GamePicker._internal(this.searchController, this.cameras, this._imageWidget);
 
   SearchController searchController;
   late CameraController _controller;
   List<CameraDescription> cameras;
   List<GameThing>? allGames = [];
   List<GameThing>? filteredGames = [];
+  Image _imageWidget;
 
   @override
   State<GamePicker> createState() => _GamePickerState();
@@ -343,7 +343,7 @@ class _GamePickerState extends State<GamePicker> {
   bool isSearchOnline = false;
   bool onlineSearchMode = true;
   String? _searchingWithQuery;
-  late Iterable<Widget> _lastOptions = <Widget>[];
+  late final Iterable<Widget> _lastOptions = <Widget>[];
 
   @override
   void dispose() {
@@ -357,38 +357,6 @@ class _GamePickerState extends State<GamePicker> {
     widget.searchController.text = "Select game";
   }
 
-  // Future<Widget> getGameImage() async {
-  //   Widget gameImage = Icon(Icons.image);
-  //   if (CameraHandler(widget.searchController, widget.cameras).recognizedGame !=
-  //           null &&
-  //       CameraHandler(widget.searchController, widget.cameras)
-  //               .recognizedGame!
-  //               .thumbBinary !=
-  //           null) {
-  //     gameImage = Image.memory(base64Decode(
-  //         CameraHandler(widget.searchController, widget.cameras)
-  //             .recognizedGame!
-  //             .thumbBinary!));
-  //   } else if (await checkInternetConnection()) {
-  //     final thumb = await getGameThumbFromBGG(
-  //         CameraHandler(widget.searchController, widget.cameras)
-  //             .recognizedGameId);
-  //     if (thumb.isNotEmpty) {
-  //       gameImage = Image.memory(base64Decode(thumb));
-  //     }
-  //   }
-  //   return gameImage;
-  // }
-
-  // void updateImage(GameThing gameItem) async {
-  //   if (isSearchOnline && gameItem.thumbBinary == null ||
-  //       (gameItem.thumbBinary != null && gameItem.thumbBinary!.isEmpty)) {
-  //     gameItem.thumbnail = await getGameThumbFromBGG(gameItem.id);
-  //     await gameItem.CreateBinaryThumb();
-  //   }
-  //   setState(() {});
-  // }
-
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -398,7 +366,7 @@ class _GamePickerState extends State<GamePicker> {
         Container(
             padding: const EdgeInsets.only(right: 0),
             width: MediaQuery.of(context).size.width * 0.2,
-            child: ChosenGameImage()),
+            child: widget._imageWidget),
         Container(
           padding: const EdgeInsets.only(right: 0),
           width: MediaQuery.of(context).size.width * 0.6,
@@ -409,7 +377,7 @@ class _GamePickerState extends State<GamePicker> {
               searchController: widget.searchController,
               builder: (context, searchController) {
                 return SearchBar(
-                  shape: MaterialStateProperty.all(const RoundedRectangleBorder(
+                  shape: WidgetStateProperty.all(const RoundedRectangleBorder(
                       borderRadius: BorderRadius.zero,
                       side: BorderSide(color: Colors.black12))),
                   controller: searchController,
@@ -422,9 +390,8 @@ class _GamePickerState extends State<GamePicker> {
                   },
                   onChanged: (_) {
                     searchController.openView();
-                    print("change");
                   },
-                  padding: const MaterialStatePropertyAll<EdgeInsets>(
+                  padding: const WidgetStatePropertyAll<EdgeInsets>(
                       EdgeInsets.symmetric(horizontal: 16.0)),
                 );
               },
@@ -446,34 +413,47 @@ class _GamePickerState extends State<GamePicker> {
                   return Column(children: [
                     ListTile(
                         title: item?.yearpublished == null
-                            ? Text(item!.name)
-                            : Text("${item!.name} (${item.yearpublished})"),
-                        leading: ConstrainedBox(
-                            constraints: BoxConstraints(
-                                maxHeight: MediaQuery.of(context).size.height,
-                                maxWidth:
-                                    MediaQuery.of(context).size.width / 10),
-                            child: item.thumbBinary != null
-                                ? Image.memory(base64Decode(item.thumbBinary!))
+                            ? Text(item!.name,
+                                overflow: TextOverflow.ellipsis,
+                                textAlign: TextAlign.left)
+                            : Text(
+                                "${item!.name} (${item.yearpublished})",
+                                overflow: TextOverflow.ellipsis,
+                                textAlign: TextAlign.left,
+                              ),
+                        leading: Container(
+                            width: MediaQuery.of(context).size.width * 0.1,
+                            // ConstrainedBox(
+                            //     constraints: BoxConstraints(
+                            //         maxHeight: MediaQuery.of(context).size.height,
+                            //         maxWidth:
+                            //             MediaQuery.of(context).size.width / 10),
+                            child: item != null
+                                ? item.thumbBinary != null
+                                    ? Image.memory(
+                                        base64Decode(item.thumbBinary!))
+                                    : null
                                 : null),
                         onTap: () async {
+                          if (item == null) return;
                           var thumbnail = await getGameThumbFromBGG(item.id);
-                          ChosenGameImage().binaryImageData =
-                              await GameThing.GetBinaryThumb(thumbnail) ?? "";
+                          GameThing.GetBinaryThumb(thumbnail).then((value) {
+                            if (value != null)
+                              setState(() {
+                                widget._imageWidget =
+                                    Image.memory(base64Decode(value));
+                              });
+                          });
                           setState(() {
                             searchController.closeView(item.name);
                             FocusScope.of(context).unfocus();
-                            // if (isSearchOnline && item.thumbBinary == null ||
-                            //     (item.thumbBinary != null &&
-                            //         item.thumbBinary!.isEmpty)) {
-                            //   item.thumbBinary =
-                            //       await getGameThumbFromBGG(item.id);
-                            // }
-                            CameraHandler(searchController, widget.cameras)
+
+                            CameraHandler(searchController, widget.cameras,
+                                    widget._imageWidget)
                                 .recognizedGameId = item.id;
-                            CameraHandler(searchController, widget.cameras)
+                            CameraHandler(searchController, widget.cameras,
+                                    widget._imageWidget)
                                 .recognizedGame = item;
-                            //updateImage(item);
                           });
                         }),
                     const Divider(
@@ -488,15 +468,13 @@ class _GamePickerState extends State<GamePicker> {
             padding: const EdgeInsets.only(right: 0),
             width: MediaQuery.of(context).size.width * 0.2,
             child: ChoiceChip(
-              //padding: const EdgeInsets.all(0),
               showCheckmark: false,
               materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
               label: SizedBox(
                   width: MediaQuery.of(context).size.width * 0.1,
-                  //height: MediaQuery.of(context).size.height * 0.03,
                   child: onlineSearchMode
-                      ? Icon(Icons.wifi)
-                      : Icon(Icons.wifi_off)),
+                      ? const Icon(Icons.wifi)
+                      : const Icon(Icons.wifi_off)),
               selected: onlineSearchMode,
               onSelected: (bool value) {
                 setState(() {
@@ -506,31 +484,5 @@ class _GamePickerState extends State<GamePicker> {
             ))
       ],
     );
-  }
-}
-
-class ChosenGameImage extends StatefulWidget {
-  static final ChosenGameImage _singleton = ChosenGameImage._internal();
-
-  factory ChosenGameImage() {
-    return _singleton;
-  }
-
-  ChosenGameImage._internal();
-
-  String binaryImageData = "";
-
-  @override
-  State<ChosenGameImage> createState() => _ChosenGameImageState();
-}
-
-class _ChosenGameImageState extends State<ChosenGameImage> {
-  @override
-  Widget build(BuildContext context) {
-    if (widget.binaryImageData.isEmpty) {
-      return Icon(Icons.image);
-    } else {
-      return Image.memory(base64Decode(widget.binaryImageData));
-    }
   }
 }

@@ -15,12 +15,13 @@ import '../widgets/camera_handler.dart';
 class PlaySender extends StatefulWidget {
   static PlaySender? _singleton;
 
-  factory PlaySender(SearchController searchController) {
-    _singleton ??= PlaySender._internal(searchController);
+  factory PlaySender(SearchController searchController, Image _imagewidget) {
+    _singleton ??= PlaySender._internal(searchController, _imagewidget);
     return _singleton!;
   }
 
-  PlaySender._internal(this.searchController);
+  PlaySender._internal(this.searchController, this._imagewidget);
+  Image _imagewidget;
   SearchController searchController;
   var logData = {
     "playdate": "2024-03-15",
@@ -64,7 +65,8 @@ class _PlaySenderState extends State<PlaySender> {
           //var hasInternetConnection = false;
           final hasInternetConnection = await checkInternetConnection();
 
-          if (CameraHandler(widget.searchController, cameras)
+          if (CameraHandler(
+                      widget.searchController, cameras, widget._imagewidget)
                   .recognizedGameId <=
               0) {
             ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
@@ -82,8 +84,9 @@ class _PlaySenderState extends State<PlaySender> {
               'win': player['win'] ? 1 : 0
             });
           }
-          final gameId =
-              CameraHandler(widget.searchController, cameras).recognizedGameId;
+          final gameId = CameraHandler(
+                  widget.searchController, cameras, widget._imagewidget)
+              .recognizedGameId;
           final dateShort =
               DateFormat('yyyy-MM-dd').format(PlayDatePicker().playDate);
           final duration = DurationSliderWidget().durationCurrentValue.round();
@@ -133,9 +136,9 @@ class _PlaySenderState extends State<PlaySender> {
           ));
         },
         style: ButtonStyle(
-            backgroundColor: MaterialStateProperty.all(
+            backgroundColor: WidgetStateProperty.all(
                 Theme.of(context).colorScheme.secondary),
-            shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+            shape: WidgetStateProperty.all<RoundedRectangleBorder>(
                 const RoundedRectangleBorder(
                     borderRadius: BorderRadius.zero,
                     side: BorderSide(color: Colors.black12)))),

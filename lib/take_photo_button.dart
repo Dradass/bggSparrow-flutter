@@ -184,7 +184,7 @@ class _TakePhotoButtonState extends State<TakePhotoButton> {
         style: ButtonStyle(
             // backgroundColor: MaterialStateProperty.all(
             //     Theme.of(context).primaryColor),
-            shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+            shape: WidgetStateProperty.all<RoundedRectangleBorder>(
                 const RoundedRectangleBorder(
                     borderRadius: BorderRadius.zero,
                     side: BorderSide(color: Colors.black12)))),

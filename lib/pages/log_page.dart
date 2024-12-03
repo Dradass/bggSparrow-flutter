@@ -28,6 +28,8 @@ class _LogScaffoldState extends State<LogScaffold> {
   var searchHistory = [];
   final SearchController searchController = SearchController();
   var hasInternetConnection = false;
+  String binaryImageData = "";
+  Image _imagewidget = Image.asset('assets/no_image.png');
 
   @override
   void initState() {
@@ -105,15 +107,14 @@ class _LogScaffoldState extends State<LogScaffold> {
                     Flexible(
                         flex: 1,
                         child: Container(
-                            color: Theme.of(context).colorScheme.background,
+                            color: Theme.of(context).colorScheme.surface,
                             width: MediaQuery.of(context).size.width,
                             child: Column(
                               children: [
                                 if (isProgressBarVisible)
                                   LinearProgressIndicator(
-                                    backgroundColor: Theme.of(context)
-                                        .colorScheme
-                                        .background,
+                                    backgroundColor:
+                                        Theme.of(context).colorScheme.surface,
                                   ),
                                 if (isProgressBarVisible)
                                   Text("Loading. ${loadingStatus.status}",
@@ -140,10 +141,13 @@ class _LogScaffoldState extends State<LogScaffold> {
                     FlexButton(LocationPicker(), 3),
                     FlexButton(Comments(), 4),
                     FlexButton(DurationSliderWidget(), 3),
-                    FlexButton(PlaySender(searchController), 3),
+                    FlexButton(PlaySender(searchController, _imagewidget), 3),
                     FlexButton(PlayersPicker(), 3),
-                    FlexButton(GamePicker(searchController, cameras), 3),
-                    FlexButton(CameraHandler(searchController, cameras), 3),
+                    FlexButton(
+                        GamePicker(searchController, cameras, _imagewidget), 3),
+                    FlexButton(
+                        CameraHandler(searchController, cameras, _imagewidget),
+                        3),
                   ],
                 )
               ],

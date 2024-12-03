@@ -281,7 +281,7 @@ class _GameHelperState extends State<GameHelper> {
                     }
                   },
                   style: ButtonStyle(
-                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                      shape: WidgetStateProperty.all<RoundedRectangleBorder>(
                           const RoundedRectangleBorder(
                               borderRadius: BorderRadius.zero,
                               side: BorderSide(color: Colors.black12)))),

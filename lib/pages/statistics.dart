@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/db/players_sql.dart';
 import 'package:intl/intl.dart';
@@ -74,10 +73,10 @@ class _StatisticsState extends State<Statistics> {
                       rows: List<DataRow>.generate(
                         plays.length,
                         (int index) => DataRow(
-                          color: MaterialStateProperty.resolveWith<Color?>(
-                              (Set<MaterialState> states) {
+                          color: WidgetStateProperty.resolveWith<Color?>(
+                              (Set<WidgetState> states) {
                             // All rows will have the same selected color.
-                            if (states.contains(MaterialState.selected)) {
+                            if (states.contains(WidgetState.selected)) {
                               return Theme.of(context)
                                   .colorScheme
                                   .primary
@@ -130,10 +129,10 @@ class _StatisticsState extends State<Statistics> {
                           rows: List<DataRow>.generate(
                             gamePlays.length,
                             (int index) => DataRow(
-                              color: MaterialStateProperty.resolveWith<Color?>(
-                                  (Set<MaterialState> states) {
+                              color: WidgetStateProperty.resolveWith<Color?>(
+                                  (Set<WidgetState> states) {
                                 // All rows will have the same selected color.
-                                if (states.contains(MaterialState.selected)) {
+                                if (states.contains(WidgetState.selected)) {
                                   return Theme.of(context)
                                       .colorScheme
                                       .primary
@@ -410,9 +409,9 @@ class _StatisticsState extends State<Statistics> {
 
                             for (var e in allGames) {
                               e.gameNameShort.length > 20
-                                ? e.gameNameShort =
-                                    "${e.gameNameShort.substring(0, 18)}..."
-                                : e.gameNameShort;
+                                  ? e.gameNameShort =
+                                      "${e.gameNameShort.substring(0, 18)}..."
+                                  : e.gameNameShort;
                             }
                             allGames
                                 .sort((a, b) => b.count!.compareTo(a.count!));
@@ -511,7 +510,8 @@ class _StatisticsState extends State<Statistics> {
                                                   winRate = value;
                                                 });
                                               },
-                                              shape: const RoundedRectangleBorder(
+                                              shape:
+                                                  const RoundedRectangleBorder(
                                                 side: BorderSide(
                                                     color: Colors.black12),
                                                 borderRadius: BorderRadius.zero,
@@ -526,7 +526,8 @@ class _StatisticsState extends State<Statistics> {
                                                   onlyChosenPlayers = value;
                                                 });
                                               },
-                                              shape: const RoundedRectangleBorder(
+                                              shape:
+                                                  const RoundedRectangleBorder(
                                                 side: BorderSide(
                                                     color: Colors.black12),
                                                 borderRadius: BorderRadius.zero,
@@ -543,7 +544,8 @@ class _StatisticsState extends State<Statistics> {
                                                       value;
                                                 });
                                               },
-                                              shape: const RoundedRectangleBorder(
+                                              shape:
+                                                  const RoundedRectangleBorder(
                                                 side: BorderSide(
                                                     color: Colors.black12),
                                                 borderRadius: BorderRadius.zero,
@@ -571,7 +573,8 @@ class _StatisticsState extends State<Statistics> {
                                                           value;
                                                     });
                                                   },
-                                                  shape: const RoundedRectangleBorder(
+                                                  shape:
+                                                      const RoundedRectangleBorder(
                                                     side: BorderSide(
                                                         color: Colors.black12),
                                                     borderRadius:
