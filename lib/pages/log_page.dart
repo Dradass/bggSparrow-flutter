@@ -8,6 +8,7 @@ import '../widgets/log_page_widgets.dart';
 import '../widgets/camera_handler.dart';
 import '../widgets/play_sender.dart';
 import '../widgets/common.dart';
+import '../task_checker.dart';
 
 class LoadingStatus {
   String status = "";
@@ -60,7 +61,6 @@ class _LogScaffoldState extends State<LogScaffold> {
                           .then((value) {
                         if (value == 0) print("Cant insert param");
                       });
-                      // TODO full history loading there
                       getAllPlaysFromServer();
                     } else {
                       print("Last launch = ${firstLaunchParam.value}");
@@ -96,9 +96,6 @@ class _LogScaffoldState extends State<LogScaffold> {
         FocusManager.instance.primaryFocus?.unfocus();
       },
       child: Scaffold(
-        // appBar: AppBar(
-        //   title: Text("123"),
-        // ),
         key: _scaffoldKey,
         // resizeToAvoidBottomInset: false,
         body: SafeArea(
@@ -129,8 +126,6 @@ class _LogScaffoldState extends State<LogScaffold> {
                     PlayDatePicker(),
                     IconButton(
                         onPressed: () {
-                          //_toggleDrawer();
-                          //Scaffold.of(context).openDrawer();
                           _scaffoldKey.currentState?.openDrawer();
                         },
                         icon: Icon(Icons.settings)),
@@ -166,8 +161,8 @@ class _LogScaffoldState extends State<LogScaffold> {
                 title: const Text('Log out'),
                 onTap: () {
                   _scaffoldKey.currentState?.closeDrawer();
+                  TaskChecker().needCancel = true;
                   Navigator.pushNamed(context, '/login');
-                  // TODO STOP Uploading
                 },
               ),
               ListTile(

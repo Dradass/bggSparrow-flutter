@@ -14,14 +14,9 @@ import 'dart:convert';
 import 'package:requests/requests.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import '../task_checker.dart';
 
-Future<void> getGamesInfoFromBgg(refreshProgress) async {
-  await ImportGameCollectionFromBGG(refreshProgress);
-  await getGamesThumbnail(refreshProgress);
-  await getGamesPlayersCount(refreshProgress);
-}
-
-Future<void> ImportGameCollectionFromBGG(refreshProgress) async {
+Future<void> importGameCollectionFromBGG(refreshProgress) async {
   await GameThingSQL.createTable();
   final collectionResponse = await http.get(Uri.parse(
       'https://boardgamegeek.com/xmlapi2/collection?username=dradass'));
@@ -84,6 +79,10 @@ Future<void> getGamesThumbnail(refreshProgress) async {
         .where((e) => e.thumbBinary != null && e.thumbBinary!.isNotEmpty)
         .length;
     for (var game in gettingAllGames) {
+      print("Task canceled = ${TaskChecker().needCancel}");
+      if (TaskChecker().needCancel) {
+        return;
+      }
       if (game.thumbBinary == null) {
         game.CreateBinaryThumb();
         refreshProgress(true,
@@ -121,6 +120,9 @@ Future<void> getGamesPlayersCount(refreshProgress) async {
         .where((e) => e.minPlayers != 0 && e.maxPlayers != 0)
         .length;
     for (var game in gettingAllGames) {
+      if (TaskChecker().needCancel) {
+        return;
+      }
       if (game.minPlayers != 0 && game.maxPlayers != 0) continue;
 
       var client = RetryClient(http.Client(), retries: 5);
@@ -386,8 +388,7 @@ Future<void> initializeBggData(
     LoadingStatus loadingStatus, refreshProgress) async {
   loadingStatus.status = "Starting to import collection from server.";
 
-  await getGamesInfoFromBgg(refreshProgress);
-  await ImportGameCollectionFromBGG(refreshProgress);
+  await importGameCollectionFromBGG(refreshProgress);
 
   refreshProgress(true, "New state");
   int maxPlayerId = await PlayersSQL.getMaxID();
@@ -396,6 +397,7 @@ Future<void> initializeBggData(
 
   await getGamesThumbnail(refreshProgress);
   await getGamesPlayersCount(refreshProgress);
+  TaskChecker().needCancel = false;
   refreshProgress(true, "End");
 }
 
