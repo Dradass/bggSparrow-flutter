@@ -4,8 +4,6 @@ import 'package:flutter_application_1/pages/game_choose.dart';
 import 'package:flutter_application_1/pages/first_player.dart';
 import 'package:flutter_application_1/pages/statistics.dart';
 
-/// Flutter code sample for [NavigationBar].
-
 class NavigationScreen extends StatefulWidget {
   const NavigationScreen({super.key});
 
@@ -18,10 +16,8 @@ class _NavigationScreenState extends State<NavigationScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
     return Scaffold(
-      // appBar: AppBar(
-      //     title: Text(backgroundLoading ? "Loading" : "Loading completed")),
+      // appBar: AppBar(title: Text("Navigation")),
       bottomNavigationBar: NavigationBar(
         //backgroundColor: Colors.amber,
         onDestinationSelected: (int index) {
@@ -57,7 +53,6 @@ class _NavigationScreenState extends State<NavigationScreen> {
       body: IndexedStack(
         index: currentPageIndex,
         children: const <Widget>[
-          /// Home page
           LogScaffold(),
           Statistics(),
           GameHelper(),

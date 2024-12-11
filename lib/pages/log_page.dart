@@ -1,5 +1,3 @@
-// TODO games search from net
-
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/main.dart';
 import '../db/game_things_sql.dart';
@@ -15,6 +13,8 @@ class LoadingStatus {
   String status = "";
 }
 
+final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
 class LogScaffold extends StatefulWidget {
   const LogScaffold({super.key});
 
@@ -29,7 +29,7 @@ class _LogScaffoldState extends State<LogScaffold> {
   final SearchController searchController = SearchController();
   var hasInternetConnection = false;
   String binaryImageData = "";
-  Image _imagewidget = Image.asset('assets/no_image.png');
+  final Image _imagewidget = Image.asset('assets/no_image.png');
 
   @override
   void initState() {
@@ -92,65 +92,106 @@ class _LogScaffoldState extends State<LogScaffold> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-        onTap: () {
-          FocusManager.instance.primaryFocus?.unfocus();
-        },
-        child: Scaffold(
-            resizeToAvoidBottomInset: false,
-            body: SafeArea(
-                child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+      onTap: () {
+        FocusManager.instance.primaryFocus?.unfocus();
+      },
+      child: Scaffold(
+        // appBar: AppBar(
+        //   title: Text("123"),
+        // ),
+        key: _scaffoldKey,
+        // resizeToAvoidBottomInset: false,
+        body: SafeArea(
+            child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Column(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    Flexible(
-                        flex: 1,
-                        child: Container(
-                            color: Theme.of(context).colorScheme.surface,
-                            width: MediaQuery.of(context).size.width,
-                            child: Column(
-                              children: [
-                                if (isProgressBarVisible)
-                                  LinearProgressIndicator(
-                                    backgroundColor:
-                                        Theme.of(context).colorScheme.surface,
-                                  ),
-                                if (isProgressBarVisible)
-                                  Text("Loading. ${loadingStatus.status}",
-                                      overflow: TextOverflow.ellipsis)
-                              ],
-                            ))),
-                    const ElevatedButton(
-                      onPressed: (getAllPlaysFromServer),
-                      child: Text("Load all data"),
-                    ),
-                    ElevatedButton(
-                      child: const Text("del tables"),
-                      onPressed: () {
-                        GameThingSQL.deleteDB();
-                      },
-                    ),
-                    ElevatedButton(
-                        onPressed: () => {
-                              Navigator.pushNamed(context, '/login')
-                              // TODO STOP Uploading
-                            },
-                        child: const Text("Move to login")),
-                    FlexButton(PlayDatePicker(), 3),
-                    FlexButton(LocationPicker(), 3),
-                    FlexButton(Comments(), 4),
-                    FlexButton(DurationSliderWidget(), 3),
-                    FlexButton(PlaySender(searchController, _imagewidget), 3),
-                    FlexButton(PlayersPicker(), 3),
-                    FlexButton(
-                        GamePicker(searchController, cameras, _imagewidget), 3),
-                    FlexButton(
-                        CameraHandler(searchController, cameras, _imagewidget),
-                        3),
-                  ],
-                )
+                Flexible(
+                    flex: 1,
+                    child: Container(
+                        color: Theme.of(context).colorScheme.surface,
+                        width: MediaQuery.of(context).size.width,
+                        child: Column(
+                          children: [
+                            if (isProgressBarVisible)
+                              LinearProgressIndicator(
+                                backgroundColor:
+                                    Theme.of(context).colorScheme.surface,
+                              ),
+                            if (isProgressBarVisible)
+                              Text("Loading. ${loadingStatus.status}",
+                                  overflow: TextOverflow.ellipsis)
+                          ],
+                        ))),
+                FlexButtonSettings(
+                    PlayDatePicker(),
+                    IconButton(
+                        onPressed: () {
+                          //_toggleDrawer();
+                          //Scaffold.of(context).openDrawer();
+                          _scaffoldKey.currentState?.openDrawer();
+                        },
+                        icon: Icon(Icons.settings)),
+                    3),
+                FlexButton(LocationPicker(), 3),
+                FlexButton(Comments(), 5),
+                FlexButton(DurationSliderWidget(), 3),
+                FlexButton(PlaySender(searchController, _imagewidget), 3),
+                FlexButton(PlayersPicker(), 3),
+                FlexButton(
+                    GamePicker(searchController, cameras, _imagewidget), 3),
+                FlexButton(
+                    CameraHandler(searchController, cameras, _imagewidget), 3),
               ],
-            ))));
+            )
+          ],
+        )),
+        drawer: Drawer(
+          child: ListView(
+            padding: EdgeInsets.zero,
+            children: [
+              ListTile(
+                title: const Text(''),
+              ),
+              ListTile(
+                title: const Text('Settings'),
+              ),
+              Divider(),
+              ListTile(
+                leading: Icon(
+                  Icons.logout,
+                ),
+                title: const Text('Log out'),
+                onTap: () {
+                  _scaffoldKey.currentState?.closeDrawer();
+                  Navigator.pushNamed(context, '/login');
+                  // TODO STOP Uploading
+                },
+              ),
+              ListTile(
+                leading: Icon(
+                  Icons.sync,
+                ),
+                title: const Text('Load all data'),
+                onTap: () {
+                  getAllPlaysFromServer();
+                },
+              ),
+              ListTile(
+                leading: Icon(
+                  Icons.clear,
+                ),
+                title: const Text('Wipe all data'),
+                onTap: () {
+                  GameThingSQL.deleteDB();
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
