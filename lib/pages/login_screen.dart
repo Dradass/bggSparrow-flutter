@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/task_checker.dart';
 import '../bggApi/bggApi.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
@@ -92,6 +93,7 @@ class _LoginButtonState extends State<LoginButton> {
                   .then((isLoginCorrent) => {
                         if (isLoginCorrent)
                           {
+                            TaskChecker().needCancel = false,
                             Navigator.pushNamed(context, '/navigation'),
                             ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(content: Text('Welcome!'))),

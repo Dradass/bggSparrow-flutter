@@ -271,16 +271,14 @@ class _GameHelperState extends State<GameHelper> {
                         chosenGame = "No game with chosen players count";
                       });
                     } else {
-                      // for (var game in filteredGames) {
-                      //   print(
-                      //       "Game = ${game.name}, min = ${game.minPlayers}, max = ${game.maxPlayers}");
-                      // }
                       setState(() {
                         chosenGame = ((filteredGames..shuffle()).first).name;
                       });
                     }
                   },
                   style: ButtonStyle(
+                      backgroundColor: WidgetStateProperty.all(
+                          Theme.of(context).colorScheme.secondary),
                       shape: WidgetStateProperty.all<RoundedRectangleBorder>(
                           const RoundedRectangleBorder(
                               borderRadius: BorderRadius.zero,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/pages/login_screen.dart';
 import 'package:intl/intl.dart';
 import '../bggApi/bggApi.dart';
 import '../db/location_sql.dart';
@@ -329,7 +330,6 @@ class GamePicker extends StatefulWidget {
   GamePicker._internal(this.searchController, this.cameras, this._imageWidget);
 
   SearchController searchController;
-  late CameraController _controller;
   List<CameraDescription> cameras;
   List<GameThing>? allGames = [];
   List<GameThing>? filteredGames = [];
@@ -342,8 +342,6 @@ class GamePicker extends StatefulWidget {
 class _GamePickerState extends State<GamePicker> {
   bool isSearchOnline = false;
   bool onlineSearchMode = true;
-  String? _searchingWithQuery;
-  late final Iterable<Widget> _lastOptions = <Widget>[];
 
   @override
   void dispose() {
@@ -407,53 +405,62 @@ class _GamePickerState extends State<GamePicker> {
                     widget.filteredGames == null
                         ? 0
                         : widget.filteredGames!.length, (int index) {
-                  final item = widget.filteredGames == null
+                  final gameItem = widget.filteredGames == null
                       ? null
                       : widget.filteredGames![index];
                   return Column(children: [
                     ListTile(
-                        title: item?.yearpublished == null
-                            ? Text(item!.name,
+                        title: gameItem?.yearpublished == null
+                            ? Text(gameItem!.name,
                                 overflow: TextOverflow.ellipsis,
                                 textAlign: TextAlign.left)
                             : Text(
-                                "${item!.name} (${item.yearpublished})",
+                                "${gameItem!.name} (${gameItem.yearpublished})",
                                 overflow: TextOverflow.ellipsis,
                                 textAlign: TextAlign.left,
                               ),
                         leading: Container(
                             width: MediaQuery.of(context).size.width * 0.1,
-                            // ConstrainedBox(
-                            //     constraints: BoxConstraints(
-                            //         maxHeight: MediaQuery.of(context).size.height,
-                            //         maxWidth:
-                            //             MediaQuery.of(context).size.width / 10),
-                            child: item != null
-                                ? item.thumbBinary != null
+                            child: gameItem != null
+                                ? gameItem.thumbBinary != null
                                     ? Image.memory(
-                                        base64Decode(item.thumbBinary!))
+                                        base64Decode(gameItem.thumbBinary!))
                                     : null
                                 : null),
                         onTap: () async {
-                          if (item == null) return;
-                          var thumbnail = await getGameThumbFromBGG(item.id);
-                          GameThing.GetBinaryThumb(thumbnail).then((value) {
-                            if (value != null)
+                          if (gameItem == null) return;
+                          var isSearchOnline = await checkInternetConnection();
+                          if (isSearchOnline) {
+                            var thumbnail =
+                                await getGameThumbFromBGG(gameItem.id);
+                            GameThing.GetBinaryThumb(thumbnail).then((value) {
+                              if (value != null)
+                                setState(() {
+                                  widget._imageWidget =
+                                      Image.memory(base64Decode(value));
+                                });
+                            });
+                          } else {
+                            if (gameItem.thumbBinary != null) {
                               setState(() {
-                                widget._imageWidget =
-                                    Image.memory(base64Decode(value));
+                                widget._imageWidget = Image.memory(
+                                    base64Decode(gameItem.thumbBinary!));
                               });
-                          });
+                            } else {
+                              widget._imageWidget =
+                                  Image.asset('assets/no_image.png');
+                            }
+                          }
                           setState(() {
-                            searchController.closeView(item.name);
+                            searchController.closeView(gameItem.name);
                             FocusScope.of(context).unfocus();
 
                             CameraHandler(searchController, widget.cameras,
                                     widget._imageWidget)
-                                .recognizedGameId = item.id;
+                                .recognizedGameId = gameItem.id;
                             CameraHandler(searchController, widget.cameras,
                                     widget._imageWidget)
-                                .recognizedGame = item;
+                                .recognizedGame = gameItem;
                           });
                         }),
                     const Divider(

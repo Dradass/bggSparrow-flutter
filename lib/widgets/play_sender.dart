@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/db/game_things_sql.dart';
 import 'package:flutter_application_1/db/plays_sql.dart';
+import 'package:flutter_application_1/login_handler.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_application_1/main.dart';
 import '../db/location_sql.dart';
@@ -105,7 +106,6 @@ class _PlaySenderState extends State<PlaySender> {
           String stringData = json.encode(widget.logData);
           print(stringData);
           if (!hasInternetConnection) {
-            // TODO сохранять данные локально в БД, если нет сети. Отправлять их при старте приложения и наличии сети.
             ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
                 content: Text(
                     'Play has been saved locally and will be sent when the internet is available.')));
@@ -150,7 +150,10 @@ class _PlaySenderState extends State<PlaySender> {
 Future<int> sendLogRequest(String logData) async {
   print("-----start sending");
   dynamic bodyLogin = json.encode({
-    'credentials': {'username': 'dradass', 'password': '1414141414'}
+    'credentials': {
+      'username': LoginHandler().login,
+      'password': LoginHandler().getDecryptedPassword()
+    }
   });
 
   http

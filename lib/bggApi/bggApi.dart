@@ -15,11 +15,12 @@ import 'package:requests/requests.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import '../task_checker.dart';
+import '../login_handler.dart';
 
 Future<void> importGameCollectionFromBGG(refreshProgress) async {
   await GameThingSQL.createTable();
   final collectionResponse = await http.get(Uri.parse(
-      'https://boardgamegeek.com/xmlapi2/collection?username=dradass'));
+      'https://boardgamegeek.com/xmlapi2/collection?username=${LoginHandler().login}'));
 
   if (collectionResponse.statusCode == 200) {
     final rootNode = xml.XmlDocument.parse(collectionResponse.body);
@@ -164,8 +165,6 @@ Future<void> getAllPlaysFromServer() async {
 
 Future<bool> getPlaysFromPage(
     int pageNumber, int maxPlayerId, maxLocationId) async {
-  const userName = 'dradass';
-
   List<Player> uniquePlayers = [];
   List<Player> currentPlayers = [];
   List<String> winnersNames = [];
@@ -174,7 +173,7 @@ Future<bool> getPlaysFromPage(
 
   print("getPlaysFromPage. create players, iteration = $pageNumber");
   final collectionResponse = await http.get(Uri.parse(
-      'https://boardgamegeek.com/xmlapi2/plays?username=$userName&page=$pageNumber'));
+      'https://boardgamegeek.com/xmlapi2/plays?username=${LoginHandler().login}&page=$pageNumber'));
   final rootNode = xml.XmlDocument.parse(collectionResponse.body);
   if (rootNode.findElements('plays').isEmpty) return false;
   final playsRoot = rootNode.findElements('plays').first;
@@ -434,7 +433,10 @@ Future<int> sendLogPlayToBGG(BggPlay bggPlay) async {
 Future<int> sendLogRequest(String logData) async {
   print("-----start sending");
   dynamic bodyLogin = json.encode({
-    'credentials': {'username': 'dradass', 'password': '1414141414'}
+    'credentials': {
+      'username': LoginHandler().login,
+      'password': LoginHandler().getDecryptedPassword()
+    }
   });
 
   http
@@ -551,7 +553,7 @@ Future<List<GameThing>?> searchGamesFromBGG(String searchString) async {
 
 Future<bool> checkInternetConnection() async {
   var connectivityResult = await (Connectivity().checkConnectivity());
-  //return false;
+  // return false;
   if (connectivityResult.contains(ConnectivityResult.mobile)) {
     return true;
   } else if (connectivityResult.contains(ConnectivityResult.wifi)) {

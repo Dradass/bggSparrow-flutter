@@ -5,6 +5,7 @@ import '../navigation_bar.dart';
 import '../pages/login_screen.dart';
 import '../bggApi/bggApi.dart';
 import '../db/game_things_sql.dart';
+import '../login_handler.dart';
 
 late List<CameraDescription> cameras;
 const primaryTextColor = Color.fromARGB(255, 85, 92, 89);
@@ -14,8 +15,11 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   GameThingSQL.initTables();
   cameras = await availableCameras();
-  // TODO Проверять только при наличии сети, и если логин и пароль пустые
   needLogin = !await checkLoginFromStorage();
+  if (!needLogin) {
+    await LoginHandler().fillLogin();
+    await LoginHandler().fillEncryptedPassword();
+  }
 
   runApp(MaterialApp(
     routes: {
@@ -24,7 +28,6 @@ Future<void> main() async {
     },
     initialRoute: needLogin ? '/login' : '/navigation',
     theme: ThemeData(
-        //primaryColor: Color.fromARGB(255, 219, 202, 124),
         textTheme: const TextTheme()
             .apply(bodyColor: primaryTextColor, displayColor: Colors.blue),
         colorScheme: const ColorScheme(
@@ -45,14 +48,14 @@ Future<void> main() async {
           ),
         ),
         elevatedButtonTheme: ElevatedButtonThemeData(
-          style: ButtonStyle(
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              padding: WidgetStateProperty.all<EdgeInsets>(EdgeInsets.zero),
-              shape: WidgetStateProperty.all<RoundedRectangleBorder>(
-                  const RoundedRectangleBorder(
-                      borderRadius: BorderRadius.zero,
-                      side: BorderSide(color: Colors.black12)))),
-        ),
+            style: ElevatedButton.styleFrom(
+          //backgroundColor: Colors.amberAccent,
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          padding: EdgeInsets.zero,
+          shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.zero),
+              side: BorderSide(color: Colors.black12)),
+        )),
         sliderTheme:
             SliderThemeData(overlayShape: SliderComponentShape.noOverlay)),
   ));

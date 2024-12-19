@@ -428,6 +428,9 @@ class _StatisticsState extends State<Statistics> {
                                   "Total plays: ${allGames.fold(0, (sum, item) => sum + item.count!)} total games: ${allGames.length}";
                             });
                           },
+                          style: ButtonStyle(
+                              backgroundColor: WidgetStateProperty.all(
+                                  Theme.of(context).colorScheme.secondary)),
                           label: const Text("Get plays"),
                           icon: const Icon(Icons.leaderboard),
                         )),
