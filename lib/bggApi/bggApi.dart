@@ -181,8 +181,6 @@ Future<bool> getPlaysFromPage(
 
   if (plays.isEmpty) return false;
 
-  print("getPlaysFromPage. plays count = ${plays.length}");
-
   for (var play in plays) {
     winnersNames = [];
     final objectId = int.parse(play.getAttribute('id').toString());
@@ -238,7 +236,6 @@ Future<bool> getPlaysFromPage(
         }
       }
     }
-    print('winners = {$winnersNames}');
     var bggPlay = BggPlay(
         id: objectId,
         gameId: gameId,
@@ -330,10 +327,8 @@ Future<bool> checkLoginByRequest(String username, String password) async {
           },
           body: bodyLogin);
   if (response.hasError) {
-    print("Wrong login");
     return false;
   } else {
-    print("Login is correct");
     return true;
   }
 }
@@ -385,11 +380,11 @@ Future<void> sendOfflinePlaysToBGG() async {
 
 Future<void> initializeBggData(
     LoadingStatus loadingStatus, refreshProgress) async {
-  loadingStatus.status = "Starting to import collection from server.";
+  loadingStatus.status = "Starting to import game collection from server.";
 
   await importGameCollectionFromBGG(refreshProgress);
 
-  refreshProgress(true, "New state");
+  refreshProgress(true, "Getting plays info.");
   int maxPlayerId = await PlayersSQL.getMaxID();
   int maxLocationId = await LocationSQL.getMaxID();
   await getPlaysFromPage(1, maxPlayerId, maxLocationId);
@@ -397,7 +392,7 @@ Future<void> initializeBggData(
   await getGamesThumbnail(refreshProgress);
   await getGamesPlayersCount(refreshProgress);
   TaskChecker().needCancel = false;
-  refreshProgress(true, "End");
+  //refreshProgress(true, "End");
 }
 
 Future<int> sendLogPlayToBGG(BggPlay bggPlay) async {
@@ -506,7 +501,6 @@ Future<List<GameThing>?> searchGamesFromBGG(String searchString) async {
     return games;
   }
 
-  ///xmlapi2/search?parameters
   var response = await http.get(
       Uri.parse(
           "https://boardgamegeek.com/xmlapi2/search?query=$searchString&type=boardgame"),

@@ -34,11 +34,11 @@ Future<void> main() async {
             brightness: Brightness.light,
             primary: primaryTextColor,
             onPrimary: Color.fromARGB(255, 183, 187, 187),
-            secondary: Color.fromARGB(255, 46, 207, 127),
+            secondary: Color.fromARGB(255, 110, 235, 173),
             onSecondary: primaryTextColor,
             error: Colors.red,
             onError: primaryTextColor,
-            surface: Color.fromARGB(255, 148, 226, 181),
+            surface: Color.fromARGB(255, 224, 255, 237),
             onSurface: primaryTextColor),
         secondaryHeaderColor: const Color.fromARGB(255, 43, 132, 190),
         chipTheme: const ChipThemeData(

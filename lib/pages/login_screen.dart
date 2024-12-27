@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/login_handler.dart';
 import 'package:flutter_application_1/task_checker.dart';
 import '../bggApi/bggApi.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -53,9 +54,12 @@ class _LoginScreenState extends State<LoginScreen> {
 void updateLoginPassword(
     String username, String password, BuildContext context) {
   const storage = FlutterSecureStorage();
+
+  LoginHandler().fillEncryptedPassword();
+  LoginHandler().fillLogin();
+
   storage.read(key: userNameParamName).then((usernameStorage) {
     if (usernameStorage == null) {
-      print("no param");
       storage.write(key: userNameParamName, value: username);
     } else {
       storage.write(key: userNameParamName, value: username);
@@ -64,7 +68,6 @@ void updateLoginPassword(
 
   storage.read(key: passwordParamName).then((passwordParam) {
     if (passwordParam == null) {
-      print("no param");
       storage.write(key: passwordParamName, value: password);
     } else {
       storage.write(key: passwordParamName, value: password);
@@ -109,6 +112,10 @@ class _LoginButtonState extends State<LoginButton> {
                           }
                       })
             },
+        style: ButtonStyle(
+          backgroundColor:
+              WidgetStateProperty.all(Theme.of(context).colorScheme.secondary),
+        ),
         child: const Text("Log in"));
   }
 }

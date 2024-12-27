@@ -171,6 +171,7 @@ class _LogScaffoldState extends State<LogScaffold> {
                 ),
                 title: const Text('Load all data'),
                 onTap: () {
+                  GameThingSQL.initTables();
                   getAllPlaysFromServer();
                 },
               ),

@@ -36,7 +36,6 @@ class _CameraHandlerState extends State<CameraHandler> {
   Future<int?> TakePhoto() async {
     var result = 0;
 
-    print("---------------Got photo");
     try {
       var capturedImage = await widget._controller.takePicture();
       var bytes = await capturedImage.readAsBytes();
@@ -44,7 +43,6 @@ class _CameraHandlerState extends State<CameraHandler> {
       imageDart.Image? img = imageDart.decodeImage(bytes);
       if (img == null) return 0;
 
-      //print("Height = ${WidgetsBinding.instance.window.physicalSize.height}");
       var ratio = img.height / 150;
       imageDart.Image resizedImg = imageDart.copyResize(img,
           width: (img.width / ratio).round(),
@@ -94,7 +92,6 @@ class _CameraHandlerState extends State<CameraHandler> {
           bestSimilarity = similarity;
         }
       }
-      //bestSimilarity = 0;
       print("bestSimilarGameID = $bestSimilarGameID");
       matching.dispose();
       return bestSimilarGameID;
@@ -136,9 +133,8 @@ class _CameraHandlerState extends State<CameraHandler> {
               context: context,
               builder: (dialogBuilder) {
                 return AlertDialog(
-                  title: const Text('Take photo'),
+                  title: const Text('Place the box in the center'),
                   content: Column(children: [
-                    //Text(recognizedImage),
                     SizedBox(
                       width: MediaQuery.of(context).size.width * 0.8,
                       height: MediaQuery.of(context).size.height * 0.5,
@@ -150,38 +146,44 @@ class _CameraHandlerState extends State<CameraHandler> {
                         // child:
                         // Expanded(
                         child: ElevatedButton(
-                          onPressed: () async {
-                            widget.recognizedGameId = 0;
-                            Navigator.of(context, rootNavigator: true).pop();
-                            setState(() {
-                              widget.searchController.text = "Game recognizing";
-                            });
-                            var gameId = await TakePhoto();
-                            var recognizedGameName = "Cant find similar game";
+                            onPressed: () async {
+                              widget.recognizedGameId = 0;
+                              Navigator.of(context, rootNavigator: true).pop();
+                              setState(() {
+                                widget.searchController.text =
+                                    "Game recognizing";
+                              });
+                              var gameId = await TakePhoto();
+                              var recognizedGameName = "Cant find similar game";
 
-                            if (gameId != null) {
-                              widget.recognizedGame =
-                                  await GameThingSQL.selectGameByID(gameId);
-                              if (widget.recognizedGame != null) {
-                                widget.recognizedGameId =
-                                    widget.recognizedGame!.id;
+                              if (gameId != null) {
+                                widget.recognizedGame =
+                                    await GameThingSQL.selectGameByID(gameId);
+                                if (widget.recognizedGame != null) {
+                                  widget.recognizedGameId =
+                                      widget.recognizedGame!.id;
 
-                                recognizedGameName =
-                                    widget.recognizedGame!.name;
+                                  recognizedGameName =
+                                      widget.recognizedGame!.name;
+                                }
                               }
-                            }
 
-                            setState(() {
-                              widget.searchController.text = recognizedGameName;
-                              if (widget.recognizedGame?.thumbBinary != null) {
-                                widget._imagewidget = Image.memory(base64Decode(
-                                    widget.recognizedGame!.thumbBinary
-                                        .toString()));
-                              }
-                            });
-                          },
-                          child: const Text('Take a photo'),
-                        )
+                              setState(() {
+                                widget.searchController.text =
+                                    recognizedGameName;
+                                if (widget.recognizedGame?.thumbBinary !=
+                                    null) {
+                                  widget._imagewidget = Image.memory(
+                                      base64Decode(widget
+                                          .recognizedGame!.thumbBinary
+                                          .toString()));
+                                }
+                              });
+                            },
+                            child: const Text('Take a photo'),
+                            style: ButtonStyle(
+                                backgroundColor: WidgetStateProperty.all(
+                                    Theme.of(context).colorScheme.secondary)))
                         //)
                         )
                   ]),

@@ -187,6 +187,7 @@ class _CommentsState extends State<Comments> {
       keyboardType: TextInputType.multiline,
       maxLines: 5,
       decoration: InputDecoration(
+          contentPadding: EdgeInsets.all(10.0),
           suffixIcon: IconButton(
               onPressed: widget.commentsController.clear,
               icon: const Icon(Icons.clear)),
@@ -219,8 +220,6 @@ class _DurationSliderWidgetState extends State<DurationSliderWidget> {
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
-        //SizedBox(height: 10),
-        //const Text("Duration"),
         Slider(
           value: widget.durationCurrentValue,
           max: 500,
