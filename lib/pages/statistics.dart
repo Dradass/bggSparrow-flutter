@@ -5,8 +5,16 @@ import '../db/plays_sql.dart';
 import '../models/bgg_play_model.dart';
 import '../bggApi/bggApi.dart';
 
+import 'dart:io';
+import 'package:path_provider/path_provider.dart';
+import '../widgets/log_page_widgets.dart';
+import 'package:flutter_application_1/main.dart';
+import '../widgets/common.dart';
+
 // Free licence for small companies <5 developers and 1 millions $
 import 'package:syncfusion_flutter_charts/charts.dart';
+
+import 'package:open_file/open_file.dart';
 
 class Statistics extends StatefulWidget {
   const Statistics({super.key});
@@ -24,11 +32,13 @@ class _StatisticsState extends State<Statistics> {
   var dateFormat = DateFormat('yyyy-MM-dd');
   String statsSummary = "";
   List<_GamePlaysCount> gamePlays = [];
+  bool needFilterByGame = false;
   bool winRate = false;
   bool onlyChosenPlayers = false;
   bool winnerAmongChosenPlayers = false;
   RangeValues maxRangeValues = const RangeValues(0, 10);
   List<Map> players = [];
+  final SearchController searchController = SearchController();
 
   @override
   Widget build(BuildContext context) {
@@ -262,7 +272,7 @@ class _StatisticsState extends State<Statistics> {
                   children: [
                     Container(
                         color: Colors.brown,
-                        width: MediaQuery.of(context).size.width * 0.5,
+                        width: MediaQuery.of(context).size.width * 0.4,
                         height: double.maxFinite,
                         child: ElevatedButton.icon(
                           onPressed: () async {
@@ -436,7 +446,7 @@ class _StatisticsState extends State<Statistics> {
                         )),
                     Container(
                         color: Colors.brown,
-                        width: MediaQuery.of(context).size.width * 0.5,
+                        width: MediaQuery.of(context).size.width * 0.4,
                         height: double.maxFinite,
                         child: ElevatedButton.icon(
                           onPressed: () async {
@@ -505,6 +515,22 @@ class _StatisticsState extends State<Statistics> {
                                           mainAxisAlignment:
                                               MainAxisAlignment.spaceBetween,
                                           children: [
+                                            // ChoiceChip(
+                                            //   label: const Text(
+                                            //       "Need filter by game"),
+                                            //   selected: needFilterByGame,
+                                            //   onSelected: (bool value) {
+                                            //     setState(() {
+                                            //       needFilterByGame = value;
+                                            //     });
+                                            //   },
+                                            //   shape:
+                                            //       const RoundedRectangleBorder(
+                                            //     side: BorderSide(
+                                            //         color: Colors.black12),
+                                            //     borderRadius: BorderRadius.zero,
+                                            //   ),
+                                            // ),
                                             ChoiceChip(
                                               label: const Text("Winrate"),
                                               selected: winRate,
@@ -606,6 +632,16 @@ class _StatisticsState extends State<Statistics> {
                           },
                           label: const Text("Filters"),
                           icon: const Icon(Icons.filter_alt),
+                        )),
+                    Container(
+                        color: Colors.brown,
+                        width: MediaQuery.of(context).size.width * 0.2,
+                        height: double.maxFinite,
+                        child: ElevatedButton.icon(
+                          onPressed: () async {
+                            exportCSV();
+                          },
+                          label: const Text("Export table"),
                         ))
                   ])),
           Flexible(
@@ -700,6 +736,59 @@ class _StatisticsState extends State<Statistics> {
         ],
       ),
     )));
+  }
+
+  void exportCSV() async {
+    String csv =
+        "id,date,gameId,gameName,quantity,location,players,winners,comments,duration\n";
+
+    for (var play in plays) {
+      csv +=
+          "${play.id},${play.date},${play.gameId},${play.gameName},${play.quantity},${play.location},${play.players},${play.winners},${play.comments},${play.duration}\n"; // Добавьте данные
+    }
+
+    Directory directory;
+    if (Platform.isAndroid) {
+      directory = Directory('/storage/emulated/0/Download');
+    } else if (Platform.isIOS) {
+      directory = await getApplicationDocumentsDirectory();
+    } else {
+      throw Exception("Unsupported platform");
+    }
+    String baseFileName =
+        "bggSparrow_stats_${dateFormat.format(startDate!)}_${dateFormat.format(endDate!)}";
+    String fileExtension = ".csv";
+
+    int fileIndex = 1;
+    String fileName = "$baseFileName($fileIndex)$fileExtension";
+    String path = "${directory.path}/$fileName";
+
+    // Проверяем, существует ли файл, и увеличиваем номер, если это так
+    while (await File(path).exists()) {
+      fileIndex++;
+      fileName = "$baseFileName($fileIndex)$fileExtension";
+      path = "${directory.path}/$fileName";
+    }
+
+    File file = File(path);
+    await file.writeAsString(csv);
+
+    // Разделение строки по символу '/'
+    List<String> parts = directory.path.split('/');
+    if (parts.isNotEmpty && parts.last.isEmpty) {
+      parts.removeLast();
+    }
+    final folderName = parts.last;
+
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        action: SnackBarAction(
+          label: 'Open file',
+          onPressed: () async {
+            final filePath = path;
+            await OpenFile.open(filePath);
+          },
+        ),
+        content: Text("Table was exported to: '$folderName'")));
   }
 }
 

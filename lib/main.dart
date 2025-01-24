@@ -7,6 +7,11 @@ import '../bggApi/bggApi.dart';
 import '../db/game_things_sql.dart';
 import '../login_handler.dart';
 
+// TODO
+// 1) Store Switch value for online \ offline search mode
+// 2) Stats: new games this month / year
+// 3) Stats: filter stats by game
+
 late List<CameraDescription> cameras;
 const primaryTextColor = Color.fromARGB(255, 85, 92, 89);
 bool backgroundLoading = false;
@@ -38,7 +43,7 @@ Future<void> main() async {
             onSecondary: primaryTextColor,
             error: Colors.red,
             onError: primaryTextColor,
-            surface: Color.fromARGB(255, 224, 255, 237),
+            surface: Color.fromARGB(255, 224, 250, 235),
             onSurface: primaryTextColor),
         secondaryHeaderColor: const Color.fromARGB(255, 43, 132, 190),
         chipTheme: const ChipThemeData(

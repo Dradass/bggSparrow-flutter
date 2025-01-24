@@ -30,6 +30,7 @@ class _LogScaffoldState extends State<LogScaffold> {
   final SearchController searchController = SearchController();
   var hasInternetConnection = false;
   String binaryImageData = "";
+  bool isOnlineSearchModeDefault = true;
   final Image _imagewidget = Image.asset('assets/no_image.png');
 
   @override
@@ -183,6 +184,35 @@ class _LogScaffoldState extends State<LogScaffold> {
                 onTap: () {
                   GameThingSQL.deleteDB();
                 },
+              ),
+              ListTile(
+                leading: Icon(
+                  Icons.wifi,
+                ),
+                title: Row(
+                  children: [
+                    Text("Default search mode:"),
+                    ChoiceChip(
+                      showCheckmark: false,
+                      label: SizedBox(
+                          width: MediaQuery.of(context).size.width * 0.1,
+                          child: isOnlineSearchModeDefault
+                              ? const Icon(Icons.wifi)
+                              : const Icon(Icons.wifi_off)),
+                      selected: isOnlineSearchModeDefault,
+                      onSelected: (bool value) {
+                        setState(() {
+                          isOnlineSearchModeDefault = value;
+                        });
+                      },
+                      shape: const RoundedRectangleBorder(
+                        side: BorderSide(color: Colors.black12),
+                        borderRadius: BorderRadius.zero,
+                      ),
+                    ),
+                  ],
+                ),
+                onTap: () {},
               ),
             ],
           ),
