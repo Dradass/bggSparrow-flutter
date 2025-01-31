@@ -4,6 +4,8 @@ import '../bggApi/bggApi.dart';
 import '../db/location_sql.dart';
 import 'package:flutter_application_1/models/bgg_location.dart';
 import 'package:flutter_application_1/models/game_thing.dart';
+import '../db/system_table.dart';
+import '../models/system_parameters.dart';
 
 import 'package:camera/camera.dart';
 
@@ -338,6 +340,7 @@ class GamePicker extends StatefulWidget {
 
 class _GamePickerState extends State<GamePicker> {
   bool isSearchOnline = false;
+  bool onlineSearchModeFromDB = true;
   bool onlineSearchMode = true;
 
   @override
@@ -350,6 +353,17 @@ class _GamePickerState extends State<GamePicker> {
   void initState() {
     super.initState();
     widget.searchController.text = "Select game";
+
+    SystemParameterSQL.selectSystemParameterById(2)
+        .then((onlineSearchModeParamValue) => {
+              if (onlineSearchModeParamValue != null)
+                {
+                  print(onlineSearchModeParamValue.value),
+                  setState(() {
+                    onlineSearchMode = onlineSearchModeParamValue.value == "1";
+                  })
+                }
+            });
   }
 
   @override

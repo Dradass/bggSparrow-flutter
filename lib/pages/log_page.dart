@@ -68,6 +68,22 @@ class _LogScaffoldState extends State<LogScaffold> {
                     }
                   });
 
+                  // Check "search mode" system param
+                  SystemParameterSQL.selectSystemParameterById(2)
+                      .then((isSearchModeOnline) {
+                    if (isSearchModeOnline == null) {
+                      SystemParameterSQL.addSystemParameter(SystemParameter(
+                              id: 2, name: "isSearchModeOnline", value: "1"))
+                          .then((value) {
+                        if (value == 0) print("Cant insert param");
+                      });
+                    } else {
+                      isOnlineSearchModeDefault =
+                          isSearchModeOnline.value == "1";
+                      print("isSearchModeOnline = ${isSearchModeOnline.value}");
+                    }
+                  });
+
                   var initializeProgress =
                       initializeBggData(loadingStatus, refreshProgress);
                   initializeProgress.then((value) {
@@ -191,28 +207,18 @@ class _LogScaffoldState extends State<LogScaffold> {
                 ),
                 title: Row(
                   children: [
-                    Text("Default search mode:"),
-                    ChoiceChip(
-                      showCheckmark: false,
-                      label: SizedBox(
-                          width: MediaQuery.of(context).size.width * 0.1,
-                          child: isOnlineSearchModeDefault
-                              ? const Icon(Icons.wifi)
-                              : const Icon(Icons.wifi_off)),
-                      selected: isOnlineSearchModeDefault,
-                      onSelected: (bool value) {
-                        setState(() {
-                          isOnlineSearchModeDefault = value;
-                        });
-                      },
-                      shape: const RoundedRectangleBorder(
-                        side: BorderSide(color: Colors.black12),
-                        borderRadius: BorderRadius.zero,
-                      ),
-                    ),
+                    Text(
+                        "Default search mode: ${isOnlineSearchModeDefault ? 'Online' : 'Offline'}")
                   ],
                 ),
-                onTap: () {},
+                onTap: () {
+                  isOnlineSearchModeDefault = !isOnlineSearchModeDefault;
+                  SystemParameterSQL.updateSystemParameter(SystemParameter(
+                          id: 2,
+                          name: "isSearchModeOnline",
+                          value: isOnlineSearchModeDefault ? "1" : "0"))
+                      .then((onValue) => {setState(() {})});
+                },
               ),
             ],
           ),

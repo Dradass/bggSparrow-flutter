@@ -8,9 +8,8 @@ import '../db/game_things_sql.dart';
 import '../login_handler.dart';
 
 // TODO
-// 1) Store Switch value for online \ offline search mode
-// 2) Stats: new games this month / year
-// 3) Stats: filter stats by game
+// 1) Stats: new games this month / year
+// 2) Stats: filter stats by game
 
 late List<CameraDescription> cameras;
 const primaryTextColor = Color.fromARGB(255, 85, 92, 89);
