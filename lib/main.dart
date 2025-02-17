@@ -8,7 +8,6 @@ import '../db/game_things_sql.dart';
 import '../login_handler.dart';
 
 // TODO
-// 1) Stats: new games this month / year
 // 2) Stats: filter stats by game
 
 late List<CameraDescription> cameras;
@@ -42,7 +41,7 @@ Future<void> main() async {
             onSecondary: primaryTextColor,
             error: Colors.red,
             onError: primaryTextColor,
-            surface: Color.fromARGB(255, 224, 250, 235),
+            surface: Color.fromARGB(255, 247, 255, 249),
             onSurface: primaryTextColor),
         secondaryHeaderColor: const Color.fromARGB(255, 43, 132, 190),
         chipTheme: const ChipThemeData(

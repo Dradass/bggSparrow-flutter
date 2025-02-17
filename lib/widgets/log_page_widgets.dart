@@ -5,7 +5,6 @@ import '../db/location_sql.dart';
 import 'package:flutter_application_1/models/bgg_location.dart';
 import 'package:flutter_application_1/models/game_thing.dart';
 import '../db/system_table.dart';
-import '../models/system_parameters.dart';
 
 import 'package:camera/camera.dart';
 

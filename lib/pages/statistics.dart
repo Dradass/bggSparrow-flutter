@@ -5,11 +5,10 @@ import '../db/plays_sql.dart';
 import '../models/bgg_play_model.dart';
 import '../bggApi/bggApi.dart';
 
+import '../db/game_things_sql.dart';
+
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
-import '../widgets/log_page_widgets.dart';
-import 'package:flutter_application_1/main.dart';
-import '../widgets/common.dart';
 
 // Free licence for small companies <5 developers and 1 millions $
 import 'package:syncfusion_flutter_charts/charts.dart';
@@ -38,10 +37,25 @@ class _StatisticsState extends State<Statistics> {
   bool winnerAmongChosenPlayers = false;
   RangeValues maxRangeValues = const RangeValues(0, 10);
   List<Map> players = [];
+  Map<int, String> chosenGames = {};
   final SearchController searchController = SearchController();
+  var chosenGameId = 0;
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
+    GameThingSQL.getAllGames().then((allGames) {
+      chosenGames[0] = "All games";
+      if (allGames == null) return;
+      for (var game in allGames) {
+        chosenGames[game.id] = game.name;
+      }
+    });
+
     return Scaffold(
         body: SafeArea(
             child: DefaultTabController(
@@ -272,181 +286,7 @@ class _StatisticsState extends State<Statistics> {
                   children: [
                     Container(
                         color: Colors.brown,
-                        width: MediaQuery.of(context).size.width * 0.4,
-                        height: double.maxFinite,
-                        child: ElevatedButton.icon(
-                          onPressed: () async {
-                            List<BggPlay> allPlays = [];
-                            plays.clear();
-                            allPlays =
-                                await PlaysSQL.getAllPlays(startDate, endDate);
-
-                            var chosenPlayers = players
-                                .where((element) => element['isChecked']);
-
-                            var excludedPlayers =
-                                players.where((element) => element['excluded']);
-
-                            // Get plays with chosen players
-                            if (chosenPlayers.isEmpty) {
-                              plays = allPlays;
-                            } else {
-                              for (var allPlay in allPlays) {
-                                if (allPlay.players == null) continue;
-
-                                // Exclude players
-                                var haveExcludedPlayer = false;
-                                for (var excludedPlayer in excludedPlayers) {
-                                  if (allPlay.players!
-                                      .split(";")
-                                      .join("|")
-                                      .contains(excludedPlayer['name'])) {
-                                    haveExcludedPlayer = true;
-                                    break;
-                                  }
-                                }
-                                if (haveExcludedPlayer) continue;
-
-                                var chosenMatches = 0;
-                                var winnerAmongThisPlay = false;
-                                for (var chosenPlayer in chosenPlayers) {
-                                  if (allPlay.players!
-                                      .split(";")
-                                      .join("|")
-                                      .contains(chosenPlayer['name'])) {
-                                    chosenMatches++;
-                                  }
-                                }
-
-                                // Check winner among chosen players
-                                for (var chosenPlayer in chosenPlayers) {
-                                  if (allPlay.winners!
-                                      .split(";")
-                                      .contains(chosenPlayer['name'])) {
-                                    winnerAmongThisPlay = true;
-                                    break;
-                                  }
-                                }
-
-                                if (onlyChosenPlayers) {
-                                  if (chosenMatches ==
-                                          allPlay.players!.split(";").length &&
-                                      chosenMatches == chosenPlayers.length) {
-                                    if (winnerAmongChosenPlayers &&
-                                        !winnerAmongThisPlay) continue;
-                                    plays.add(allPlay);
-                                  }
-                                } else {
-                                  if (chosenMatches >= chosenPlayers.length) {
-                                    if (winnerAmongChosenPlayers &&
-                                        !winnerAmongThisPlay) continue;
-                                    plays.add(allPlay);
-                                  }
-                                }
-                              }
-                            }
-
-                            plays = plays
-                                .where((e) =>
-                                    e.players!.split(';').length <=
-                                        maxRangeValues.end &&
-                                    e.players!.split(';').length >=
-                                        maxRangeValues.start)
-                                .toList();
-
-                            // Get all plays and plays count for each game
-                            gamePlays.clear();
-                            List<_GamePlaysCount> allGames = [];
-                            List<_GamePlaysCount> allWinners = [];
-                            var allPlayers = (await PlayersSQL.getAllPlayers());
-                            if (!winRate) {
-                              for (var play in plays) {
-                                if (allGames
-                                    .map((e) => e.gameName)
-                                    .contains(play.gameName)) {
-                                  var gamePlay = allGames
-                                      .where((element) =>
-                                          element.gameName == play.gameName)
-                                      .first;
-                                  gamePlay.count =
-                                      gamePlay.count! + play.quantity!;
-                                } else {
-                                  allGames.add(_GamePlaysCount(
-                                      play.gameName,
-                                      play.gameName,
-                                      play.quantity,
-                                      play.gameId));
-                                }
-                              }
-                              // Winrate
-                            } else {
-                              for (var play in plays) {
-                                if (play.winners != null &&
-                                    play.winners!.isNotEmpty) {
-                                  var winners = play.winners!.split(';');
-
-                                  for (var winner in winners) {
-                                    if (winner == '0') {
-                                      continue;
-                                    }
-                                    if (allWinners
-                                        .map((e) => e.gameName)
-                                        .contains(winner)) {
-                                      var existingWinner = allWinners
-                                          .where((element) =>
-                                              element.gameName == winner)
-                                          .first;
-                                      existingWinner.count =
-                                          existingWinner.count! + 1;
-                                    } else {
-                                      var winnerFromDb = allPlayers
-                                          .where((e) => e['name'] == (winner));
-                                      if (winnerFromDb.isEmpty) {
-                                        continue;
-                                      }
-
-                                      allWinners.add(_GamePlaysCount(winner,
-                                          winner, 1, winnerFromDb.first['id']));
-                                    }
-                                  }
-                                }
-                              }
-                            }
-
-                            if (winRate) {
-                              allGames = allWinners;
-                            }
-
-                            for (var e in allGames) {
-                              e.gameNameShort.length > 20
-                                  ? e.gameNameShort =
-                                      "${e.gameNameShort.substring(0, 18)}..."
-                                  : e.gameNameShort;
-                            }
-                            allGames
-                                .sort((a, b) => b.count!.compareTo(a.count!));
-                            if (firstGamesCount != 0) {
-                              gamePlays = allGames
-                                  .take(firstGamesCount.round())
-                                  .toList();
-                            } else {
-                              gamePlays = allGames;
-                            }
-
-                            setState(() {
-                              statsSummary =
-                                  "Total plays: ${allGames.fold(0, (sum, item) => sum + item.count!)} total games: ${allGames.length}";
-                            });
-                          },
-                          style: ButtonStyle(
-                              backgroundColor: WidgetStateProperty.all(
-                                  Theme.of(context).colorScheme.secondary)),
-                          label: const Text("Get plays"),
-                          icon: const Icon(Icons.leaderboard),
-                        )),
-                    Container(
-                        color: Colors.brown,
-                        width: MediaQuery.of(context).size.width * 0.4,
+                        width: MediaQuery.of(context).size.width * 0.3,
                         height: double.maxFinite,
                         child: ElevatedButton.icon(
                           onPressed: () async {
@@ -531,6 +371,31 @@ class _StatisticsState extends State<Statistics> {
                                             //     borderRadius: BorderRadius.zero,
                                             //   ),
                                             // ),
+                                            DropdownButton(
+                                              value: chosenGames.isNotEmpty
+                                                  ? chosenGames[chosenGameId]
+                                                  : null,
+                                              onChanged: (String? value) {
+                                                print(value);
+                                                // setState(() {
+                                                //   dropdownValue = value!;
+                                                // });
+                                                chosenGameId = chosenGames
+                                                    .entries
+                                                    .firstWhere((entry) =>
+                                                        entry.value == value)
+                                                    .key;
+                                                print(chosenGameId);
+                                                setState(() {});
+                                              },
+                                              items: chosenGames.values.map<
+                                                      DropdownMenuItem<String>>(
+                                                  (String value) {
+                                                return DropdownMenuItem<String>(
+                                                    value: value,
+                                                    child: Text(value));
+                                              }).toList(),
+                                            ),
                                             ChoiceChip(
                                               label: const Text("Winrate"),
                                               selected: winRate,
@@ -635,7 +500,197 @@ class _StatisticsState extends State<Statistics> {
                         )),
                     Container(
                         color: Colors.brown,
-                        width: MediaQuery.of(context).size.width * 0.2,
+                        width: MediaQuery.of(context).size.width * 0.4,
+                        height: double.maxFinite,
+                        child: ElevatedButton.icon(
+                          onPressed: () async {
+                            List<BggPlay> allPlays = [];
+                            plays.clear();
+                            allPlays =
+                                await PlaysSQL.getAllPlays(startDate, endDate);
+
+                            var chosenPlayers = players
+                                .where((element) => element['isChecked']);
+
+                            var excludedPlayers =
+                                players.where((element) => element['excluded']);
+
+                            // Get plays with chosen players
+                            if (chosenPlayers.isEmpty) {
+                              plays = allPlays;
+                            } else {
+                              for (var allPlay in allPlays) {
+                                if (allPlay.players == null) continue;
+
+                                // Exclude players
+                                var haveExcludedPlayer = false;
+                                for (var excludedPlayer in excludedPlayers) {
+                                  if (allPlay.players!
+                                      .split(";")
+                                      .join("|")
+                                      .contains(excludedPlayer['name'])) {
+                                    haveExcludedPlayer = true;
+                                    break;
+                                  }
+                                }
+                                if (haveExcludedPlayer) continue;
+
+                                var chosenMatches = 0;
+                                var winnerAmongThisPlay = false;
+                                for (var chosenPlayer in chosenPlayers) {
+                                  if (allPlay.players!
+                                      .split(";")
+                                      .join("|")
+                                      .contains(chosenPlayer['name'])) {
+                                    chosenMatches++;
+                                  }
+                                }
+
+                                // Check winner among chosen players
+                                for (var chosenPlayer in chosenPlayers) {
+                                  if (allPlay.winners!
+                                      .split(";")
+                                      .contains(chosenPlayer['name'])) {
+                                    winnerAmongThisPlay = true;
+                                    break;
+                                  }
+                                }
+
+                                if (onlyChosenPlayers) {
+                                  if (chosenMatches ==
+                                          allPlay.players!.split(";").length &&
+                                      chosenMatches == chosenPlayers.length) {
+                                    if (winnerAmongChosenPlayers &&
+                                        !winnerAmongThisPlay) continue;
+                                    plays.add(allPlay);
+                                  }
+                                } else {
+                                  if (chosenMatches >= chosenPlayers.length) {
+                                    if (winnerAmongChosenPlayers &&
+                                        !winnerAmongThisPlay) continue;
+                                    plays.add(allPlay);
+                                  }
+                                }
+                              }
+                            }
+
+                            if (chosenGameId != 0)
+                              plays = plays
+                                  .where((e) => e.gameId == chosenGameId)
+                                  .toList();
+
+                            plays = plays
+                                .where((e) =>
+                                    e.players!.split(';').length <=
+                                        maxRangeValues.end &&
+                                    e.players!.split(';').length >=
+                                        maxRangeValues.start)
+                                .toList();
+
+                            // Get all plays and plays count for each game
+                            gamePlays.clear();
+                            List<_GamePlaysCount> allGames = [];
+                            List<_GamePlaysCount> allWinners = [];
+                            var allPlayers = (await PlayersSQL.getAllPlayers());
+                            if (!winRate) {
+                              for (var play in plays) {
+                                if (allGames
+                                    .map((e) => e.gameName)
+                                    .contains(play.gameName)) {
+                                  var gamePlay = allGames
+                                      .where((element) =>
+                                          element.gameName == play.gameName)
+                                      .first;
+                                  gamePlay.count =
+                                      gamePlay.count! + play.quantity!;
+                                } else {
+                                  allGames.add(_GamePlaysCount(
+                                      play.gameName,
+                                      play.gameName,
+                                      play.quantity,
+                                      play.gameId));
+                                }
+                              }
+                              // Winrate
+                            } else {
+                              for (var play in plays) {
+                                if (play.winners != null &&
+                                    play.winners!.isNotEmpty) {
+                                  var winners = play.winners!.split(';');
+
+                                  for (var winner in winners) {
+                                    if (winner == '0') {
+                                      continue;
+                                    }
+                                    if (allWinners
+                                        .map((e) => e.gameName)
+                                        .contains(winner)) {
+                                      var existingWinner = allWinners
+                                          .where((element) =>
+                                              element.gameName == winner)
+                                          .first;
+                                      existingWinner.count =
+                                          existingWinner.count! + 1;
+                                    } else {
+                                      var winnerFromDb = allPlayers
+                                          .where((e) => e['name'] == (winner));
+                                      if (winnerFromDb.isEmpty) {
+                                        continue;
+                                      }
+
+                                      allWinners.add(_GamePlaysCount(winner,
+                                          winner, 1, winnerFromDb.first['id']));
+                                    }
+                                  }
+                                }
+                              }
+                            }
+
+                            if (winRate) {
+                              allGames = allWinners;
+                            }
+
+                            for (var e in allGames) {
+                              e.gameNameShort.length > 20
+                                  ? e.gameNameShort =
+                                      "${e.gameNameShort.substring(0, 18)}..."
+                                  : e.gameNameShort;
+                            }
+                            allGames
+                                .sort((a, b) => b.count!.compareTo(a.count!));
+                            if (firstGamesCount != 0) {
+                              gamePlays = allGames
+                                  .take(firstGamesCount.round())
+                                  .toList();
+                            } else {
+                              gamePlays = allGames;
+                            }
+
+                            setState(() {
+                              statsSummary =
+                                  "Total plays: ${allGames.fold(0, (sum, item) => sum + item.count!)} total games: ${allGames.length}";
+                            });
+                          },
+                          style: ButtonStyle(
+                              backgroundColor: WidgetStateProperty.all(
+                                  Theme.of(context).colorScheme.secondary)),
+                          label: const Text("Get plays"),
+                          icon: const Icon(Icons.leaderboard),
+                        )),
+                    Container(
+                        color: Colors.brown,
+                        width: MediaQuery.of(context).size.width * 0.15,
+                        height: double.maxFinite,
+                        child: ElevatedButton.icon(
+                          onPressed: () async {
+                            plays = await getNewPlays();
+                            setState(() {});
+                          },
+                          label: const Text("New games"),
+                        )),
+                    Container(
+                        color: Colors.brown,
+                        width: MediaQuery.of(context).size.width * 0.15,
                         height: double.maxFinite,
                         child: ElevatedButton.icon(
                           onPressed: () async {
@@ -736,6 +791,30 @@ class _StatisticsState extends State<Statistics> {
         ],
       ),
     )));
+  }
+
+  Future<List<BggPlay>> getNewPlays() async {
+    List<BggPlay> chosenPeriodPlays = [];
+    chosenPeriodPlays = await PlaysSQL.getAllPlays(startDate, endDate);
+    chosenPeriodPlays.sort((a, b) => a.id.compareTo(b.id));
+    Set<int> firstPlaysGameIds = {};
+    List<BggPlay> firstPlays = [];
+
+    for (var play in chosenPeriodPlays) {
+      if (firstPlaysGameIds.add(play.gameId)) {
+        firstPlays.add(play);
+      }
+    }
+
+    List<BggPlay> oldPlays = [];
+    oldPlays = await PlaysSQL.getAllPlays(DateTime(2000), startDate);
+
+    List<BggPlay> newPlays = firstPlays
+        .where((element) =>
+            !oldPlays.map((e) => e.gameId).contains(element.gameId))
+        .toList();
+
+    return (newPlays);
   }
 
   void exportCSV() async {
