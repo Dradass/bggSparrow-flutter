@@ -154,8 +154,6 @@ class _LogScaffoldState extends State<LogScaffold> {
                 FlexButton(PlayersPicker(), 3),
                 FlexButton(
                     GamePicker(searchController, cameras, _imagewidget), 3),
-                FlexButton(
-                    CameraHandler(searchController, cameras, _imagewidget), 3),
               ],
             )
           ],

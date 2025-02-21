@@ -11,6 +11,12 @@ import 'package:camera/camera.dart';
 import 'dart:convert';
 import '../widgets/camera_handler.dart';
 
+import '../db/game_things_sql.dart';
+import 'package:image/image.dart' as imageDart;
+
+import 'package:flutter/services.dart';
+import 'package:flutter_pixelmatching/flutter_pixelmatching.dart';
+
 class PlayDatePicker extends StatefulWidget {
   static final PlayDatePicker _singleton = PlayDatePicker._internal();
 
@@ -333,6 +339,10 @@ class GamePicker extends StatefulWidget {
   List<GameThing>? filteredGames = [];
   Image _imageWidget;
 
+  int recognizedGameId = 0;
+  GameThing? recognizedGame;
+  late CameraController _controller;
+
   @override
   State<GamePicker> createState() => _GamePickerState();
 }
@@ -363,6 +373,90 @@ class _GamePickerState extends State<GamePicker> {
                   })
                 }
             });
+
+    widget._controller = CameraController(
+        widget.cameras.first, ResolutionPreset.max,
+        enableAudio: false);
+    widget._controller.initialize().then((_) {
+      if (!mounted) {
+        return;
+      }
+      setState(() {});
+    }).catchError((Object e) {
+      if (e is CameraException) {
+        switch (e.code) {
+          case 'CameraAccessDenied':
+            print("access was denied");
+            break;
+          default:
+            print(e.description);
+            break;
+        }
+      }
+    });
+  }
+
+  Future<int?> TakePhoto() async {
+    var result = 0;
+
+    try {
+      var capturedImage = await widget._controller.takePicture();
+      var bytes = await capturedImage.readAsBytes();
+
+      imageDart.Image? img = imageDart.decodeImage(bytes);
+      if (img == null) return 0;
+
+      var ratio = img.height / 150;
+      imageDart.Image resizedImg = imageDart.copyResize(img,
+          width: (img.width / ratio).round(),
+          height: (img.height / ratio).round());
+
+      var imgBytes = imageDart.encodeJpg(resizedImg);
+
+      var getGamesWithThumb = await GameThingSQL.getAllGames();
+
+      if (getGamesWithThumb == null) return 0;
+      print("recognizedImage = $widget.recognizedImage");
+
+      int bestGameID = 0;
+      bestGameID = await getSimilarGameID(imgBytes, getGamesWithThumb);
+
+      print(bestGameID);
+      result = bestGameID;
+      return result;
+    } catch (e) {
+      // If an error occurs, log the error to the console.
+      print(e);
+      return 0;
+    }
+  }
+
+  Future<int> getSimilarGameID(
+      Uint8List bytes, List<GameThing> getGamesWithThumb) async {
+    final matching = PixelMatching();
+    await matching.initialize(image: bytes);
+
+    var bestSimilarity = 0.0;
+    var bestSimilarGameID = 0;
+    if (matching.isInitialized) {
+      for (final gameImage in getGamesWithThumb) {
+        if (gameImage.thumbBinary == null) continue;
+        final binaryImage = base64Decode(gameImage.thumbBinary!);
+
+        final similarity = await matching.similarity(binaryImage);
+        print(
+            "game = ${gameImage.name}, id = ${gameImage.id}, similarity = $similarity");
+        if (similarity > bestSimilarity) {
+          bestSimilarGameID = gameImage.id;
+          bestSimilarity = similarity;
+        }
+      }
+      print("bestSimilarGameID = $bestSimilarGameID");
+      matching.dispose();
+      return bestSimilarGameID;
+    }
+    matching.dispose();
+    return bestSimilarGameID;
   }
 
   @override
@@ -377,7 +471,7 @@ class _GamePickerState extends State<GamePicker> {
             child: widget._imageWidget),
         Container(
           padding: const EdgeInsets.only(right: 0),
-          width: MediaQuery.of(context).size.width * 0.6,
+          width: MediaQuery.of(context).size.width * 0.5,
           height: MediaQuery.of(context).size.height,
           // height: MediaQuery.of(context).size.height *
           //     0.5,
@@ -400,7 +494,7 @@ class _GamePickerState extends State<GamePicker> {
                     searchController.openView();
                   },
                   padding: const WidgetStatePropertyAll<EdgeInsets>(
-                      EdgeInsets.symmetric(horizontal: 16.0)),
+                      EdgeInsets.symmetric(horizontal: 1.0)),
                 );
               },
               suggestionsBuilder: (context, searchController) async {
@@ -482,8 +576,89 @@ class _GamePickerState extends State<GamePicker> {
               }),
         ),
         Container(
+          padding: const EdgeInsets.only(right: 0),
+          width: MediaQuery.of(context).size.width * 0.15,
+          child: ElevatedButton.icon(
+              onPressed: () {
+                showDialog(
+                    context: context,
+                    builder: (dialogBuilder) {
+                      return AlertDialog(
+                        title: const Text('Place the box in the center'),
+                        content: Column(children: [
+                          SizedBox(
+                            width: MediaQuery.of(context).size.width * 0.8,
+                            height: MediaQuery.of(context).size.height * 0.5,
+                            child: CameraPreview(widget._controller),
+                          ),
+                          SizedBox(
+                              width: MediaQuery.of(context).size.width,
+                              //height: MediaQuery.of(context).size.height * 0.3,
+                              // child:
+                              // Expanded(
+                              child: ElevatedButton(
+                                  onPressed: () async {
+                                    widget.recognizedGameId = 0;
+                                    Navigator.of(context, rootNavigator: true)
+                                        .pop();
+                                    setState(() {
+                                      widget.searchController.text =
+                                          "Game recognizing";
+                                    });
+                                    var gameId = await TakePhoto();
+                                    var recognizedGameName =
+                                        "Cant find similar game";
+
+                                    if (gameId != null) {
+                                      widget.recognizedGame =
+                                          await GameThingSQL.selectGameByID(
+                                              gameId);
+                                      if (widget.recognizedGame != null) {
+                                        widget.recognizedGameId =
+                                            widget.recognizedGame!.id;
+
+                                        recognizedGameName =
+                                            widget.recognizedGame!.name;
+                                      }
+                                    }
+
+                                    setState(() {
+                                      widget.searchController.text =
+                                          recognizedGameName;
+                                      if (widget.recognizedGame?.thumbBinary !=
+                                          null) {
+                                        widget._imageWidget = Image.memory(
+                                            base64Decode(widget
+                                                .recognizedGame!.thumbBinary
+                                                .toString()));
+                                      }
+                                    });
+                                  },
+                                  child: const Text('Take a photo'),
+                                  style: ButtonStyle(
+                                      backgroundColor: WidgetStateProperty.all(
+                                          Theme.of(context)
+                                              .colorScheme
+                                              .secondary)))
+                              //)
+                              )
+                        ]),
+                      );
+                    });
+              },
+              style: ButtonStyle(
+                  // backgroundColor: MaterialStateProperty.all(
+                  //     Theme.of(context).primaryColor),
+                  shape: WidgetStateProperty.all<RoundedRectangleBorder>(
+                      const RoundedRectangleBorder(
+                          borderRadius: BorderRadius.zero,
+                          side: BorderSide(color: Colors.black12)))),
+              label: const Text(""),
+              icon: const Icon(Icons.photo_camera)),
+        ),
+        Container(
             padding: const EdgeInsets.only(right: 0),
-            width: MediaQuery.of(context).size.width * 0.2,
+            width: MediaQuery.of(context).size.width * 0.15,
             child: ChoiceChip(
               showCheckmark: false,
               materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
