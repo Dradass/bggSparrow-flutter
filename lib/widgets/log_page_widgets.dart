@@ -5,11 +5,11 @@ import '../db/location_sql.dart';
 import 'package:flutter_application_1/models/bgg_location.dart';
 import 'package:flutter_application_1/models/game_thing.dart';
 import '../db/system_table.dart';
+import '../globals.dart';
 
 import 'package:camera/camera.dart';
 
 import 'dart:convert';
-import '../widgets/camera_handler.dart';
 
 import '../db/game_things_sql.dart';
 import 'package:image/image.dart' as imageDart;
@@ -559,12 +559,8 @@ class _GamePickerState extends State<GamePicker> {
                             searchController.closeView(gameItem.name);
                             FocusScope.of(context).unfocus();
 
-                            CameraHandler(searchController, widget.cameras,
-                                    widget._imageWidget)
-                                .recognizedGameId = gameItem.id;
-                            CameraHandler(searchController, widget.cameras,
-                                    widget._imageWidget)
-                                .recognizedGame = gameItem;
+                            selectedGameId = gameItem.id;
+                            selectedGame = gameItem;
                           });
                         }),
                     const Divider(
@@ -633,6 +629,9 @@ class _GamePickerState extends State<GamePicker> {
                                                 .toString()));
                                       }
                                     });
+
+                                    selectedGameId = widget.recognizedGameId;
+                                    selectedGame = widget.recognizedGame;
                                   },
                                   child: const Text('Take a photo'),
                                   style: ButtonStyle(

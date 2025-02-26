@@ -3,15 +3,14 @@ import 'package:flutter_application_1/db/game_things_sql.dart';
 import 'package:flutter_application_1/db/plays_sql.dart';
 import 'package:flutter_application_1/login_handler.dart';
 import 'package:intl/intl.dart';
-import 'package:flutter_application_1/main.dart';
 import '../db/location_sql.dart';
 import '../models/bgg_play_model.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../bggApi/bggApi.dart';
+import '../globals.dart';
 
 import '../widgets/log_page_widgets.dart';
-import '../widgets/camera_handler.dart';
 
 class PlaySender extends StatefulWidget {
   static PlaySender? _singleton;
@@ -66,10 +65,7 @@ class _PlaySenderState extends State<PlaySender> {
           //var hasInternetConnection = false;
           final hasInternetConnection = await checkInternetConnection();
 
-          if (CameraHandler(
-                      widget.searchController, cameras, widget._imagewidget)
-                  .recognizedGameId <=
-              0) {
+          if (selectedGameId <= 0) {
             ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
               content: Text('No game was chosen to log play'),
             ));
@@ -85,9 +81,7 @@ class _PlaySenderState extends State<PlaySender> {
               'win': player['win'] ? 1 : 0
             });
           }
-          final gameId = CameraHandler(
-                  widget.searchController, cameras, widget._imagewidget)
-              .recognizedGameId;
+          final gameId = selectedGameId;
           final dateShort =
               DateFormat('yyyy-MM-dd').format(PlayDatePicker().playDate);
           final duration = DurationSliderWidget().durationCurrentValue.round();

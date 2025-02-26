@@ -5,7 +5,6 @@ import '../db/system_table.dart';
 import '../bggApi/bggApi.dart';
 import '../models/system_parameters.dart';
 import '../widgets/log_page_widgets.dart';
-import '../widgets/camera_handler.dart';
 import '../widgets/play_sender.dart';
 import '../widgets/common.dart';
 import '../task_checker.dart';
