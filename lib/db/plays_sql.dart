@@ -9,10 +9,7 @@ class PlaysSQL {
 
   static Future<Database> _getDB() async {
     return openDatabase(join(await getDatabasesPath(), _dbName),
-        onCreate: (db, version) async {
-      // await db.execute(
-      //     "CREATE TABLE Players(id INTEGER PRIMARY KEY, name TEXT NOT NULL, userid INTEGER, username TEXT);");
-    }, version: _version);
+        onCreate: (db, version) async {}, version: _version);
   }
 
   static void createTable() async {
@@ -30,7 +27,6 @@ class PlaysSQL {
   static Future<int> addPlay(BggPlay bggPlay) async {
     print("Adding play id = ${bggPlay.id}");
     final db = await _getDB();
-    //if (player.username == null) player.username = '';
     return await db.insert("Plays", bggPlay.toJson(),
         conflictAlgorithm: ConflictAlgorithm.replace);
   }
@@ -50,7 +46,6 @@ class PlaysSQL {
 
   static Future<BggPlay?> selectPlayByID(int playId) async {
     final db = await _getDB();
-    //return await db.("Games", where: 'id = ?', whereArgs: [gameThing.id]);
     List<Map<String, dynamic>> result =
         await db.rawQuery('SELECT * FROM Plays WHERE id=?', [playId]);
     if (result.isEmpty) {
@@ -74,9 +69,8 @@ class PlaysSQL {
 
   static Future<int?> getMinFreeOfflinePlayId() async {
     final db = await _getDB();
-    List<Map<String, dynamic>> result = await db.rawQuery(
-        //'select coalesce(MIN(t2.id) - 1, 0) from Plays t left outer join Plays t2 on t.id = t2.id - 1 where t2.id is null;');
-        'select MIN(id) - 1 from Plays;');
+    List<Map<String, dynamic>> result =
+        await db.rawQuery('select MIN(id) - 1 from Plays;');
     if (result.isEmpty) {
       return null;
     }
@@ -89,7 +83,6 @@ class PlaysSQL {
 
   static Future<List<BggPlay>> selectOfflineLoggedPlays() async {
     final db = await _getDB();
-    //return await db.("Games", where: 'id = ?', whereArgs: [gameThing.id]);
     List<Map<String, dynamic>> result =
         await db.rawQuery('SELECT * FROM Plays WHERE offline=1');
     if (result.isEmpty) {

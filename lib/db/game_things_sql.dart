@@ -1,6 +1,5 @@
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
-
 import '../models/game_thing.dart';
 
 class GameThingSQL {
@@ -31,10 +30,6 @@ class GameThingSQL {
     final db = await _getDB();
     await db.execute(
         "CREATE TABLE IF NOT EXISTS Games(id INTEGER PRIMARY KEY, name TEXT NOT NULL, image TEXT NOT NULL, thumbnail TEXT NOT NULL, thumbbin TEXT, minPlayers INTEGER, maxPlayers INTEGER, owned INTEGER, yearpublished DATETIME);");
-    // await db.execute(
-    //     "CREATE TABLE Games(id INTEGER PRIMARY KEY, name TEXT NOT NULL, image TEXT NOT NULL, thumbnail TEXT NOT NULL, thumbbin TEXT);");
-    // await db.execute(
-    //     "CREATE TABLE Players(id INTEGER PRIMARY KEY, name TEXT NOT NULL, userid INTEGER, username TEXT);");
   }
 
   static Future<void> initTables() async {
@@ -44,7 +39,6 @@ class GameThingSQL {
   static void deleteDB() async {
     final path = join(await getDatabasesPath(), _dbName);
 
-    //await ((await openDatabase(path)).close());
     await deleteDatabase(path);
   }
 
@@ -77,7 +71,6 @@ class GameThingSQL {
 
   static Future<GameThing?> selectGameByID(int gameId) async {
     final db = await _getDB();
-    //return await db.("Games", where: 'id = ?', whereArgs: [gameThing.id]);
     List<Map<String, dynamic>> result =
         await db.rawQuery('SELECT * FROM Games WHERE id=?', [gameId]);
     if (result.isEmpty) return null;
@@ -95,7 +88,5 @@ class GameThingSQL {
         maps.length, (index) => GameThing.fromJson(maps[index])));
     games.sort((a, b) => a.name.compareTo(b.name));
     return games;
-    // return (List.generate(
-    //     maps.length, (index) => GameThing.fromJson(maps[index])));
   }
 }

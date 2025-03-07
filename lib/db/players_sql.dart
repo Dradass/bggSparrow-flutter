@@ -1,7 +1,5 @@
-
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
-
 import '../models/bgg_player_model.dart';
 
 class PlayersSQL {
@@ -10,10 +8,7 @@ class PlayersSQL {
 
   static Future<Database> _getDB() async {
     return openDatabase(join(await getDatabasesPath(), _dbName),
-        onCreate: (db, version) async {
-      // await db.execute(
-      //     "CREATE TABLE Players(id INTEGER PRIMARY KEY, name TEXT NOT NULL, userid INTEGER, username TEXT);");
-    }, version: _version);
+        onCreate: (db, version) async {}, version: _version);
   }
 
   static void createTable() async {
@@ -32,7 +27,6 @@ class PlayersSQL {
     print(
         "Adding player ${player.name}, id = ${player.id}, userid = ${player.userid}, username = ${player.username}");
     final db = await _getDB();
-    //if (player.username == null) player.username = '';
     return await db.insert("Players", player.toJson(),
         conflictAlgorithm: ConflictAlgorithm.replace);
   }
@@ -52,7 +46,6 @@ class PlayersSQL {
 
   static Future<Player?> selectPlayerByUserID(int userId) async {
     final db = await _getDB();
-    //return await db.("Games", where: 'id = ?', whereArgs: [gameThing.id]);
     List<Map<String, dynamic>> result =
         await db.rawQuery('SELECT * FROM Players WHERE userid=?', [userId]);
     if (result.isEmpty) return null;
@@ -76,7 +69,6 @@ class PlayersSQL {
     var maxId = result.first.values.first;
     if (result.isEmpty || maxId == null) return 0;
     return maxId;
-    //return null;
   }
 
   static Future<List<Map>> getAllPlayers() async {
