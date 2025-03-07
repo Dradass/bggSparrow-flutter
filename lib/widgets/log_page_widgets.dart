@@ -599,7 +599,7 @@ class _GamePickerState extends State<GamePicker> {
                                         .pop();
                                     setState(() {
                                       widget.searchController.text =
-                                          "Game recognizing";
+                                          "Recognizing";
                                     });
                                     var gameId = await TakePhoto();
                                     var recognizedGameName =
