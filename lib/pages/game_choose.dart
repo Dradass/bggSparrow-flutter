@@ -17,27 +17,7 @@ class _GameHelperState extends State<GameHelper> {
   int gamesFilterNeedClear = 0;
   List<Map<GameThing, int>> gamesFromFilter = [];
   List<Map<GameThing, int>> allItems = [];
-  // List<Map<GameThing, int>> items = [];
   final SearchController searchController = SearchController();
-
-  // void queryListener() {
-  //   search(searchController.text);
-  // }
-
-  // void search(String query) {
-  //   if (query.isEmpty) {
-  //     setState(() {
-  //       items = allItems;
-  //     });
-  //   } else {
-  //     setState(() {
-  //       items = allItems
-  //           .where((e) =>
-  //               e.keys.first.name.toLowerCase().contains(query.toLowerCase()))
-  //           .toList();
-  //     });
-  //   }
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -54,7 +34,6 @@ class _GameHelperState extends State<GameHelper> {
         Flexible(
             flex: 1,
             child: SizedBox(
-                //color: Colors.blueAccent,
                 width: MediaQuery.of(context).size.width,
                 height: MediaQuery.of(context).size.height,
                 child: Column(
@@ -78,7 +57,6 @@ class _GameHelperState extends State<GameHelper> {
         Flexible(
             flex: 1,
             child: SizedBox(
-                //color: Colors.blueAccent,
                 width: MediaQuery.of(context).size.width,
                 height: MediaQuery.of(context).size.height,
                 child: Column(
@@ -105,7 +83,6 @@ class _GameHelperState extends State<GameHelper> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   SizedBox(
-                      //color: Colors.brown,
                       width: MediaQuery.of(context).size.width * 0.5,
                       height: double.maxFinite,
                       child: ChoiceChip(
@@ -211,7 +188,6 @@ class _GameHelperState extends State<GameHelper> {
                                             mainAxisAlignment:
                                                 MainAxisAlignment.spaceBetween,
                                             children: [
-                                              //SizedBox(width: 10),
                                               Expanded(
                                                   child: Text(
                                                 (game.keys.first).name,
@@ -233,7 +209,6 @@ class _GameHelperState extends State<GameHelper> {
         Flexible(
             flex: 1,
             child: SizedBox(
-                //color: Colors.blueAccent,
                 width: MediaQuery.of(context).size.width,
                 height: MediaQuery.of(context).size.height,
                 child: ElevatedButton(
@@ -256,8 +231,6 @@ class _GameHelperState extends State<GameHelper> {
                     List<GameThing> filteredGames = [];
                     if (allGames == null) return;
                     for (var game in allGames) {
-                      // print(
-                      //     "Game = ${game.name}, min = ${game.minPlayers}, max = ${game.maxPlayers}");
                       if (isGameMatchChosenPlayersCount(
                           game, chosenPlayersCount, maxRangeValues)) {
                         if (onlyOwnedGames) {
@@ -341,7 +314,6 @@ class _CustomCounterState extends State<CustomCounter> {
         },
         elevation: 2.0,
         shape: const CircleBorder(),
-        //fillColor: Colors.grey,
         child: const Icon(
           Icons.remove,
           color: Colors.black,
@@ -360,7 +332,6 @@ class _CustomCounterState extends State<CustomCounter> {
         },
         elevation: 2.0,
         shape: const CircleBorder(),
-        //fillColor: Colors.grey,
         child: const Icon(
           Icons.add,
           color: Colors.black,

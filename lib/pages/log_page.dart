@@ -113,7 +113,6 @@ class _LogScaffoldState extends State<LogScaffold> {
       },
       child: Scaffold(
         key: _scaffoldKey,
-        // resizeToAvoidBottomInset: false,
         body: SafeArea(
             child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -161,17 +160,11 @@ class _LogScaffoldState extends State<LogScaffold> {
           child: ListView(
             padding: EdgeInsets.zero,
             children: [
+              const ListTile(title: Text('')),
+              const ListTile(title: Text('Settings')),
+              const Divider(),
               ListTile(
-                title: const Text(''),
-              ),
-              ListTile(
-                title: const Text('Settings'),
-              ),
-              Divider(),
-              ListTile(
-                leading: Icon(
-                  Icons.logout,
-                ),
+                leading: const Icon(Icons.logout),
                 title: const Text('Log out'),
                 onTap: () {
                   _scaffoldKey.currentState?.closeDrawer();
@@ -180,9 +173,7 @@ class _LogScaffoldState extends State<LogScaffold> {
                 },
               ),
               ListTile(
-                leading: Icon(
-                  Icons.sync,
-                ),
+                leading: const Icon(Icons.sync),
                 title: const Text('Load all data'),
                 onTap: () {
                   GameThingSQL.initTables();
@@ -190,18 +181,14 @@ class _LogScaffoldState extends State<LogScaffold> {
                 },
               ),
               ListTile(
-                leading: Icon(
-                  Icons.clear,
-                ),
+                leading: const Icon(Icons.clear),
                 title: const Text('Wipe all data'),
                 onTap: () {
                   GameThingSQL.deleteDB();
                 },
               ),
               ListTile(
-                leading: Icon(
-                  Icons.wifi,
-                ),
+                leading: const Icon(Icons.wifi),
                 title: Row(
                   children: [
                     Text(

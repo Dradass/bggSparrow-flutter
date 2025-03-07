@@ -72,30 +72,14 @@ class GameThing {
         yearpublished: yearpublished);
   }
 
-  // factory GameThing.fromXmlCollection(String xmlBody) {
-  //   final document = xml.XmlDocument.parse(xmlBody);
-  //   final itemsNode = document.findElements('items').first;
-  //   final items = itemsNode.findElements('item');
-
-  //   final item = items.first;
-  //   final itemID = int.parse(item.getAttribute("objectid").toString());
-  //   final itemName = item.findElements('name').first.toString();
-  //   final thumbnail = item.findElements('thumbnail').first.toString();
-  //   final image = item.findElements('image').first.toString();
-
-  //   return GameThing(
-  //       name: itemName, id: itemID, thumbnail: thumbnail, image: image);
-  // }
-
   static Future<String?> GetBinaryThumb(String thumbnail) async {
     try {
       var client = RetryClient(http.Client(), retries: 5);
       var response = await client.get(Uri.parse(thumbnail));
       client.close();
 
-      //http.Response response = await http.get(Uri.parse(thumbnail));
       if (response.statusCode == 200) {
-        var imageBytes = response.bodyBytes; //Uint8List
+        var imageBytes = response.bodyBytes;
         var bodyBytes = base64Encode(imageBytes);
         return bodyBytes;
       }
@@ -111,9 +95,8 @@ class GameThing {
       var response = await client.get(Uri.parse(thumbnail));
       client.close();
 
-      //http.Response response = await http.get(Uri.parse(thumbnail));
       if (response.statusCode == 200) {
-        var imageBytes = response.bodyBytes; //Uint8List
+        var imageBytes = response.bodyBytes;
         var bodyBytes = base64Encode(imageBytes);
 
         final gameThing = GameThing(

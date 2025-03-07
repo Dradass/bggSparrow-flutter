@@ -4,16 +4,14 @@ import 'package:intl/intl.dart';
 import '../db/plays_sql.dart';
 import '../models/bgg_play_model.dart';
 import '../bggApi/bggApi.dart';
-
 import '../db/game_things_sql.dart';
 
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
+import 'package:open_file/open_file.dart';
 
 // Free licence for small companies <5 developers and 1 millions $
 import 'package:syncfusion_flutter_charts/charts.dart';
-
-import 'package:open_file/open_file.dart';
 
 class Statistics extends StatefulWidget {
   const Statistics({super.key});
@@ -72,10 +70,8 @@ class _StatisticsState extends State<Statistics> {
           ])),
           LayoutBuilder(builder: ((context, constraints) {
             return SizedBox(
-              //Add this to give height
               height: MediaQuery.of(context).size.height * 0.50,
               child: TabBarView(children: [
-                // StatsTable(plays),
                 SingleChildScrollView(
                     scrollDirection: Axis.vertical,
                     child: DataTable(
@@ -99,18 +95,16 @@ class _StatisticsState extends State<Statistics> {
                         (int index) => DataRow(
                           color: WidgetStateProperty.resolveWith<Color?>(
                               (Set<WidgetState> states) {
-                            // All rows will have the same selected color.
                             if (states.contains(WidgetState.selected)) {
                               return Theme.of(context)
                                   .colorScheme
                                   .primary
                                   .withOpacity(0.08);
                             }
-                            // Even rows will have a grey color.
                             if (index.isEven) {
                               return Colors.grey.withOpacity(0.3);
                             }
-                            return null; // Use default value for other states and odd rows.
+                            return null;
                           }),
                           onSelectChanged: (selected) {
                             if (selected!) {
@@ -136,9 +130,7 @@ class _StatisticsState extends State<Statistics> {
                     child: SingleChildScrollView(
                         scrollDirection: Axis.vertical,
                         child: FittedBox(
-                            child:
-                                //StatsTable(),
-                                DataTable(
+                            child: DataTable(
                           columnSpacing: 20,
                           headingRowHeight: 0,
                           showCheckboxColumn: false,
@@ -166,7 +158,7 @@ class _StatisticsState extends State<Statistics> {
                                 if (index.isEven) {
                                   return Colors.grey.withOpacity(0.3);
                                 }
-                                return null; // Use default value for other states and odd rows.
+                                return null;
                               }),
                               onLongPress: () {
                                 print("Long press");
@@ -198,23 +190,15 @@ class _StatisticsState extends State<Statistics> {
                 SafeArea(
                   child: SfCartesianChart(
                     title: const ChartTitle(text: "Games stats"),
-
                     primaryXAxis: const CategoryAxis(
                       labelRotation: 270,
-                      // labelIntersectAction:
-                      //     AxisLabelIntersectAction.multipleRows,
                       interval: 1,
                       majorGridLines: MajorGridLines(width: 0),
                     ),
-                    // primaryYAxis: const NumericAxis(
-                    //     axisLine: AxisLine(width: 0),
-                    //     labelFormat: '{value}%',
-                    //     majorTickLines: MajorTickLines(size: 0)),
                     tooltipBehavior: TooltipBehavior(enable: true),
                     series: <CartesianSeries<_GamePlaysCount, String>>[
                       ColumnSeries(
                         dataSource: gamePlays,
-                        // name: "Games",
                         dataLabelMapper: (_GamePlaysCount data, _) =>
                             data.gameNameShort,
                         xValueMapper: (_GamePlaysCount data, _) =>
@@ -299,8 +283,6 @@ class _StatisticsState extends State<Statistics> {
                                   return StatefulBuilder(
                                       builder: (context, setState) {
                                     return AlertDialog(
-                                        //insetPadding: EdgeInsets.zero,
-                                        //title: const Text("Your friends"),
                                         content: Column(children: [
                                       const Text(
                                         "Games limit",
@@ -355,37 +337,16 @@ class _StatisticsState extends State<Statistics> {
                                           mainAxisAlignment:
                                               MainAxisAlignment.spaceBetween,
                                           children: [
-                                            // ChoiceChip(
-                                            //   label: const Text(
-                                            //       "Need filter by game"),
-                                            //   selected: needFilterByGame,
-                                            //   onSelected: (bool value) {
-                                            //     setState(() {
-                                            //       needFilterByGame = value;
-                                            //     });
-                                            //   },
-                                            //   shape:
-                                            //       const RoundedRectangleBorder(
-                                            //     side: BorderSide(
-                                            //         color: Colors.black12),
-                                            //     borderRadius: BorderRadius.zero,
-                                            //   ),
-                                            // ),
                                             DropdownButton(
                                               value: chosenGames.isNotEmpty
                                                   ? chosenGames[chosenGameId]
                                                   : null,
                                               onChanged: (String? value) {
-                                                print(value);
-                                                // setState(() {
-                                                //   dropdownValue = value!;
-                                                // });
                                                 chosenGameId = chosenGames
                                                     .entries
                                                     .firstWhere((entry) =>
                                                         entry.value == value)
                                                     .key;
-                                                print(chosenGameId);
                                                 setState(() {});
                                               },
                                               items: chosenGames.values.map<
@@ -574,10 +535,11 @@ class _StatisticsState extends State<Statistics> {
                               }
                             }
 
-                            if (chosenGameId != 0)
+                            if (chosenGameId != 0) {
                               plays = plays
                                   .where((e) => e.gameId == chosenGameId)
                                   .toList();
+                            }
 
                             plays = plays
                                 .where((e) =>
@@ -701,9 +663,6 @@ class _StatisticsState extends State<Statistics> {
                   ])),
           Flexible(
               flex: 1,
-              // color: Colors.amberAccent,
-              // width: MediaQuery.of(context).size.width,
-              //height: MediaQuery.of(context).size.height * 0.125,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
@@ -711,7 +670,6 @@ class _StatisticsState extends State<Statistics> {
                     color: Colors.tealAccent,
                     width: MediaQuery.of(context).size.width * 0.3,
                     height: double.maxFinite,
-                    //height: MediaQuery.of(context).size.height * 0.125,
                     child: ElevatedButton(
                         onPressed: () async {
                           var pickedDate = await showDatePicker(

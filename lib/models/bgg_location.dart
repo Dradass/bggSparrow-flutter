@@ -6,7 +6,6 @@ class Location {
   Location({required this.id, required this.name, this.isDefault = 0});
 
   factory Location.fromJson(Map<String, dynamic> json) {
-    //print("json = $json");
     return Location(
         name: json['name'], id: json['id'], isDefault: json['isDefault']);
   }

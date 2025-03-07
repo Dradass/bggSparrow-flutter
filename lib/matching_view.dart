@@ -48,7 +48,7 @@ class MatchingViewState extends State<MatchingView> {
         print(imageBytes);
 
         // initialize PixelMatching and Camera
-        image = imageBytes; //imgBytes;
+        image = imageBytes;
         initializePixelMatching();
         initializeCamera();
       });
