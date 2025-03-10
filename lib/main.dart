@@ -7,9 +7,6 @@ import '../bggApi/bggApi.dart';
 import '../db/game_things_sql.dart';
 import '../login_handler.dart';
 
-// TODO
-// 2) Stats: filter stats by game
-
 late List<CameraDescription> cameras;
 const primaryTextColor = Color.fromARGB(255, 85, 92, 89);
 bool backgroundLoading = false;
