@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/game_thing.dart';
 import '../db/game_things_sql.dart';
+import 'dart:developer';
 
 class GameHelper extends StatefulWidget {
   const GameHelper({super.key});
@@ -105,7 +106,7 @@ class _GameHelperState extends State<GameHelper> {
                         onPressed: () async {
                           var allGames = await GameThingSQL.getAllGames();
                           if (allGames == null) {
-                            print("No games");
+                            log("No games");
                             return;
                           }
                           allGames.sort((a, b) => a.name.compareTo(b.name));

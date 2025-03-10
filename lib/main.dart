@@ -3,7 +3,7 @@ import 'package:camera/camera.dart';
 import 'dart:async';
 import '../navigation_bar.dart';
 import '../pages/login_screen.dart';
-import '../bggApi/bggApi.dart';
+import 'bggApi/bgg_api.dart';
 import '../db/game_things_sql.dart';
 import '../login_handler.dart';
 

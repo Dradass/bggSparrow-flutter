@@ -7,21 +7,21 @@ import '../db/location_sql.dart';
 import '../models/bgg_play_model.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import '../bggApi/bggApi.dart';
+import '../bggApi/bgg_api.dart';
 import '../globals.dart';
+import 'dart:developer';
 
 import '../widgets/log_page_widgets.dart';
 
 class PlaySender extends StatefulWidget {
   static PlaySender? _singleton;
 
-  factory PlaySender(SearchController searchController, Image _imagewidget) {
-    _singleton ??= PlaySender._internal(searchController, _imagewidget);
+  factory PlaySender(SearchController searchController) {
+    _singleton ??= PlaySender._internal(searchController);
     return _singleton!;
   }
 
-  PlaySender._internal(this.searchController, this._imagewidget);
-  Image _imagewidget;
+  PlaySender._internal(this.searchController);
   SearchController searchController;
   var logData = {
     "playdate": "2024-03-15",
@@ -94,16 +94,13 @@ class _PlaySenderState extends State<PlaySender> {
 
           var chosenLocation = await LocationSQL.selectLocationByName(
               LocationPicker().selectedLocation);
-          print(chosenLocation);
           widget.logData['location'] =
               chosenLocation != null ? chosenLocation.name : "";
           String stringData = json.encode(widget.logData);
-          print(stringData);
           if (!hasInternetConnection) {
             ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
                 content: Text(
                     'Play has been saved locally and will be sent when the internet is available.')));
-            //SystemParameterSQL.addOrUpdateLoggedOfflinePlays();
             final gameThing = await GameThingSQL.selectGameByID(gameId);
             final minFreeId = await PlaysSQL.getMinFreeOfflinePlayId();
             if (minFreeId == null) {

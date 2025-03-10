@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/login_handler.dart';
 import 'package:flutter_application_1/task_checker.dart';
-import '../bggApi/bggApi.dart';
+import '../bggApi/bgg_api.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 const userNameParamName = "username";

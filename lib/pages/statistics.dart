@@ -3,7 +3,7 @@ import 'package:flutter_application_1/db/players_sql.dart';
 import 'package:intl/intl.dart';
 import '../db/plays_sql.dart';
 import '../models/bgg_play_model.dart';
-import '../bggApi/bggApi.dart';
+import '../bggApi/bgg_api.dart';
 import '../db/game_things_sql.dart';
 
 import 'dart:io';
@@ -288,8 +288,7 @@ class _StatisticsState extends State<Statistics> {
                                         "Games limit",
                                         overflow: TextOverflow.ellipsis,
                                       ),
-                                      Container(
-                                          child: Column(
+                                      Column(
                                         mainAxisAlignment:
                                             MainAxisAlignment.spaceBetween,
                                         children: [
@@ -332,7 +331,7 @@ class _StatisticsState extends State<Statistics> {
                                             ),
                                           ),
                                         ],
-                                      )),
+                                      ),
                                       Column(
                                           mainAxisAlignment:
                                               MainAxisAlignment.spaceBetween,

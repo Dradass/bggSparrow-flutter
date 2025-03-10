@@ -2,12 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/main.dart';
 import '../db/game_things_sql.dart';
 import '../db/system_table.dart';
-import '../bggApi/bggApi.dart';
+import '../bggApi/bgg_api.dart';
 import '../models/system_parameters.dart';
 import '../widgets/log_page_widgets.dart';
 import '../widgets/play_sender.dart';
 import '../widgets/common.dart';
 import '../task_checker.dart';
+import 'dart:developer';
 
 class LoadingStatus {
   String status = "";
@@ -59,11 +60,11 @@ class _LogScaffoldState extends State<LogScaffold> {
                       SystemParameterSQL.addSystemParameter(SystemParameter(
                               id: 1, name: "firstLaunch", value: "1"))
                           .then((value) {
-                        if (value == 0) print("Cant insert param");
+                        if (value == 0) log("Cant insert param");
                       });
                       getAllPlaysFromServer();
                     } else {
-                      print("Last launch = ${firstLaunchParam.value}");
+                      log("Last launch = ${firstLaunchParam.value}");
                     }
                   });
 
@@ -74,12 +75,12 @@ class _LogScaffoldState extends State<LogScaffold> {
                       SystemParameterSQL.addSystemParameter(SystemParameter(
                               id: 2, name: "isSearchModeOnline", value: "1"))
                           .then((value) {
-                        if (value == 0) print("Cant insert param");
+                        if (value == 0) log("Cant insert param");
                       });
                     } else {
                       isOnlineSearchModeDefault =
                           isSearchModeOnline.value == "1";
-                      print("isSearchModeOnline = ${isSearchModeOnline.value}");
+                      log("isSearchModeOnline = ${isSearchModeOnline.value}");
                     }
                   });
 
@@ -98,7 +99,7 @@ class _LogScaffoldState extends State<LogScaffold> {
   }
 
   void refreshProgress(bool needShowProgressBar, String statusState) {
-    print("refresh proress: $statusState");
+    log("refresh proress: $statusState");
     setState(() {
       isProgressBarVisible = needShowProgressBar;
       loadingStatus.status = statusState;
@@ -143,12 +144,12 @@ class _LogScaffoldState extends State<LogScaffold> {
                         onPressed: () {
                           _scaffoldKey.currentState?.openDrawer();
                         },
-                        icon: Icon(Icons.settings)),
+                        icon: const Icon(Icons.settings)),
                     3),
                 FlexButton(LocationPicker(), 3),
                 FlexButton(Comments(), 5),
                 FlexButton(DurationSliderWidget(), 3),
-                FlexButton(PlaySender(searchController, _imagewidget), 3),
+                FlexButton(PlaySender(searchController), 3),
                 FlexButton(PlayersPicker(), 3),
                 FlexButton(
                     GamePicker(searchController, cameras, _imagewidget), 3),

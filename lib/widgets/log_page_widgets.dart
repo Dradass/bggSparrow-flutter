@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../bggApi/bggApi.dart';
+import '../bggApi/bgg_api.dart';
 import '../db/location_sql.dart';
 import 'package:flutter_application_1/models/bgg_location.dart';
 import 'package:flutter_application_1/models/game_thing.dart';
@@ -12,10 +12,11 @@ import 'package:camera/camera.dart';
 import 'dart:convert';
 
 import '../db/game_things_sql.dart';
-import 'package:image/image.dart' as imageDart;
+import 'package:image/image.dart' as image_dart;
 
 import 'package:flutter/services.dart';
 import 'package:flutter_pixelmatching/flutter_pixelmatching.dart';
+import 'dart:developer';
 
 class PlayDatePicker extends StatefulWidget {
   static final PlayDatePicker _singleton = PlayDatePicker._internal();
@@ -111,7 +112,7 @@ class _LocationPickerState extends State<LocationPicker> {
                                   }
 
                                   location['isDefault'] = value ? 1 : 0;
-                                  print(value);
+                                  log(value.toString());
                                   var locationObject = Location(
                                       id: location['id'],
                                       name: location['name'],
@@ -192,7 +193,7 @@ class _CommentsState extends State<Comments> {
       keyboardType: TextInputType.multiline,
       maxLines: 5,
       decoration: InputDecoration(
-          contentPadding: EdgeInsets.all(10.0),
+          contentPadding: const EdgeInsets.all(10.0),
           suffixIcon: IconButton(
               onPressed: widget.commentsController.clear,
               icon: const Icon(Icons.clear)),
@@ -325,19 +326,18 @@ class GamePicker extends StatefulWidget {
   static GamePicker? _singleton;
 
   factory GamePicker(SearchController searchController,
-      List<CameraDescription> cameras, Image _imageWidget) {
-    _singleton ??=
-        GamePicker._internal(searchController, cameras, _imageWidget);
+      List<CameraDescription> cameras, Image imageWidget) {
+    _singleton ??= GamePicker._internal(searchController, cameras, imageWidget);
     return _singleton!;
   }
 
-  GamePicker._internal(this.searchController, this.cameras, this._imageWidget);
+  GamePicker._internal(this.searchController, this.cameras, this.imageWidget);
 
   SearchController searchController;
   List<CameraDescription> cameras;
   List<GameThing>? allGames = [];
   List<GameThing>? filteredGames = [];
-  Image _imageWidget;
+  Image imageWidget;
 
   int recognizedGameId = 0;
   GameThing? recognizedGame;
@@ -367,7 +367,7 @@ class _GamePickerState extends State<GamePicker> {
         .then((onlineSearchModeParamValue) => {
               if (onlineSearchModeParamValue != null)
                 {
-                  print(onlineSearchModeParamValue.value),
+                  log(onlineSearchModeParamValue.value.toString()),
                   setState(() {
                     onlineSearchMode = onlineSearchModeParamValue.value == "1";
                   })
@@ -386,47 +386,47 @@ class _GamePickerState extends State<GamePicker> {
       if (e is CameraException) {
         switch (e.code) {
           case 'CameraAccessDenied':
-            print("access was denied");
+            log("access was denied");
             break;
           default:
-            print(e.description);
+            log(e.description.toString());
             break;
         }
       }
     });
   }
 
-  Future<int?> TakePhoto() async {
+  Future<int?> takePhoto() async {
     var result = 0;
 
     try {
       var capturedImage = await widget._controller.takePicture();
       var bytes = await capturedImage.readAsBytes();
 
-      imageDart.Image? img = imageDart.decodeImage(bytes);
+      image_dart.Image? img = image_dart.decodeImage(bytes);
       if (img == null) return 0;
 
       var ratio = img.height / 150;
-      imageDart.Image resizedImg = imageDart.copyResize(img,
+      image_dart.Image resizedImg = image_dart.copyResize(img,
           width: (img.width / ratio).round(),
           height: (img.height / ratio).round());
 
-      var imgBytes = imageDart.encodeJpg(resizedImg);
+      var imgBytes = image_dart.encodeJpg(resizedImg);
 
       var getGamesWithThumb = await GameThingSQL.getAllGames();
 
       if (getGamesWithThumb == null) return 0;
-      print("recognizedImage = $widget.recognizedImage");
+      log("recognizedImage = $widget.recognizedImage");
 
       int bestGameID = 0;
       bestGameID = await getSimilarGameID(imgBytes, getGamesWithThumb);
 
-      print(bestGameID);
+      log(bestGameID.toString());
       result = bestGameID;
       return result;
     } catch (e) {
       // If an error occurs, log the error to the console.
-      print(e);
+      log(e.toString());
       return 0;
     }
   }
@@ -444,14 +444,13 @@ class _GamePickerState extends State<GamePicker> {
         final binaryImage = base64Decode(gameImage.thumbBinary!);
 
         final similarity = await matching.similarity(binaryImage);
-        print(
-            "game = ${gameImage.name}, id = ${gameImage.id}, similarity = $similarity");
+        log("game = ${gameImage.name}, id = ${gameImage.id}, similarity = $similarity");
         if (similarity > bestSimilarity) {
           bestSimilarGameID = gameImage.id;
           bestSimilarity = similarity;
         }
       }
-      print("bestSimilarGameID = $bestSimilarGameID");
+      log("bestSimilarGameID = $bestSimilarGameID");
       matching.dispose();
       return bestSimilarGameID;
     }
@@ -468,7 +467,7 @@ class _GamePickerState extends State<GamePicker> {
         Container(
             padding: const EdgeInsets.only(right: 0),
             width: MediaQuery.of(context).size.width * 0.2,
-            child: widget._imageWidget),
+            child: widget.imageWidget),
         Container(
           padding: const EdgeInsets.only(right: 0),
           width: MediaQuery.of(context).size.width * 0.5,
@@ -538,20 +537,21 @@ class _GamePickerState extends State<GamePicker> {
                             var thumbnail =
                                 await getGameThumbFromBGG(gameItem.id);
                             GameThing.GetBinaryThumb(thumbnail).then((value) {
-                              if (value != null)
+                              if (value != null) {
                                 setState(() {
-                                  widget._imageWidget =
+                                  widget.imageWidget =
                                       Image.memory(base64Decode(value));
                                 });
+                              }
                             });
                           } else {
                             if (gameItem.thumbBinary != null) {
                               setState(() {
-                                widget._imageWidget = Image.memory(
+                                widget.imageWidget = Image.memory(
                                     base64Decode(gameItem.thumbBinary!));
                               });
                             } else {
-                              widget._imageWidget =
+                              widget.imageWidget =
                                   Image.asset('assets/no_image.png');
                             }
                           }
@@ -601,7 +601,7 @@ class _GamePickerState extends State<GamePicker> {
                                       widget.searchController.text =
                                           "Recognizing";
                                     });
-                                    var gameId = await TakePhoto();
+                                    var gameId = await takePhoto();
                                     var recognizedGameName =
                                         "Cant find similar game";
 
@@ -623,7 +623,7 @@ class _GamePickerState extends State<GamePicker> {
                                           recognizedGameName;
                                       if (widget.recognizedGame?.thumbBinary !=
                                           null) {
-                                        widget._imageWidget = Image.memory(
+                                        widget.imageWidget = Image.memory(
                                             base64Decode(widget
                                                 .recognizedGame!.thumbBinary
                                                 .toString()));
@@ -633,12 +633,12 @@ class _GamePickerState extends State<GamePicker> {
                                     selectedGameId = widget.recognizedGameId;
                                     selectedGame = widget.recognizedGame;
                                   },
-                                  child: const Text('Take a photo'),
                                   style: ButtonStyle(
                                       backgroundColor: WidgetStateProperty.all(
                                           Theme.of(context)
                                               .colorScheme
-                                              .secondary)))
+                                              .secondary)),
+                                  child: const Text('Take a photo'))
                               //)
                               )
                         ]),
