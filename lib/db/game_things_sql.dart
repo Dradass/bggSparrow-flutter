@@ -1,6 +1,7 @@
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 import '../models/game_thing.dart';
+import 'dart:developer';
 
 class GameThingSQL {
   static const int _version = 1;
@@ -23,7 +24,7 @@ class GameThingSQL {
         "CREATE TABLE Plays(id INTEGER PRIMARY KEY, date DATETIME NOT NULL, quantity INTEGER, location TEXT, gameId INTEGER NOT NULL, gameName TEXT NOT NULL, comments TEXT, players TEXT, winners TEXT, duration INTEGER, offline INTEGER);");
     await db.execute(
         "CREATE TABLE SystemParameters(id INTEGER PRIMARY KEY, name TEXT NOT NULL, value TEXT);");
-    print('TABLES WERE CREATED');
+    log('TABLES WERE CREATED');
   }
 
   static Future<void> createTable() async {
@@ -44,13 +45,10 @@ class GameThingSQL {
 
   static void dropTable() async {
     final db = await _getDB();
-    print('drop table');
     await db.execute("DROP TABLE Games;");
   }
 
   static Future<int> addGame(GameThing gameThing) async {
-    final name = gameThing.name;
-    print("Adding game thing $name");
     final db = await _getDB();
     return await db.insert("Games", gameThing.toJson(),
         conflictAlgorithm: ConflictAlgorithm.replace);

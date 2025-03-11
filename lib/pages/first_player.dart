@@ -99,10 +99,8 @@ class _FirstPlayerChoserState extends State<FirstPlayerChoser> {
       },
       onPointerCancel: (opc) {
         clearPointerPosition(opc.pointer);
-        print('onPointerCancel');
       },
       onPointerUp: (opc) {
-        print('onPointerUp');
         clearPointerPosition(opc.pointer);
       },
       child: Stack(children: children),

@@ -19,13 +19,10 @@ class SystemParameterSQL {
 
   static void dropTable() async {
     final db = await _getDB();
-    print('drop table');
     await db.execute("DROP TABLE SystemParameters;");
   }
 
   static Future<int> addSystemParameter(SystemParameter systemParameter) async {
-    print(
-        "Adding system param ${systemParameter.name}, id = ${systemParameter.id}, value = ${systemParameter.value}");
     final db = await _getDB();
     return await db.insert("SystemParameters", systemParameter.toJson(),
         conflictAlgorithm: ConflictAlgorithm.replace);

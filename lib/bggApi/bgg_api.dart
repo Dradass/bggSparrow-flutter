@@ -16,6 +16,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import '../task_checker.dart';
 import '../login_handler.dart';
+import 'dart:developer';
 
 const maxPagesCount = 1000;
 
@@ -38,7 +39,7 @@ Future<void> importGameCollectionFromBGG(refreshProgress) async {
           item.findElements('status').first.getAttribute('own').toString());
       var minPlayers = 0;
       var maxPlayers = 0;
-      print("Importing game $objectName");
+      log("Importing game $objectName");
       refreshProgress(true, "Importing game $objectName");
 
       // Anti DDOS
@@ -64,12 +65,12 @@ Future<void> getGamesThumbnail(refreshProgress) async {
         .where((e) => e.thumbBinary != null && e.thumbBinary!.isNotEmpty)
         .length;
     for (var game in gettingAllGames) {
-      print("Task canceled = ${TaskChecker().needCancel}");
+      log("Task canceled = ${TaskChecker().needCancel}");
       if (TaskChecker().needCancel) {
         return;
       }
       if (game.thumbBinary == null) {
-        game.CreateBinaryThumb();
+        game.createBinaryThumb();
         refreshProgress(true,
             "Creating thumbnails. $gamesWithThumbCount / ${gettingAllGames.length - 1}");
         gamesWithThumbCount += 1;
@@ -90,7 +91,7 @@ Future<String> getGameThumbFromBGG(int gameId) async {
     final gameThingServer = GameThing.fromXml(gameThingResponse.body);
     return gameThingServer.thumbnail;
   } else {
-    print("Error getting thumbnail");
+    log("Error getting thumbnail");
     return "";
   }
 }
@@ -116,7 +117,7 @@ Future<void> getGamesPlayersCount(refreshProgress) async {
         final gameThingServer = GameThing.fromXml(gameThingResponse.body);
         game.minPlayers = gameThingServer.minPlayers;
         game.maxPlayers = gameThingServer.maxPlayers;
-        print("Update players count of game ${game.name} id = ${game.id}");
+        log("Update players count of game ${game.name} id = ${game.id}");
         refreshProgress(true,
             "Update players game info. $gamesWithPlayerInfo / ${gettingAllGames.length - 1}");
         gamesWithPlayerInfo += 1;
@@ -124,8 +125,7 @@ Future<void> getGamesPlayersCount(refreshProgress) async {
         // Anti DDOS
         await Future.delayed(const Duration(milliseconds: 2000));
       } else {
-        print(
-            "Error while getting info about game ${game.name} id = ${game.id}");
+        log("Error while getting info about game ${game.name} id = ${game.id}");
       }
     }
   }
@@ -148,7 +148,7 @@ Future<bool> getPlaysFromPage(
   List<Location> uniqueLocations = [];
   List<BggPlay> bggPlays = [];
 
-  print("getPlaysFromPage. create players, iteration = $pageNumber");
+  log("getPlaysFromPage. create players, iteration = $pageNumber");
   final collectionResponse = await http.get(Uri.parse(
       'https://boardgamegeek.com/xmlapi2/plays?username=${LoginHandler().login}&page=$pageNumber'));
   final rootNode = xml.XmlDocument.parse(collectionResponse.body);
@@ -241,9 +241,9 @@ Future<void> fillLocalPlayers(
   var newBggPlayers = uniquePlayers.where((element) => element.userid != 0);
   for (var newPlayer in newBggPlayers) {
     if (await PlayersSQL.selectPlayerByUserID(newPlayer.userid!) != null) {
-      print("Exist bgg player ${newPlayer.name}, userid = ${newPlayer.userid}");
+      log("Exist bgg player ${newPlayer.name}, userid = ${newPlayer.userid}");
     } else {
-      print("creating bgg player ${newPlayer.name}");
+      log("creating bgg player ${newPlayer.name}");
       maxPlayerId++;
       newPlayer.id = maxPlayerId;
       PlayersSQL.addPlayer(newPlayer);
@@ -254,7 +254,7 @@ Future<void> fillLocalPlayers(
   for (var newPlayer in newNotBggPlayers) {
     var foundResult = await PlayersSQL.selectPlayerByName(newPlayer.name);
     if (foundResult != null) {
-      print("Exist player name ${newPlayer.name}");
+      log("Exist player name ${newPlayer.name}");
     } else {
       maxPlayerId++;
       newPlayer.id = maxPlayerId;
@@ -267,9 +267,9 @@ Future<void> fillLocalLocations(
     List<Location> newLocations, int maxLocationId) async {
   for (var newLocation in newLocations) {
     if (await LocationSQL.selectLocationByName(newLocation.name) != null) {
-      print("Existed location: ${newLocation.name}");
+      log("Existed location: ${newLocation.name}");
     } else {
-      print("New location :${newLocation.name}");
+      log("New location :${newLocation.name}");
       maxLocationId++;
       newLocation.id = maxLocationId;
       newLocation.isDefault = 0;
@@ -280,11 +280,11 @@ Future<void> fillLocalLocations(
 
 Future<void> fillLocalPlays(List<BggPlay> bggPlays) async {
   for (var bggPlay in bggPlays) {
-    print(bggPlay.id);
+    log(bggPlay.id.toString());
     if (await PlaysSQL.selectPlayByID(bggPlay.id) != null) {
-      print("Existed play: ${bggPlay.id}");
+      log("Existed play: ${bggPlay.id}");
     } else {
-      print("New play :${bggPlay.id}");
+      log("New play :${bggPlay.id}");
       PlaysSQL.addPlay(bggPlay);
     }
   }
@@ -400,7 +400,7 @@ Future<int> sendLogPlayToBGG(BggPlay bggPlay) async {
 }
 
 Future<int> sendLogRequest(String logData) async {
-  print("-----start sending");
+  log("Send log request");
   dynamic bodyLogin = json.encode({
     'credentials': {
       'username': LoginHandler().login,

@@ -20,12 +20,10 @@ class PlaysSQL {
 
   static void dropTable() async {
     final db = await _getDB();
-    print('drop table');
     await db.execute("DROP TABLE Plays;");
   }
 
   static Future<int> addPlay(BggPlay bggPlay) async {
-    print("Adding play id = ${bggPlay.id}");
     final db = await _getDB();
     return await db.insert("Plays", bggPlay.toJson(),
         conflictAlgorithm: ConflictAlgorithm.replace);

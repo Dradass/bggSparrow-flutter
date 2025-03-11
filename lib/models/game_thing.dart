@@ -3,6 +3,7 @@ import '../db/game_things_sql.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/retry.dart';
 import 'dart:convert';
+import 'dart:developer';
 
 class GameThing {
   final String name;
@@ -72,7 +73,7 @@ class GameThing {
         yearpublished: yearpublished);
   }
 
-  static Future<String?> GetBinaryThumb(String thumbnail) async {
+  static Future<String?> getBinaryThumb(String thumbnail) async {
     try {
       var client = RetryClient(http.Client(), retries: 5);
       var response = await client.get(Uri.parse(thumbnail));
@@ -84,12 +85,12 @@ class GameThing {
         return bodyBytes;
       }
     } catch (e) {
-      print("Error while creating thumb: $e");
+      log("Error while creating thumb: $e");
     }
     return null;
   }
 
-  Future<void> CreateBinaryThumb() async {
+  Future<void> createBinaryThumb() async {
     try {
       var client = RetryClient(http.Client(), retries: 5);
       var response = await client.get(Uri.parse(thumbnail));
@@ -108,13 +109,13 @@ class GameThing {
             minPlayers: minPlayers,
             maxPlayers: maxPlayers,
             owned: owned);
-        print("Create thumb for $name");
+        log("Create thumb for $name");
         GameThingSQL.updateGame(gameThing);
       } else {
-        print("Error while getting thumb: $name");
+        log("Error while getting thumb: $name");
       }
     } catch (e) {
-      print("Error while creating thumb: $e");
+      log("Error while creating thumb: $e");
     }
   }
 

@@ -536,7 +536,7 @@ class _GamePickerState extends State<GamePicker> {
                           if (isSearchOnline) {
                             var thumbnail =
                                 await getGameThumbFromBGG(gameItem.id);
-                            GameThing.GetBinaryThumb(thumbnail).then((value) {
+                            GameThing.getBinaryThumb(thumbnail).then((value) {
                               if (value != null) {
                                 setState(() {
                                   widget.imageWidget =

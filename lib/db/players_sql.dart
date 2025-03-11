@@ -1,6 +1,7 @@
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 import '../models/bgg_player_model.dart';
+import 'dart:developer';
 
 class PlayersSQL {
   static const int _version = 1;
@@ -19,13 +20,11 @@ class PlayersSQL {
 
   static void dropTable() async {
     final db = await _getDB();
-    print('drop table');
     await db.execute("DROP TABLE Players;");
   }
 
   static Future<int> addPlayer(Player player) async {
-    print(
-        "Adding player ${player.name}, id = ${player.id}, userid = ${player.userid}, username = ${player.username}");
+    log("Adding player ${player.name}, id = ${player.id}, userid = ${player.userid}, username = ${player.username}");
     final db = await _getDB();
     return await db.insert("Players", player.toJson(),
         conflictAlgorithm: ConflictAlgorithm.replace);

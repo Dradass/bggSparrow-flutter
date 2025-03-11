@@ -9,6 +9,7 @@ import '../db/game_things_sql.dart';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:open_file/open_file.dart';
+import 'dart:developer';
 
 // Free licence for small companies <5 developers and 1 millions $
 import 'package:syncfusion_flutter_charts/charts.dart';
@@ -108,8 +109,7 @@ class _StatisticsState extends State<Statistics> {
                           }),
                           onSelectChanged: (selected) {
                             if (selected!) {
-                              print(
-                                  'row-selected: ${plays[index].id}, playes = ${plays[index].players}');
+                              log('row-selected: ${plays[index].id}, playes = ${plays[index].players}');
                             }
                           },
                           cells: <DataCell>[
@@ -161,12 +161,11 @@ class _StatisticsState extends State<Statistics> {
                                 return null;
                               }),
                               onLongPress: () {
-                                print("Long press");
+                                log("Long press");
                               },
                               onSelectChanged: (selected) {
                                 if (selected!) {
-                                  print(
-                                      'row-selected: ${gamePlays[index].gameId}, playes = ${gamePlays[index].count}');
+                                  log('row-selected: ${gamePlays[index].gameId}, playes = ${gamePlays[index].count}');
                                 }
                               },
                               cells: <DataCell>[

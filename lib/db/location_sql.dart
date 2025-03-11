@@ -19,12 +19,10 @@ class LocationSQL {
 
   static void dropTable() async {
     final db = await _getDB();
-    print('drop table');
     await db.execute("DROP TABLE Locations;");
   }
 
   static Future<int> addLocation(Location location) async {
-    print("Adding location ${location.name}, id = ${location.id}");
     final db = await _getDB();
     return await db.insert("Locations", location.toJson(),
         conflictAlgorithm: ConflictAlgorithm.replace);
@@ -84,7 +82,6 @@ class LocationSQL {
     List<Map> locations = [];
     List<Map<String, dynamic>> result =
         await db.rawQuery('SELECT * FROM Locations WHERE isdefault=1');
-    print(result);
     if (result.isEmpty) return null;
     for (var locationResult in result) {
       var location = Location.fromJson(locationResult);
@@ -99,7 +96,6 @@ class LocationSQL {
 
   static void updateDefaultLocation(Location location) async {
     var defaultLocation = await getDefaultLocation();
-    print(defaultLocation);
 
     if (defaultLocation != null) {
       updateLocation(Location(
@@ -107,6 +103,5 @@ class LocationSQL {
     }
 
     updateLocation(location);
-    print("new def loca = ${location.name}, isdefault = ${location.isDefault}");
   }
 }
