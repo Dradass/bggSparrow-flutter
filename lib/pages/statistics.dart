@@ -62,13 +62,12 @@ class _StatisticsState extends State<Statistics> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          Container(
-              child: const TabBar(tabs: [
+          const TabBar(tabs: [
             Tab(text: "Plays"),
             Tab(text: "Table"),
             Tab(text: "Histogram"),
             Tab(text: "Piechart"),
-          ])),
+          ]),
           LayoutBuilder(builder: ((context, constraints) {
             return SizedBox(
               height: MediaQuery.of(context).size.height * 0.50,
@@ -126,66 +125,64 @@ class _StatisticsState extends State<Statistics> {
                         ),
                       ),
                     )),
-                Container(
-                    child: SingleChildScrollView(
-                        scrollDirection: Axis.vertical,
-                        child: FittedBox(
-                            child: DataTable(
-                          columnSpacing: 20,
-                          headingRowHeight: 0,
-                          showCheckboxColumn: false,
-                          columns: const <DataColumn>[
-                            DataColumn(
-                              label: Text('Game'),
-                            ),
-                            DataColumn(
-                              label: Text('Quantity'),
-                            ),
-                          ],
-                          rows: List<DataRow>.generate(
-                            gamePlays.length,
-                            (int index) => DataRow(
-                              color: WidgetStateProperty.resolveWith<Color?>(
-                                  (Set<WidgetState> states) {
-                                // All rows will have the same selected color.
-                                if (states.contains(WidgetState.selected)) {
-                                  return Theme.of(context)
-                                      .colorScheme
-                                      .primary
-                                      .withOpacity(0.08);
-                                }
-                                // Even rows will have a grey color.
-                                if (index.isEven) {
-                                  return Colors.grey.withOpacity(0.3);
-                                }
-                                return null;
-                              }),
-                              onLongPress: () {
-                                log("Long press");
-                              },
-                              onSelectChanged: (selected) {
-                                if (selected!) {
-                                  log('row-selected: ${gamePlays[index].gameId}, playes = ${gamePlays[index].count}');
-                                }
-                              },
-                              cells: <DataCell>[
-                                DataCell(SizedBox(
-                                    width: MediaQuery.of(context).size.width *
-                                        0.75,
-                                    child: Text(
-                                      gamePlays[index].gameName,
-                                      overflow: TextOverflow.ellipsis,
-                                      textAlign: TextAlign.left,
-                                    ))),
-                                DataCell(Text(
-                                  gamePlays[index].count.toString(),
+                SingleChildScrollView(
+                    scrollDirection: Axis.vertical,
+                    child: FittedBox(
+                        child: DataTable(
+                      columnSpacing: 20,
+                      headingRowHeight: 0,
+                      showCheckboxColumn: false,
+                      columns: const <DataColumn>[
+                        DataColumn(
+                          label: Text('Game'),
+                        ),
+                        DataColumn(
+                          label: Text('Quantity'),
+                        ),
+                      ],
+                      rows: List<DataRow>.generate(
+                        gamePlays.length,
+                        (int index) => DataRow(
+                          color: WidgetStateProperty.resolveWith<Color?>(
+                              (Set<WidgetState> states) {
+                            // All rows will have the same selected color.
+                            if (states.contains(WidgetState.selected)) {
+                              return Theme.of(context)
+                                  .colorScheme
+                                  .primary
+                                  .withOpacity(0.08);
+                            }
+                            // Even rows will have a grey color.
+                            if (index.isEven) {
+                              return Colors.grey.withOpacity(0.3);
+                            }
+                            return null;
+                          }),
+                          onLongPress: () {
+                            log("Long press");
+                          },
+                          onSelectChanged: (selected) {
+                            if (selected!) {
+                              log('row-selected: ${gamePlays[index].gameId}, playes = ${gamePlays[index].count}');
+                            }
+                          },
+                          cells: <DataCell>[
+                            DataCell(SizedBox(
+                                width: MediaQuery.of(context).size.width * 0.75,
+                                child: Text(
+                                  gamePlays[index].gameName,
                                   overflow: TextOverflow.ellipsis,
-                                  textAlign: TextAlign.center,
-                                )),
-                              ],
-                            ),
-                          ),
-                        )))),
+                                  textAlign: TextAlign.left,
+                                ))),
+                            DataCell(Text(
+                              gamePlays[index].count.toString(),
+                              overflow: TextOverflow.ellipsis,
+                              textAlign: TextAlign.center,
+                            )),
+                          ],
+                        ),
+                      ),
+                    ))),
                 SafeArea(
                   child: SfCartesianChart(
                     title: const ChartTitle(text: "Games stats"),
@@ -278,7 +275,7 @@ class _StatisticsState extends State<Statistics> {
                             }
                             showDialog(
                                 context: context,
-                                builder: (BuildContext) {
+                                builder: (buildContext) {
                                   return StatefulBuilder(
                                       builder: (context, setState) {
                                     return AlertDialog(

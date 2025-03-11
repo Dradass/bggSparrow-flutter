@@ -32,9 +32,9 @@ Future<void> importGameCollectionFromBGG(refreshProgress) async {
     for (final item in items) {
       final objectId = int.parse(item.getAttribute('objectid').toString());
       if (await GameThingSQL.selectGameByID(objectId) != null) continue;
-      final objectName = item.findElements('name').first.text;
-      final thumbnail = item.findElements('thumbnail').first.text;
-      final image = item.findElements('image').first.text;
+      final objectName = item.findElements('name').first.innerText;
+      final thumbnail = item.findElements('thumbnail').first.innerText;
+      final image = item.findElements('image').first.innerText;
       final owned = int.parse(
           item.findElements('status').first.getAttribute('own').toString());
       var minPlayers = 0;
@@ -166,7 +166,7 @@ Future<bool> getPlaysFromPage(
     final duration = int.parse(play.getAttribute('length').toString());
     final quantity = int.parse(play.getAttribute('quantity').toString());
     final comments = play.findElements('comments').firstOrNull != null
-        ? play.findElements('comments').first.text
+        ? play.findElements('comments').first.innerText
         : "";
     final gameId = int.parse(
         play.findElements('item').first.getAttribute('objectid').toString());

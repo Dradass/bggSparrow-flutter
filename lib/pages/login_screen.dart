@@ -76,11 +76,11 @@ void updateLoginPassword(
 }
 
 class LoginButton extends StatefulWidget {
-  LoginButton(this.loginTextController, this.paswordTextController,
+  const LoginButton(this.loginTextController, this.paswordTextController,
       {super.key});
 
-  TextEditingController loginTextController;
-  TextEditingController paswordTextController;
+  final TextEditingController loginTextController;
+  final TextEditingController paswordTextController;
 
   @override
   State<LoginButton> createState() => _LoginButtonState();

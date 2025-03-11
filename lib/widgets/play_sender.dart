@@ -9,7 +9,6 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../bggApi/bgg_api.dart';
 import '../globals.dart';
-import 'dart:developer';
 
 import '../widgets/log_page_widgets.dart';
 

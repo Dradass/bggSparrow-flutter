@@ -43,7 +43,7 @@ class _PlayDatePickerState extends State<PlayDatePicker> {
               lastDate: DateTime(3000));
           if (pickedDate != null) {
             setState(() {
-              widget.playDate = pickedDate;
+              PlayDatePicker(pickedDate);
             });
           }
         },
@@ -522,7 +522,7 @@ class _GamePickerState extends State<GamePicker> {
                                 overflow: TextOverflow.ellipsis,
                                 textAlign: TextAlign.left,
                               ),
-                        leading: Container(
+                        leading: SizedBox(
                             width: MediaQuery.of(context).size.width * 0.1,
                             child: gameItem != null
                                 ? gameItem.thumbBinary != null

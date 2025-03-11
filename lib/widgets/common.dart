@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 class FlexButton extends StatelessWidget {
-  Widget childWidget;
-  int flexValue = 3;
+  final Widget childWidget;
+  final int flexValue;
 
   @override
   Widget build(BuildContext context) {
@@ -14,13 +14,13 @@ class FlexButton extends StatelessWidget {
             child: childWidget));
   }
 
-  FlexButton(this.childWidget, this.flexValue, {super.key});
+  const FlexButton(this.childWidget, this.flexValue, {super.key});
 }
 
 class FlexButtonSettings extends StatelessWidget {
-  Widget childWidget;
-  Widget settingsWidget;
-  int flexValue = 3;
+  final Widget childWidget;
+  final Widget settingsWidget;
+  final int flexValue;
 
   @override
   Widget build(BuildContext context) {
@@ -41,6 +41,7 @@ class FlexButtonSettings extends StatelessWidget {
             )));
   }
 
-  FlexButtonSettings(this.childWidget, this.settingsWidget, this.flexValue,
+  const FlexButtonSettings(
+      this.childWidget, this.settingsWidget, this.flexValue,
       {super.key});
 }

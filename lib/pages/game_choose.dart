@@ -122,7 +122,7 @@ class _GameHelperState extends State<GameHelper> {
                           }
                           showDialog(
                               context: context,
-                              builder: (BuildContext) {
+                              builder: (buildContext) {
                                 return StatefulBuilder(
                                     builder: (context, setState) {
                                   return AlertDialog(
@@ -291,10 +291,10 @@ bool isGameMatchChosenPlayersCount(
 }
 
 class CustomCounter extends StatefulWidget {
-  CustomCounter(this.game, this.gamesFromFilter, {super.key});
+  const CustomCounter(this.game, this.gamesFromFilter, {super.key});
 
-  Map<GameThing, int> game;
-  List<Map<GameThing, int>> gamesFromFilter = [];
+  final Map<GameThing, int> game;
+  final List<Map<GameThing, int>> gamesFromFilter;
   @override
   State<CustomCounter> createState() => _CustomCounterState();
 }
