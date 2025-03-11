@@ -43,7 +43,7 @@ class _PlayDatePickerState extends State<PlayDatePicker> {
               lastDate: DateTime(3000));
           if (pickedDate != null) {
             setState(() {
-              PlayDatePicker(pickedDate);
+              PlayDatePicker();
             });
           }
         },
