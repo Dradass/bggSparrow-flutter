@@ -55,9 +55,6 @@ void updateLoginPassword(
     String username, String password, BuildContext context) {
   const storage = FlutterSecureStorage();
 
-  LoginHandler().fillEncryptedPassword();
-  LoginHandler().fillLogin();
-
   storage.read(key: userNameParamName).then((usernameStorage) {
     if (usernameStorage == null) {
       storage.write(key: userNameParamName, value: username);
@@ -66,6 +63,8 @@ void updateLoginPassword(
     }
   });
 
+  LoginHandler().login = username;
+
   storage.read(key: passwordParamName).then((passwordParam) {
     if (passwordParam == null) {
       storage.write(key: passwordParamName, value: password);
@@ -73,6 +72,8 @@ void updateLoginPassword(
       storage.write(key: passwordParamName, value: password);
     }
   });
+
+  LoginHandler().encryptedPassword = password;
 }
 
 class LoginButton extends StatefulWidget {

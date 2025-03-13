@@ -15,7 +15,7 @@ class LoginHandler {
   String encryptedPassword = "";
   String encryptionKey = getRandomString(15);
 
-  Future<void> fillEncryptedPassword() async {
+  Future<void> readEncryptedPasswordFromSecureStorage() async {
     encryptedPassword =
         ((await const FlutterSecureStorage().read(key: "password"))!);
     // TODO Encrypt password
@@ -30,7 +30,7 @@ class LoginHandler {
     return encryptedPassword;
   }
 
-  Future<void> fillLogin() async {
+  Future<void> readLoginFromSecureStorage() async {
     login = ((await const FlutterSecureStorage().read(key: "username"))!);
   }
 }

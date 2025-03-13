@@ -42,9 +42,6 @@ Future<void> importGameCollectionFromBGG(refreshProgress) async {
       log("Importing game $objectName");
       refreshProgress(true, "Importing game $objectName");
 
-      // Anti DDOS
-      await Future.delayed(const Duration(milliseconds: 1000));
-
       GameThing gameThing = GameThing(
           name: objectName,
           id: objectId,

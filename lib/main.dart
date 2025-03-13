@@ -23,8 +23,8 @@ Future<void> main() async {
   cameras = await availableCameras();
   needLogin = !await checkLoginFromStorage();
   if (!needLogin) {
-    await LoginHandler().fillLogin();
-    await LoginHandler().fillEncryptedPassword();
+    await LoginHandler().readLoginFromSecureStorage();
+    await LoginHandler().readEncryptedPasswordFromSecureStorage();
   }
 
   runApp(MaterialApp(
