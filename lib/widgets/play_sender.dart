@@ -21,8 +21,8 @@ class PlaySender extends StatefulWidget {
   }
 
   PlaySender._internal(this.searchController);
-  SearchController searchController;
-  var logData = {
+  final SearchController searchController;
+  final logData = {
     "playdate": "2024-03-15",
     "comments": "#bggSparrow",
     "length": 60,

@@ -26,7 +26,7 @@ class PlayDatePicker extends StatefulWidget {
   }
 
   PlayDatePicker._internal();
-  DateTime playDate = DateTime.now();
+  final playDate = DateTime.now();
 
   @override
   State<PlayDatePicker> createState() => _PlayDatePickerState();
@@ -92,7 +92,7 @@ class _LocationPickerState extends State<LocationPicker> {
           }
           showDialog(
               context: context,
-              builder: (BuildContext) {
+              builder: (buildContext) {
                 return StatefulBuilder(builder: (context, setState) {
                   return AlertDialog(
                       //insetPadding: EdgeInsets.zero,
@@ -268,7 +268,7 @@ class _PlayersPickerState extends State<PlayersPicker> {
           }
           showDialog(
               context: context,
-              builder: (BuildContext) {
+              builder: (buildContext) {
                 return StatefulBuilder(builder: (context, setState) {
                   return AlertDialog(
                       //insetPadding: EdgeInsets.zero,
@@ -508,66 +508,68 @@ class _GamePickerState extends State<GamePicker> {
                     widget.filteredGames == null
                         ? 0
                         : widget.filteredGames!.length, (int index) {
-                  final gameItem = widget.filteredGames == null
+                  GameThing? gameItem = widget.filteredGames == null
                       ? null
                       : widget.filteredGames![index];
-                  return Column(children: [
-                    ListTile(
-                        title: gameItem?.yearpublished == null
-                            ? Text(gameItem!.name,
-                                overflow: TextOverflow.ellipsis,
-                                textAlign: TextAlign.left)
-                            : Text(
-                                "${gameItem!.name} (${gameItem.yearpublished})",
-                                overflow: TextOverflow.ellipsis,
-                                textAlign: TextAlign.left,
-                              ),
-                        leading: SizedBox(
-                            width: MediaQuery.of(context).size.width * 0.1,
-                            child: gameItem != null
-                                ? gameItem.thumbBinary != null
-                                    ? Image.memory(
-                                        base64Decode(gameItem.thumbBinary!))
-                                    : null
-                                : null),
-                        onTap: () async {
-                          if (gameItem == null) return;
-                          var isSearchOnline = await checkInternetConnection();
-                          if (isSearchOnline) {
-                            var thumbnail =
-                                await getGameThumbFromBGG(gameItem.id);
-                            GameThing.getBinaryThumb(thumbnail).then((value) {
-                              if (value != null) {
+                  return gameItem != null
+                      ? Column(children: [
+                          ListTile(
+                              title: gameItem.yearpublished == null
+                                  ? Text(gameItem.name,
+                                      overflow: TextOverflow.ellipsis,
+                                      textAlign: TextAlign.left)
+                                  : Text(
+                                      "${gameItem.name} (${gameItem.yearpublished})",
+                                      overflow: TextOverflow.ellipsis,
+                                      textAlign: TextAlign.left,
+                                    ),
+                              leading: SizedBox(
+                                  width:
+                                      MediaQuery.of(context).size.width * 0.1,
+                                  child: gameItem.thumbBinary != null
+                                      ? Image.memory(
+                                          base64Decode(gameItem.thumbBinary!))
+                                      : null),
+                              onTap: () async {
+                                var isSearchOnline =
+                                    await checkInternetConnection();
+                                if (isSearchOnline) {
+                                  var thumbnail =
+                                      await getGameThumbFromBGG(gameItem.id);
+                                  GameThing.getBinaryThumb(thumbnail)
+                                      .then((value) {
+                                    if (value != null) {
+                                      setState(() {
+                                        widget.imageWidget =
+                                            Image.memory(base64Decode(value));
+                                      });
+                                    }
+                                  });
+                                } else {
+                                  if (gameItem.thumbBinary != null) {
+                                    setState(() {
+                                      widget.imageWidget = Image.memory(
+                                          base64Decode(gameItem.thumbBinary!));
+                                    });
+                                  } else {
+                                    widget.imageWidget =
+                                        Image.asset('assets/no_image.png');
+                                  }
+                                }
                                 setState(() {
-                                  widget.imageWidget =
-                                      Image.memory(base64Decode(value));
-                                });
-                              }
-                            });
-                          } else {
-                            if (gameItem.thumbBinary != null) {
-                              setState(() {
-                                widget.imageWidget = Image.memory(
-                                    base64Decode(gameItem.thumbBinary!));
-                              });
-                            } else {
-                              widget.imageWidget =
-                                  Image.asset('assets/no_image.png');
-                            }
-                          }
-                          setState(() {
-                            searchController.closeView(gameItem.name);
-                            FocusScope.of(context).unfocus();
+                                  searchController.closeView(gameItem.name);
+                                  FocusScope.of(context).unfocus();
 
-                            selectedGameId = gameItem.id;
-                            selectedGame = gameItem;
-                          });
-                        }),
-                    const Divider(
-                      height: 0,
-                      color: Colors.black12,
-                    ),
-                  ]);
+                                  selectedGameId = gameItem.id;
+                                  selectedGame = gameItem;
+                                });
+                              }),
+                          const Divider(
+                            height: 0,
+                            color: Colors.black12,
+                          ),
+                        ])
+                      : const Column(children: []);
                 });
               }),
         ),
