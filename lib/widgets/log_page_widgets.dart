@@ -13,6 +13,8 @@ import 'dart:convert';
 
 import '../db/game_things_sql.dart';
 import 'package:image/image.dart' as image_dart;
+import '../db/players_sql.dart';
+import '../models/bgg_player_model.dart';
 
 import 'package:flutter/services.dart';
 import 'package:flutter_pixelmatching/flutter_pixelmatching.dart';
@@ -259,6 +261,61 @@ class PlayersPicker extends StatefulWidget {
 }
 
 class _PlayersPickerState extends State<PlayersPicker> {
+  final playerNameController = TextEditingController();
+
+  void addBggPlayer(String userName, context) async {
+    final playerNameInfo = await getBggPlayerName(userName);
+    if (playerNameInfo.isNotEmpty) {
+      final playerName = playerNameInfo['preparedName'];
+      final userId = playerNameInfo['id'];
+      var foundResult = await PlayersSQL.selectPlayerByUserID(userId);
+      if (foundResult != null) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text('This player is already in your firends list')));
+      } else {
+        final maxId = await PlayersSQL.getMaxID();
+        final newPlayer = Player(
+            id: maxId + 1,
+            name: playerName,
+            username: userName,
+            userid: userId);
+        PlayersSQL.addPlayer(newPlayer);
+
+        widget.players.add({
+          'name': playerName,
+          'id': maxId + 1,
+          'isChecked': false,
+          'win': false,
+          'excluded': false,
+        });
+      }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('No player with such nickname found')));
+    }
+  }
+
+  void addNotBggPlayer(String playerName, context) async {
+    var foundResult = await PlayersSQL.selectPlayerByName(playerName);
+    if (foundResult != null) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('This player is already in your firends list')));
+      return;
+    }
+    final maxId = await PlayersSQL.getMaxID();
+    widget.players.add({
+      'name': playerName,
+      'id': maxId + 1,
+      'isChecked': false,
+      'win': false,
+      'excluded': false,
+    });
+    final newPlayer = Player(id: maxId + 1, name: playerName, userid: 0);
+    PlayersSQL.addPlayer(newPlayer);
+    widget.players
+        .sort(((a, b) => a['name'].toString().compareTo(b['name'].toString())));
+  }
+
   @override
   Widget build(BuildContext context) {
     return ElevatedButton.icon(
@@ -272,7 +329,30 @@ class _PlayersPickerState extends State<PlayersPicker> {
                 return StatefulBuilder(builder: (context, setState) {
                   return AlertDialog(
                       //insetPadding: EdgeInsets.zero,
-                      title: const Text("Your friends"),
+                      title: Column(children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            ElevatedButton(
+                                onPressed: () => {
+                                      addNotBggPlayer(
+                                          playerNameController.text, context),
+                                      setState(() {})
+                                    },
+                                child: const Text("Add new player")),
+                            ElevatedButton(
+                                onPressed: () => addBggPlayer(
+                                    playerNameController.text, context),
+                                child: const Text("Add bgg player")),
+                          ],
+                        ),
+                        TextField(
+                            controller: playerNameController,
+                            decoration: const InputDecoration(
+                              labelText: 'Add new player',
+                              hintText: 'Enter friend name or nickname',
+                            ))
+                      ]),
                       content: SingleChildScrollView(
                           child: Column(
                               children: widget.players.map((player) {

@@ -55,6 +55,26 @@ Future<void> importGameCollectionFromBGG(refreshProgress) async {
   }
 }
 
+Future<Map<String, dynamic>> getBggPlayerName(String username) async {
+  final getPlayerResponse = await http
+      .get(Uri.parse('https://boardgamegeek.com//xmlapi2/user?name=$username'));
+
+  if (getPlayerResponse.statusCode == 200) {
+    final rootNode = xml.XmlDocument.parse(getPlayerResponse.body);
+    final userId = rootNode.rootElement.getAttribute('id');
+    if (userId == null) return {};
+    final userElement = rootNode.findAllElements('user').first;
+    final firstNameElement = userElement.findElements('firstname').first;
+    final firstName = firstNameElement.getAttribute('value');
+    final lastnameElement = userElement.findElements('lastname').first;
+    final lastname = lastnameElement.getAttribute('value');
+    final name = lastname == null ? firstName : "$firstName $lastname";
+    return {'id': int.parse(userId), 'preparedName': name};
+  } else {
+    return {};
+  }
+}
+
 Future<void> getGamesThumbnail(refreshProgress) async {
   final gettingAllGames = await GameThingSQL.getAllGames();
   if (gettingAllGames != null) {

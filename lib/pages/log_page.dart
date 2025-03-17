@@ -134,7 +134,7 @@ class _LogScaffoldState extends State<LogScaffold> {
                                     Theme.of(context).colorScheme.surface,
                               ),
                             if (isProgressBarVisible)
-                              Text("Loading. ${loadingStatus.status}",
+                              Text(loadingStatus.status,
                                   overflow: TextOverflow.ellipsis)
                           ],
                         ))),

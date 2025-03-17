@@ -10,8 +10,8 @@ import '../login_handler.dart';
 // TODO
 // 1. Debug mode for camera capture
 // 2. No borders to buttons
-// 3. Add new player
-// 4. Color picker
+// 3. Color picker
+// 4. Icons and background
 
 late List<CameraDescription> cameras;
 const primaryTextColor = Color.fromARGB(255, 85, 92, 89);
