@@ -6,6 +6,8 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 const userNameParamName = "username";
 const passwordParamName = "password";
+String? errorLoginText;
+String? errorPasswordText;
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -25,6 +27,45 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
+  void checkLoginAndPassword() {
+    if (loginTextController.text.isEmpty) {
+      setState(() {
+        errorLoginText = 'Enter login';
+        errorPasswordText = null;
+      });
+      return;
+    }
+    if (passwordTextController.text.isEmpty) {
+      setState(() {
+        errorLoginText = null;
+        errorPasswordText = 'Enter password';
+      });
+      return;
+    }
+    checkLoginByRequest(loginTextController.text, passwordTextController.text)
+        .then((isLoginCorrent) => {
+              if (isLoginCorrent)
+                {
+                  setState(() {
+                    errorLoginText = null;
+                    errorPasswordText = null;
+                  }),
+                  TaskChecker().needCancel = false,
+                  Navigator.pushNamed(context, '/navigation'),
+                  ScaffoldMessenger.of(context)
+                      .showSnackBar(const SnackBar(content: Text('Welcome!'))),
+                  updateLoginPassword(loginTextController.text,
+                      passwordTextController.text, context)
+                }
+              else
+                {
+                  setState(() {
+                    errorPasswordText = 'Login or password is incorrect';
+                  })
+                }
+            });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -32,20 +73,28 @@ class _LoginScreenState extends State<LoginScreen> {
         const Divider(),
         TextField(
           controller: loginTextController,
-          decoration: const InputDecoration(
+          decoration: InputDecoration(
             labelText: 'Login',
+            errorText: errorLoginText,
           ),
         ),
         TextField(
             controller: passwordTextController,
             obscureText: true,
-            decoration: const InputDecoration(
+            decoration: InputDecoration(
               labelText: 'Password',
+              errorText: errorPasswordText,
             )),
         SizedBox(
             width: MediaQuery.of(context).size.width,
             height: MediaQuery.of(context).size.height * 0.1,
-            child: LoginButton(loginTextController, passwordTextController))
+            child: ElevatedButton(
+                onPressed: checkLoginAndPassword,
+                style: ButtonStyle(
+                  backgroundColor: WidgetStateProperty.all(
+                      Theme.of(context).colorScheme.secondary),
+                ),
+                child: const Text("Log in")))
       ]),
     );
   }
@@ -74,49 +123,4 @@ void updateLoginPassword(
   });
 
   LoginHandler().encryptedPassword = password;
-}
-
-class LoginButton extends StatefulWidget {
-  const LoginButton(this.loginTextController, this.paswordTextController,
-      {super.key});
-
-  final TextEditingController loginTextController;
-  final TextEditingController paswordTextController;
-
-  @override
-  State<LoginButton> createState() => _LoginButtonState();
-}
-
-class _LoginButtonState extends State<LoginButton> {
-  @override
-  Widget build(BuildContext context) {
-    return ElevatedButton(
-        onPressed: () => {
-              checkLoginByRequest(widget.loginTextController.text,
-                      widget.paswordTextController.text)
-                  .then((isLoginCorrent) => {
-                        if (isLoginCorrent)
-                          {
-                            TaskChecker().needCancel = false,
-                            Navigator.pushNamed(context, '/navigation'),
-                            ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Welcome!'))),
-                            updateLoginPassword(widget.loginTextController.text,
-                                widget.paswordTextController.text, context)
-                          }
-                        else
-                          {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                    content:
-                                        Text('Login or password is incorrect')))
-                          }
-                      })
-            },
-        style: ButtonStyle(
-          backgroundColor:
-              WidgetStateProperty.all(Theme.of(context).colorScheme.secondary),
-        ),
-        child: const Text("Log in"));
-  }
 }
