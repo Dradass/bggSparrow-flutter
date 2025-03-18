@@ -262,16 +262,16 @@ class PlayersPicker extends StatefulWidget {
 
 class _PlayersPickerState extends State<PlayersPicker> {
   final playerNameController = TextEditingController();
+  String? _errorText;
 
-  void addBggPlayer(String userName, context) async {
+  Future<String?> addBggPlayer(String userName, context) async {
     final playerNameInfo = await getBggPlayerName(userName);
     if (playerNameInfo.isNotEmpty) {
       final playerName = playerNameInfo['preparedName'];
       final userId = playerNameInfo['id'];
       var foundResult = await PlayersSQL.selectPlayerByUserID(userId);
       if (foundResult != null) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-            content: Text('This player is already in your firends list')));
+        return 'This player is already in your firends list';
       } else {
         final maxId = await PlayersSQL.getMaxID();
         final newPlayer = Player(
@@ -288,19 +288,18 @@ class _PlayersPickerState extends State<PlayersPicker> {
           'win': false,
           'excluded': false,
         });
+        _errorText = null;
       }
+      return null;
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No player with such nickname found')));
+      return 'No player with such nickname found';
     }
   }
 
-  void addNotBggPlayer(String playerName, context) async {
+  Future<String?> addNotBggPlayer(String playerName, context) async {
     var foundResult = await PlayersSQL.selectPlayerByName(playerName);
     if (foundResult != null) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text('This player is already in your firends list')));
-      return;
+      return 'This player is already in your firends list';
     }
     final maxId = await PlayersSQL.getMaxID();
     widget.players.add({
@@ -314,6 +313,7 @@ class _PlayersPickerState extends State<PlayersPicker> {
     PlayersSQL.addPlayer(newPlayer);
     widget.players
         .sort(((a, b) => a['name'].toString().compareTo(b['name'].toString())));
+    return null;
   }
 
   @override
@@ -331,27 +331,53 @@ class _PlayersPickerState extends State<PlayersPicker> {
                       //insetPadding: EdgeInsets.zero,
                       title: Column(children: [
                         Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
                             ElevatedButton(
-                                onPressed: () => {
-                                      addNotBggPlayer(
-                                          playerNameController.text, context),
-                                      setState(() {})
-                                    },
-                                child: const Text("Add new player")),
-                            ElevatedButton(
-                                onPressed: () => addBggPlayer(
+                              onPressed: () async => {
+                                _errorText = await addNotBggPlayer(
                                     playerNameController.text, context),
-                                child: const Text("Add bgg player")),
+                                setState(() {})
+                              },
+                              style: ButtonStyle(
+                                  backgroundColor: WidgetStateProperty.all(
+                                      Theme.of(context).colorScheme.secondary),
+                                  shape:
+                                      WidgetStateProperty.all<OutlinedBorder>(
+                                    const RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.only(
+                                        topLeft: Radius.circular(20),
+                                      ),
+                                    ),
+                                  )),
+                              child: const Text("Add new player"),
+                            ),
+                            ElevatedButton(
+                              onPressed: () async => {
+                                _errorText = await addBggPlayer(
+                                    playerNameController.text, context),
+                                setState(() {})
+                              },
+                              style: ButtonStyle(
+                                  backgroundColor: WidgetStateProperty.all(
+                                      Theme.of(context).colorScheme.secondary),
+                                  shape:
+                                      WidgetStateProperty.all<OutlinedBorder>(
+                                          const RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.only(
+                                      topRight: Radius.circular(20),
+                                    ),
+                                  ))),
+                              child: const Text("Add bgg player"),
+                            ),
                           ],
                         ),
                         TextField(
                             controller: playerNameController,
-                            decoration: const InputDecoration(
-                              labelText: 'Add new player',
-                              hintText: 'Enter friend name or nickname',
-                            ))
+                            decoration: InputDecoration(
+                                labelText: 'Add new player',
+                                errorText: _errorText,
+                                hintText: 'Enter friend name or nickname'))
                       ]),
                       content: SingleChildScrollView(
                           child: Column(
@@ -735,7 +761,7 @@ class _GamePickerState extends State<GamePicker> {
                           borderRadius: BorderRadius.zero,
                           side: BorderSide(color: Colors.black12)))),
               label: const Text(""),
-              icon: const Icon(Icons.photo_camera)),
+              icon: const Icon(Icons.document_scanner)),
         ),
         Container(
             padding: const EdgeInsets.only(right: 0),
