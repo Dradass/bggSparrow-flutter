@@ -688,7 +688,8 @@ class _GamePickerState extends State<GamePicker> {
                     context: context,
                     builder: (dialogBuilder) {
                       return AlertDialog(
-                        title: const Text('Place the box in the center'),
+                        title:
+                            const Text('Place the top of the box in the frame'),
                         content: Column(children: [
                           SizedBox(
                             width: MediaQuery.of(context).size.width * 0.8,
