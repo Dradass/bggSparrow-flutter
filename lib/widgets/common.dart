@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../globals.dart';
 
 class FlexButton extends StatelessWidget {
   final Widget childWidget;
@@ -44,4 +45,13 @@ class FlexButtonSettings extends StatelessWidget {
   const FlexButtonSettings(
       this.childWidget, this.settingsWidget, this.flexValue,
       {super.key});
+}
+
+void showSnackBar(BuildContext context, String message) {
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      duration: Duration(seconds: messageDuration),
+      content: Text(message),
+    ),
+  );
 }

@@ -3,6 +3,7 @@ import 'package:flutter_application_1/login_handler.dart';
 import 'package:flutter_application_1/task_checker.dart';
 import '../bggApi/bgg_api.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import '../widgets/common.dart';
 
 const userNameParamName = "username";
 const passwordParamName = "password";
@@ -52,8 +53,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   }),
                   TaskChecker().needCancel = false,
                   Navigator.pushNamed(context, '/navigation'),
-                  ScaffoldMessenger.of(context)
-                      .showSnackBar(const SnackBar(content: Text('Welcome!'))),
+                  showSnackBar(context, 'Welcome!'),
                   updateLoginPassword(loginTextController.text,
                       passwordTextController.text, context)
                 }

@@ -39,10 +39,7 @@ class _LogScaffoldState extends State<LogScaffold> {
 
     checkInternetConnection().then((isConnected) => {
           if (!isConnected)
-            {
-              ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('No internet connection!')))
-            }
+            {showSnackBar(context, 'No internet connection!')}
           else
             {
               sendOfflinePlaysToBGG(),
