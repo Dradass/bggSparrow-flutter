@@ -148,7 +148,7 @@ class _FirstPlayerChoserState extends State<FirstPlayerChoser> {
           }
         }
         setState(() {
-          counter = "Touch the screen";
+          counter = "";
         });
       }
     } else {
