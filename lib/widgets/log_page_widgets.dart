@@ -473,7 +473,6 @@ class _GamePickerState extends State<GamePicker> {
         .then((onlineSearchModeParamValue) => {
               if (onlineSearchModeParamValue != null)
                 {
-                  log(onlineSearchModeParamValue.value.toString()),
                   setState(() {
                     onlineSearchMode = onlineSearchModeParamValue.value == "1";
                   })

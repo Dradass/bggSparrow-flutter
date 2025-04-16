@@ -297,7 +297,6 @@ Future<void> fillLocalLocations(
 
 Future<void> fillLocalPlays(List<BggPlay> bggPlays) async {
   for (var bggPlay in bggPlays) {
-    log(bggPlay.id.toString());
     if (await PlaysSQL.selectPlayByID(bggPlay.id) != null) {
       log("Existed play: ${bggPlay.id}");
     } else {
