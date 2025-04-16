@@ -18,7 +18,7 @@ class _FirstPlayerChoserState extends State<FirstPlayerChoser> {
   bool forceInReleaseMode = true;
   bool enabled = true;
   var counter = "Touch the screen";
-  double indicatorSize = 120;
+  double indicatorSize = 150;
   var indicatorColor = const Color.fromARGB(255, 32, 184, 19);
   final List<Color> colors = <Color>[
     Colors.red,
@@ -28,28 +28,37 @@ class _FirstPlayerChoserState extends State<FirstPlayerChoser> {
     Colors.orange,
     Colors.black
   ];
+  double opacity = 1.0; // Добавлена переменная для управления прозрачностью
 
   Iterable<Widget> buildTouchIndicators() sync* {
     if (touchPositions.isNotEmpty) {
-      for (var touchPosition in touchPositions.values) {
+      for (var entry in touchPositions.entries) {
+        final index = entry.key;
+        final touchPosition = entry.value;
+        final isRandomPlayer = index == randomPlayer;
         yield Positioned.directional(
           start: touchPosition.dx - indicatorSize / 2,
           top: touchPosition.dy - indicatorSize / 2,
           textDirection: TextDirection.ltr,
-          child: indicator != null
-              ? indicator!
-              : Container(
-                  decoration: const BoxDecoration(
-                    shape: BoxShape.circle,
-                    //color: colors[1], // indicatorColor.withOpacity(0.3),
+          child: AnimatedOpacity(
+            opacity:
+                isRandomPlayer ? 1.0 : opacity, // Использование AnimatedOpacity
+            duration: const Duration(seconds: 1),
+            child: indicator != null
+                ? indicator!
+                : Container(
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      //color: colors[1], // indicatorColor.withOpacity(0.3),
+                    ),
+                    child: Icon(
+                      Icons.fingerprint,
+                      size: indicatorSize,
+                      color: colors[Random()
+                          .nextInt(5)], // indicatorColor.withOpacity(0.9),
+                    ),
                   ),
-                  child: Icon(
-                    Icons.fingerprint,
-                    size: indicatorSize,
-                    color: colors[Random()
-                        .nextInt(5)], // indicatorColor.withOpacity(0.9),
-                  ),
-                ),
+          ),
         );
       }
     }
@@ -64,6 +73,7 @@ class _FirstPlayerChoserState extends State<FirstPlayerChoser> {
   void clearPointerPosition(int index) {
     setState(() {
       touchPositions.remove(index);
+      opacity = 1.0;
       counter = "Touch the screen";
     });
   }
@@ -122,6 +132,7 @@ class _FirstPlayerChoserState extends State<FirstPlayerChoser> {
         });
       } else {
         setState(() {
+          //opacity = 0.0;
           counter = "Waiting your friends";
         });
       }
@@ -141,14 +152,15 @@ class _FirstPlayerChoserState extends State<FirstPlayerChoser> {
     if (touchPositions.length == firstPositionsCount) {
       if (touchPositions.length > 1) {
         randomPlayer = ((touchPositions.keys).toList()..shuffle()).first;
-        for (var position in (touchPositions.keys).toList()..shuffle()) {
-          if (position != randomPlayer) {
-            touchPositions[position] = const Offset(-100, -100);
-            savePointerPosition(position, touchPositions[position]!);
-          }
-        }
+        // for (var position in (touchPositions.keys).toList()..shuffle()) {
+        //   if (position != randomPlayer) {
+        //     touchPositions[position] = const Offset(-100, -100);
+        //     savePointerPosition(position, touchPositions[position]!);
+        //   }
+        // }
         setState(() {
           counter = "";
+          opacity = 0.0;
         });
       }
     } else {
