@@ -10,7 +10,8 @@ class FirstPlayerChoser extends StatefulWidget {
   State<FirstPlayerChoser> createState() => _FirstPlayerChoserState();
 }
 
-class _FirstPlayerChoserState extends State<FirstPlayerChoser> {
+class _FirstPlayerChoserState extends State<FirstPlayerChoser>
+    with TickerProviderStateMixin {
   Map<int, Offset> touchPositions = <int, Offset>{};
   List<Widget> children = [];
   int? randomPlayer;
@@ -18,7 +19,7 @@ class _FirstPlayerChoserState extends State<FirstPlayerChoser> {
   bool forceInReleaseMode = true;
   bool enabled = true;
   var counter = "Touch the screen";
-  double indicatorSize = 150;
+  double indicatorSize = 130;
   var indicatorColor = const Color.fromARGB(255, 32, 184, 19);
   final List<Color> colors = <Color>[
     Colors.red,
@@ -30,6 +31,22 @@ class _FirstPlayerChoserState extends State<FirstPlayerChoser> {
   ];
   double fingerPrintsOpacity = 1.0;
 
+  final Map<int, AnimationController> _colorControllers = {};
+  final Map<int, Animation<Color?>> _colorAnimations = {};
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    for (var controller in _colorControllers.values) {
+      controller.dispose();
+    }
+    super.dispose();
+  }
+
   Iterable<Widget> buildTouchIndicators() sync* {
     if (touchPositions.isNotEmpty) {
       for (var entry in touchPositions.entries) {
@@ -37,6 +54,28 @@ class _FirstPlayerChoserState extends State<FirstPlayerChoser> {
         final touchPosition = entry.value;
         final isRandomPlayer = index == randomPlayer;
         final newSize = indicatorSize;
+
+        if (!_colorControllers.containsKey(index)) {
+          _colorControllers[index] = AnimationController(
+            duration:
+                const Duration(seconds: 10), // Увеличена продолжительность
+            vsync: this,
+          )..repeat(reverse: true);
+
+          _colorAnimations[index] = TweenSequence<Color?>(
+            [
+              for (var i = 0; i < colors.length; i++)
+                TweenSequenceItem<Color?>(
+                  tween: ColorTween(
+                    begin: colors[i],
+                    end: colors[(i + 1) % colors.length],
+                  ),
+                  weight: 1,
+                ),
+            ],
+          ).animate(_colorControllers[index]!);
+        }
+
         yield Positioned.directional(
           start: touchPosition.dx - newSize / 2,
           top: touchPosition.dy - newSize / 2,
@@ -47,12 +86,18 @@ class _FirstPlayerChoserState extends State<FirstPlayerChoser> {
             child: indicator != null
                 ? indicator!
                 : AnimatedContainer(
-                    width: indicatorSize,
-                    height: indicatorSize,
+                    width: newSize,
+                    height: newSize,
                     duration: const Duration(seconds: 1),
-                    decoration: BoxDecoration(
-                      color: colors[Random().nextInt(colors.length)],
-                      shape: BoxShape.circle,
+                    child: AnimatedBuilder(
+                      animation: _colorAnimations[index]!,
+                      builder: (context, child) {
+                        return Icon(
+                          Icons.fingerprint,
+                          color: _colorAnimations[index]!.value,
+                          size: newSize,
+                        );
+                      },
                     ),
                   ),
           ),
@@ -156,14 +201,5 @@ class _FirstPlayerChoserState extends State<FirstPlayerChoser> {
     } else {
       return;
     }
-  }
-
-  void animateIndicatorSize() {
-    //  for (var i = 0; i < 3; i++) {
-    // await Future.delayed(const Duration(seconds: 1));
-    setState(() {
-      indicatorSize += 20;
-    });
-    //}
   }
 }
