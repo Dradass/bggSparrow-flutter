@@ -36,18 +36,20 @@ class _FirstPlayerChoserState extends State<FirstPlayerChoser> {
         final index = entry.key;
         final touchPosition = entry.value;
         final isRandomPlayer = index == randomPlayer;
+        final newSize = indicatorSize;
         yield Positioned.directional(
-          start: touchPosition.dx - indicatorSize / 2,
-          top: touchPosition.dy - indicatorSize / 2,
+          start: touchPosition.dx - newSize / 2,
+          top: touchPosition.dy - newSize / 2,
           textDirection: TextDirection.ltr,
           child: AnimatedOpacity(
             opacity: isRandomPlayer ? 1.0 : fingerPrintsOpacity,
             duration: const Duration(seconds: 1),
             child: indicator != null
                 ? indicator!
-                : Container(
+                : AnimatedContainer(
                     width: indicatorSize,
                     height: indicatorSize,
+                    duration: const Duration(seconds: 1),
                     decoration: BoxDecoration(
                       color: colors[Random().nextInt(colors.length)],
                       shape: BoxShape.circle,
@@ -126,6 +128,7 @@ class _FirstPlayerChoserState extends State<FirstPlayerChoser> {
         });
       } else {
         setState(() {
+          //animateIndicatorSize();
           counter = "Waiting your friends";
         });
       }
@@ -153,5 +156,14 @@ class _FirstPlayerChoserState extends State<FirstPlayerChoser> {
     } else {
       return;
     }
+  }
+
+  void animateIndicatorSize() {
+    //  for (var i = 0; i < 3; i++) {
+    // await Future.delayed(const Duration(seconds: 1));
+    setState(() {
+      indicatorSize += 20;
+    });
+    //}
   }
 }
