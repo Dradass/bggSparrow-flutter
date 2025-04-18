@@ -22,12 +22,22 @@ class _FirstPlayerChoserState extends State<FirstPlayerChoser>
   double indicatorSize = 130;
   var indicatorColor = const Color.fromARGB(255, 32, 184, 19);
   final List<Color> colors = <Color>[
-    Colors.red,
-    Colors.blue,
-    Colors.green,
-    Colors.yellow,
-    Colors.orange,
-    Colors.black
+    Colors.redAccent,
+    Colors.pinkAccent,
+    Colors.purpleAccent,
+    Colors.deepPurpleAccent,
+    Colors.indigoAccent,
+    Colors.blueAccent,
+    Colors.lightBlueAccent,
+    Colors.cyanAccent,
+    Colors.tealAccent,
+    Colors.greenAccent,
+    Colors.lightGreenAccent,
+    Colors.limeAccent,
+    Colors.yellowAccent,
+    Colors.amberAccent,
+    Colors.orangeAccent,
+    Colors.deepOrangeAccent,
   ];
   double fingerPrintsOpacity = 1.0;
 
@@ -57,8 +67,7 @@ class _FirstPlayerChoserState extends State<FirstPlayerChoser>
 
         if (!_colorControllers.containsKey(index)) {
           _colorControllers[index] = AnimationController(
-            duration:
-                const Duration(seconds: 10), // Увеличена продолжительность
+            duration: const Duration(seconds: 10),
             vsync: this,
           )..repeat(reverse: true);
 
@@ -173,7 +182,6 @@ class _FirstPlayerChoserState extends State<FirstPlayerChoser>
         });
       } else {
         setState(() {
-          //animateIndicatorSize();
           counter = "Waiting your friends";
         });
       }
