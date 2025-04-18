@@ -9,6 +9,7 @@ import '../widgets/play_sender.dart';
 import '../widgets/common.dart';
 import '../task_checker.dart';
 import 'dart:developer';
+import '../globals.dart';
 
 class LoadingStatus {
   String status = "";
@@ -31,7 +32,6 @@ class _LogScaffoldState extends State<LogScaffold> {
   var hasInternetConnection = false;
   String binaryImageData = "";
   bool isOnlineSearchModeDefault = true;
-  bool simpleIndicatorMode = false;
   final Image _imagewidget = Image.asset('assets/no_image.png');
 
   @override
@@ -221,7 +221,8 @@ class _LogScaffoldState extends State<LogScaffold> {
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.fingerprint),
+                leading: Icon(
+                    simpleIndicatorMode ? Icons.circle : Icons.fingerprint),
                 title: Row(
                   children: [
                     Text(

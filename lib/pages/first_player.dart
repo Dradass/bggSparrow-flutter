@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import '../models/system_parameters.dart';
 import '../db/system_table.dart';
 import 'dart:developer' as developer;
+import '../globals.dart';
 
 class FirstPlayerChoser extends StatefulWidget {
   const FirstPlayerChoser({super.key});
@@ -19,7 +20,6 @@ class _FirstPlayerChoserState extends State<FirstPlayerChoser>
   List<Widget> children = [];
   int? randomPlayer;
   var indicator;
-  bool simpleIndicatorMode = false;
   bool forceInReleaseMode = true;
   bool enabled = true;
   var counter = "Touch the screen";
@@ -93,6 +93,30 @@ class _FirstPlayerChoserState extends State<FirstPlayerChoser>
         final isRandomPlayer = index == randomPlayer;
         final newSize = indicatorSize;
 
+        if (simpleIndicatorMode) {
+          yield Positioned.directional(
+            start: touchPosition.dx - newSize / 2,
+            top: touchPosition.dy - newSize / 2,
+            textDirection: TextDirection.ltr,
+            child: AnimatedOpacity(
+              opacity: isRandomPlayer ? 1.0 : fingerPrintsOpacity,
+              duration: const Duration(seconds: 1),
+              child: indicator != null
+                  ? indicator!
+                  : AnimatedContainer(
+                      width: indicatorSize,
+                      height: indicatorSize,
+                      duration: const Duration(seconds: 1),
+                      decoration: BoxDecoration(
+                        color: colors[Random().nextInt(colors.length)],
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+            ),
+          );
+          return;
+        }
+
         if (!_colorControllers.containsKey(index)) {
           _colorControllers[index] = AnimationController(
             duration: const Duration(seconds: 10),
@@ -122,31 +146,21 @@ class _FirstPlayerChoserState extends State<FirstPlayerChoser>
             duration: const Duration(seconds: 1),
             child: indicator != null
                 ? indicator!
-                : simpleIndicatorMode
-                    ? AnimatedContainer(
-                        width: indicatorSize,
-                        height: indicatorSize,
-                        duration: const Duration(seconds: 1),
-                        decoration: BoxDecoration(
-                          color: colors[Random().nextInt(colorsSmall.length)],
-                          shape: BoxShape.circle,
-                        ),
-                      )
-                    : AnimatedContainer(
-                        width: newSize,
-                        height: newSize,
-                        duration: const Duration(seconds: 1),
-                        child: AnimatedBuilder(
-                          animation: _colorAnimations[index]!,
-                          builder: (context, child) {
-                            return Icon(
-                              Icons.fingerprint,
-                              color: _colorAnimations[index]!.value,
-                              size: newSize,
-                            );
-                          },
-                        ),
-                      ),
+                : AnimatedContainer(
+                    width: newSize,
+                    height: newSize,
+                    duration: const Duration(seconds: 1),
+                    child: AnimatedBuilder(
+                      animation: _colorAnimations[index]!,
+                      builder: (context, child) {
+                        return Icon(
+                          Icons.fingerprint,
+                          color: _colorAnimations[index]!.value,
+                          size: newSize,
+                        );
+                      },
+                    ),
+                  ),
           ),
         );
       }
