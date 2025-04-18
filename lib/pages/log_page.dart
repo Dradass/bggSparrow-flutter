@@ -31,6 +31,7 @@ class _LogScaffoldState extends State<LogScaffold> {
   var hasInternetConnection = false;
   String binaryImageData = "";
   bool isOnlineSearchModeDefault = true;
+  bool simpleIndicatorMode = false;
   final Image _imagewidget = Image.asset('assets/no_image.png');
 
   @override
@@ -39,7 +40,8 @@ class _LogScaffoldState extends State<LogScaffold> {
 
     checkInternetConnection().then((isConnected) => {
           if (!isConnected)
-            {showSnackBar(context, 'No internet connection!')}
+            //{showSnackBar(context, 'No internet connection')}
+            log('No internet connection')
           else
             {
               sendOfflinePlaysToBGG(),
@@ -62,6 +64,22 @@ class _LogScaffoldState extends State<LogScaffold> {
                       getAllPlaysFromServer();
                     } else {
                       log("Last launch = ${firstLaunchParam.value}");
+                    }
+                  });
+
+                  // Check "first player mode" system param
+                  SystemParameterSQL.selectSystemParameterById(3)
+                      .then((simpleIndicatorModeValue) {
+                    if (simpleIndicatorModeValue == null) {
+                      SystemParameterSQL.addSystemParameter(SystemParameter(
+                              id: 3, name: "simpleIndicatorMode", value: "1"))
+                          .then((value) {
+                        if (value == 0) log("Cant insert param");
+                      });
+                    } else {
+                      simpleIndicatorMode =
+                          simpleIndicatorModeValue.value == "1";
+                      log("simpleIndicatorMode = ${simpleIndicatorModeValue.value}");
                     }
                   });
 
@@ -199,6 +217,23 @@ class _LogScaffoldState extends State<LogScaffold> {
                           id: 2,
                           name: "isSearchModeOnline",
                           value: isOnlineSearchModeDefault ? "1" : "0"))
+                      .then((onValue) => {setState(() {})});
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.fingerprint),
+                title: Row(
+                  children: [
+                    Text(
+                        "First player mode: ${simpleIndicatorMode ? 'Circle' : 'Finger'}")
+                  ],
+                ),
+                onTap: () {
+                  simpleIndicatorMode = !simpleIndicatorMode;
+                  SystemParameterSQL.updateSystemParameter(SystemParameter(
+                          id: 3,
+                          name: "simpleIndicatorMode",
+                          value: simpleIndicatorMode ? "1" : "0"))
                       .then((onValue) => {setState(() {})});
                 },
               ),

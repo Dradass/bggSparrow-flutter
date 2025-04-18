@@ -2,6 +2,9 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
+import '../models/system_parameters.dart';
+import '../db/system_table.dart';
+import 'dart:developer' as developer;
 
 class FirstPlayerChoser extends StatefulWidget {
   const FirstPlayerChoser({super.key});
@@ -16,6 +19,7 @@ class _FirstPlayerChoserState extends State<FirstPlayerChoser>
   List<Widget> children = [];
   int? randomPlayer;
   var indicator;
+  bool simpleIndicatorMode = false;
   bool forceInReleaseMode = true;
   bool enabled = true;
   var counter = "Touch the screen";
@@ -39,6 +43,14 @@ class _FirstPlayerChoserState extends State<FirstPlayerChoser>
     Colors.orangeAccent,
     Colors.deepOrangeAccent,
   ];
+  final List<Color> colorsSmall = <Color>[
+    Colors.red,
+    Colors.blue,
+    Colors.green,
+    Colors.yellow,
+    Colors.orange,
+    Colors.black
+  ];
   double fingerPrintsOpacity = 1.0;
 
   final Map<int, AnimationController> _colorControllers = {};
@@ -47,6 +59,22 @@ class _FirstPlayerChoserState extends State<FirstPlayerChoser>
   @override
   void initState() {
     super.initState();
+
+    // Check "first player mode" system param
+    SystemParameterSQL.selectSystemParameterById(3)
+        .then((simpleIndicatorModeValue) {
+      if (simpleIndicatorModeValue == null) {
+        SystemParameterSQL.addSystemParameter(
+                SystemParameter(id: 3, name: "simpleIndicatorMode", value: "1"))
+            .then((value) {
+          if (value == 0) developer.log("Cant insert param");
+        });
+      } else {
+        simpleIndicatorMode = simpleIndicatorModeValue.value == "1";
+        developer
+            .log("simpleIndicatorMode = ${simpleIndicatorModeValue.value}");
+      }
+    });
   }
 
   @override
@@ -94,21 +122,31 @@ class _FirstPlayerChoserState extends State<FirstPlayerChoser>
             duration: const Duration(seconds: 1),
             child: indicator != null
                 ? indicator!
-                : AnimatedContainer(
-                    width: newSize,
-                    height: newSize,
-                    duration: const Duration(seconds: 1),
-                    child: AnimatedBuilder(
-                      animation: _colorAnimations[index]!,
-                      builder: (context, child) {
-                        return Icon(
-                          Icons.fingerprint,
-                          color: _colorAnimations[index]!.value,
-                          size: newSize,
-                        );
-                      },
-                    ),
-                  ),
+                : simpleIndicatorMode
+                    ? AnimatedContainer(
+                        width: indicatorSize,
+                        height: indicatorSize,
+                        duration: const Duration(seconds: 1),
+                        decoration: BoxDecoration(
+                          color: colors[Random().nextInt(colorsSmall.length)],
+                          shape: BoxShape.circle,
+                        ),
+                      )
+                    : AnimatedContainer(
+                        width: newSize,
+                        height: newSize,
+                        duration: const Duration(seconds: 1),
+                        child: AnimatedBuilder(
+                          animation: _colorAnimations[index]!,
+                          builder: (context, child) {
+                            return Icon(
+                              Icons.fingerprint,
+                              color: _colorAnimations[index]!.value,
+                              size: newSize,
+                            );
+                          },
+                        ),
+                      ),
           ),
         );
       }
