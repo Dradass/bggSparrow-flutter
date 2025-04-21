@@ -114,55 +114,54 @@ class _FirstPlayerChoserState extends State<FirstPlayerChoser>
                     ),
             ),
           );
-          return;
-        }
+        } else {
+          if (!_colorControllers.containsKey(index)) {
+            _colorControllers[index] = AnimationController(
+              duration: const Duration(seconds: 10),
+              vsync: this,
+            )..repeat(reverse: true);
 
-        if (!_colorControllers.containsKey(index)) {
-          _colorControllers[index] = AnimationController(
-            duration: const Duration(seconds: 10),
-            vsync: this,
-          )..repeat(reverse: true);
-
-          _colorAnimations[index] = TweenSequence<Color?>(
-            [
-              for (var i = 0; i < colors.length; i++)
-                TweenSequenceItem<Color?>(
-                  tween: ColorTween(
-                    begin: colors[i],
-                    end: colors[(i + 1) % colors.length],
-                  ),
-                  weight: 1,
-                ),
-            ],
-          ).animate(_colorControllers[index]!);
-        }
-
-        yield Positioned.directional(
-          start: touchPosition.dx - newSize / 2,
-          top: touchPosition.dy - newSize / 2,
-          textDirection: TextDirection.ltr,
-          child: AnimatedOpacity(
-            opacity: isRandomPlayer ? 1.0 : fingerPrintsOpacity,
-            duration: const Duration(seconds: 1),
-            child: indicator != null
-                ? indicator!
-                : AnimatedContainer(
-                    width: newSize,
-                    height: newSize,
-                    duration: const Duration(seconds: 1),
-                    child: AnimatedBuilder(
-                      animation: _colorAnimations[index]!,
-                      builder: (context, child) {
-                        return Icon(
-                          Icons.fingerprint,
-                          color: _colorAnimations[index]!.value,
-                          size: newSize,
-                        );
-                      },
+            _colorAnimations[index] = TweenSequence<Color?>(
+              [
+                for (var i = 0; i < colors.length; i++)
+                  TweenSequenceItem<Color?>(
+                    tween: ColorTween(
+                      begin: colors[i],
+                      end: colors[(i + 1) % colors.length],
                     ),
+                    weight: 1,
                   ),
-          ),
-        );
+              ],
+            ).animate(_colorControllers[index]!);
+          }
+
+          yield Positioned.directional(
+            start: touchPosition.dx - newSize / 2,
+            top: touchPosition.dy - newSize / 2,
+            textDirection: TextDirection.ltr,
+            child: AnimatedOpacity(
+              opacity: isRandomPlayer ? 1.0 : fingerPrintsOpacity,
+              duration: const Duration(seconds: 1),
+              child: indicator != null
+                  ? indicator!
+                  : AnimatedContainer(
+                      width: newSize,
+                      height: newSize,
+                      duration: const Duration(seconds: 1),
+                      child: AnimatedBuilder(
+                        animation: _colorAnimations[index]!,
+                        builder: (context, child) {
+                          return Icon(
+                            Icons.fingerprint,
+                            color: _colorAnimations[index]!.value,
+                            size: newSize,
+                          );
+                        },
+                      ),
+                    ),
+            ),
+          );
+        }
       }
     }
   }

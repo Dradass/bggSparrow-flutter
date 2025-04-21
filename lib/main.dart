@@ -14,6 +14,7 @@ import '../login_handler.dart';
 // 4. Icons and background
 // 5. Games list
 // 6. Players list
+// 7. Edit play
 
 late List<CameraDescription> cameras;
 const primaryTextColor = Color.fromARGB(255, 85, 92, 89);
