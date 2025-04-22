@@ -106,6 +106,9 @@ class _StatisticsState extends State<Statistics> {
                             }
                             return null;
                           }),
+                          onLongPress: () {
+                            log('long row press: ${plays[index].id}, playes = ${plays[index].players}');
+                          },
                           onSelectChanged: (selected) {
                             if (selected!) {
                               log('row-selected: ${plays[index].id}, playes = ${plays[index].players}');
@@ -543,7 +546,7 @@ class _StatisticsState extends State<Statistics> {
                                     e.players!.split(';').length >=
                                         maxRangeValues.start)
                                 .toList();
-
+                            plays.sort((a, b) => b.id.compareTo(a.id));
                             // Get all plays and plays count for each game
                             gamePlays.clear();
                             List<_GamePlaysCount> allGames = [];
