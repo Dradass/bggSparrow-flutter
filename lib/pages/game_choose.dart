@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/game_thing.dart';
 import 'package:flutter_application_1/models/custom_list_model.dart';
-import 'package:flutter_application_1/pages/login_screen.dart';
 import '../db/game_things_sql.dart';
 import '../db/custom_list_sql.dart';
-import '../widgets/common.dart';
 import 'dart:developer';
 
 class GameHelper extends StatefulWidget {
@@ -22,6 +20,7 @@ class _GameHelperState extends State<GameHelper> {
   int gamesFilterNeedClear = 0;
   List<Map<GameThing, int>> gamesFromFilter = [];
   List<Map<GameThing, int>> allItems = [];
+  List<GameThing>? allGames = [];
   final SearchController searchController = SearchController();
   Map<int, String> gamesList = {};
   var chosenGameListId = 0;
@@ -29,16 +28,17 @@ class _GameHelperState extends State<GameHelper> {
   String? createListHelperText;
   final TextEditingController newCustimListNameController =
       TextEditingController();
+  bool isSystemDropDownItem = true;
 
   Future<void> updateGamesToAll() async {
-    var allGames = await GameThingSQL.getAllGames();
+    allGames = await GameThingSQL.getAllGames();
     if (allGames == null) {
       log("No games");
       return;
     }
-    allGames.sort((a, b) => a.name.compareTo(b.name));
+    allGames!.sort((a, b) => a.name.compareTo(b.name));
     gamesFromFilter.clear();
-    for (var game in allGames) {
+    for (var game in allGames!) {
       if (onlyOwnedGames) {
         if (game.owned == 0) continue;
       }
@@ -54,11 +54,35 @@ class _GameHelperState extends State<GameHelper> {
       gamesList[0] = "All";
       var customLists = (List.generate(
           lists.length, (index) => CustomList.fromJson(lists[index])));
-      if (customLists == null) return;
+      if (customLists.isEmpty) return;
       for (var customList in customLists) {
         gamesList[customList.id] = customList.name;
       }
     });
+  }
+
+  List<GameThing> getSelectedGames() {
+    List<GameThing> selectedGames = [];
+    for (var gameFromFilter in gamesFromFilter) {
+      if (gameFromFilter.values.first > 0) {
+        selectedGames.add(gameFromFilter.keys.first);
+      }
+    }
+    return selectedGames;
+  }
+
+  Future<bool> updateCustomList(
+      List<GameThing> selectedGames, int listId) async {
+    selectedGames.sort((a, b) => a.id.compareTo(b.id));
+    final selectedGamesString = selectedGames.map((x) => x.id).join(";");
+    var existedList = await CustomListSQL.selectCustomListById(listId);
+    if (existedList == null) {
+      return false;
+    }
+    var newList = CustomList(
+        id: listId, name: existedList.name, value: selectedGamesString);
+    CustomListSQL.updateCustomList(newList);
+    return true;
   }
 
   Future<void> updateGamesFromCustomList(int listId) async {
@@ -69,9 +93,7 @@ class _GameHelperState extends State<GameHelper> {
     }
     var customList = await CustomListSQL.selectCustomListById(chosenGameListId);
     if (customList != null) {
-      print(customList.name);
       var gamesString = customList.value;
-      print(gamesString);
       if (gamesString != null) {
         var gamesList = gamesString.split(';');
         gamesFromFilter.clear();
@@ -79,6 +101,8 @@ class _GameHelperState extends State<GameHelper> {
           var gameThing = await GameThingSQL.selectGameByID(int.parse(game));
           gamesFromFilter.add({gameThing!: 1});
         }
+        gamesFromFilter
+            .sort((a, b) => a.keys.first.name.compareTo(b.keys.first.name));
       }
     }
   }
@@ -168,7 +192,6 @@ class _GameHelperState extends State<GameHelper> {
                 height: double.maxFinite,
                 child: ElevatedButton.icon(
                   onPressed: () async {
-                    //await updateGamesToAll();
                     await updateGamesFromCustomList(chosenGameListId);
                     await updateCustomLists();
                     showDialog(
@@ -189,19 +212,15 @@ class _GameHelperState extends State<GameHelper> {
                                           0.3,
                                       child: ElevatedButton(
                                           onPressed: () {
-                                            for (var gameFromFilter
-                                                in gamesFromFilter) {
-                                              var game =
-                                                  gameFromFilter.keys.first;
-                                              gameFromFilter.update(
-                                                  game,
-                                                  (value2) => game.owned == 1
-                                                      ? value2 = 1
-                                                      : 0);
+                                            for (var game in allGames!) {
+                                              if (!gamesFromFilter.any((x) =>
+                                                  x.keys.first == game)) {
+                                                gamesFromFilter.add({game: 0});
+                                              }
                                             }
                                             setState(() {});
                                           },
-                                          child: const Text("Only owned"))),
+                                          child: const Text("Show all games"))),
                                   Row(children: [
                                     const Text('Votes'),
                                     Checkbox(
@@ -228,67 +247,130 @@ class _GameHelperState extends State<GameHelper> {
                                 children: [
                                   SizedBox(
                                       width: MediaQuery.of(context).size.width *
-                                          0.6,
+                                          0.68,
                                       child: ExpansionTile(
+                                          shape: Border(),
                                           title: const Text('Games lists'),
                                           children: [
-                                            Row(children: [
-                                              ElevatedButton(
-                                                  onPressed: () async {
-                                                    // TODO Disable delete button
-                                                    if (chosenGameListId == 0) {
-                                                      showSnackBar(context,
-                                                          "Cant delete this list");
-                                                      return;
-                                                    }
-                                                    final customList =
-                                                        await CustomListSQL
-                                                            .selectCustomListById(
-                                                                chosenGameListId);
-                                                    if (customList == null) {
-                                                      return;
-                                                    }
-                                                    CustomListSQL
-                                                        .deleteCustomList(
-                                                            customList);
-                                                    //await updateCustomLists();
-                                                    gamesList
-                                                        .remove(customList.id);
-                                                    setState(() {});
-                                                    showSnackBar(context,
-                                                        "List was deleted");
-                                                  },
-                                                  child: Text('Delete')),
-                                              DropdownButton(
-                                                value: gamesList.isNotEmpty
-                                                    ? gamesList[
-                                                        chosenGameListId]
-                                                    : null,
-                                                onChanged:
-                                                    (String? value) async {
-                                                  chosenGameListId = gamesList
-                                                      .entries
-                                                      .firstWhere((entry) =>
-                                                          entry.value == value)
-                                                      .key;
-                                                  print(
-                                                      'chosenGameListId = $chosenGameListId');
-                                                  await updateGamesFromCustomList(
-                                                      chosenGameListId);
-                                                  setState(() {});
-                                                },
-                                                items: gamesList.values.map<
-                                                        DropdownMenuItem<
-                                                            String>>(
-                                                    (String value) {
-                                                  return DropdownMenuItem<
-                                                          String>(
-                                                      value: value,
-                                                      child: Text(value));
-                                                }).toList(),
-                                              )
-                                            ]),
                                             Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceBetween,
+                                                children: [
+                                                  Container(
+                                                      child: Row(children: [
+                                                    ElevatedButton(
+                                                        onPressed:
+                                                            isSystemDropDownItem
+                                                                ? null
+                                                                : () async {
+                                                                    setState(
+                                                                        () {
+                                                                      createListErrorText =
+                                                                          null;
+                                                                      createListHelperText =
+                                                                          null;
+                                                                    });
+                                                                    var selectedGames =
+                                                                        getSelectedGames();
+                                                                    if (!await updateCustomList(
+                                                                        selectedGames,
+                                                                        chosenGameListId)) {
+                                                                      setState(
+                                                                          () {
+                                                                        createListErrorText =
+                                                                            "Cant update this list";
+                                                                      });
+                                                                      return;
+                                                                    }
+                                                                    setState(
+                                                                        () {});
+                                                                    setState(
+                                                                        () {
+                                                                      createListHelperText =
+                                                                          "List was updated";
+                                                                    });
+                                                                  },
+                                                        child: const Text(
+                                                            'Update')),
+                                                    DropdownButton(
+                                                      padding:
+                                                          EdgeInsets.all(10),
+                                                      value: gamesList
+                                                              .isNotEmpty
+                                                          ? gamesList[
+                                                              chosenGameListId]
+                                                          : null,
+                                                      onChanged: (String?
+                                                          value) async {
+                                                        chosenGameListId = gamesList
+                                                            .entries
+                                                            .firstWhere(
+                                                                (entry) =>
+                                                                    entry
+                                                                        .value ==
+                                                                    value)
+                                                            .key;
+                                                        isSystemDropDownItem =
+                                                            chosenGameListId ==
+                                                                    0
+                                                                ? true
+                                                                : false;
+
+                                                        await updateGamesFromCustomList(
+                                                            chosenGameListId);
+                                                        setState(() {});
+                                                      },
+                                                      items: gamesList.values.map<
+                                                              DropdownMenuItem<
+                                                                  String>>(
+                                                          (String value) {
+                                                        return DropdownMenuItem<
+                                                                String>(
+                                                            value: value,
+                                                            child: Text(value));
+                                                      }).toList(),
+                                                    )
+                                                  ])),
+                                                  ElevatedButton(
+                                                      onPressed:
+                                                          isSystemDropDownItem
+                                                              ? null
+                                                              : () async {
+                                                                  setState(() {
+                                                                    createListErrorText =
+                                                                        null;
+                                                                    createListHelperText =
+                                                                        null;
+                                                                  });
+
+                                                                  final customList =
+                                                                      await CustomListSQL
+                                                                          .selectCustomListById(
+                                                                              chosenGameListId);
+                                                                  if (customList ==
+                                                                      null) {
+                                                                    return;
+                                                                  }
+                                                                  CustomListSQL
+                                                                      .deleteCustomList(
+                                                                          customList);
+                                                                  gamesList.remove(
+                                                                      customList
+                                                                          .id);
+                                                                  setState(
+                                                                      () {});
+                                                                  setState(() {
+                                                                    createListHelperText =
+                                                                        "List was deleted";
+                                                                  });
+                                                                },
+                                                      child:
+                                                          const Text('Delete')),
+                                                ]),
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.start,
                                               children: [
                                                 ElevatedButton(
                                                     onPressed: () async {
@@ -321,17 +403,8 @@ class _GameHelperState extends State<GameHelper> {
                                                         return;
                                                       }
                                                       List<GameThing>
-                                                          selectedGames = [];
-                                                      for (var gameFromFilter
-                                                          in gamesFromFilter) {
-                                                        if (gameFromFilter
-                                                                .values.first >
-                                                            0) {
-                                                          selectedGames.add(
-                                                              gameFromFilter
-                                                                  .keys.first);
-                                                        }
-                                                      }
+                                                          selectedGames =
+                                                          getSelectedGames();
                                                       if (selectedGames
                                                           .isEmpty) {
                                                         setState(() {
@@ -347,8 +420,6 @@ class _GameHelperState extends State<GameHelper> {
                                                           selectedGames
                                                               .map((x) => x.id)
                                                               .join(";");
-                                                      print(
-                                                          selectedGamesString);
                                                       var someId = await CustomListSQL
                                                           .addCustomListByName(
                                                               listName,
@@ -373,7 +444,8 @@ class _GameHelperState extends State<GameHelper> {
                                                           .text = '';
                                                       setState(() {});
                                                     },
-                                                    child: Text('Create')),
+                                                    child:
+                                                        const Text('Create')),
                                                 SizedBox(
                                                     width:
                                                         MediaQuery.of(context)
@@ -384,11 +456,21 @@ class _GameHelperState extends State<GameHelper> {
                                                         controller:
                                                             newCustimListNameController,
                                                         decoration: InputDecoration(
+                                                            border: InputBorder
+                                                                .none,
+                                                            contentPadding:
+                                                                const EdgeInsets
+                                                                    .fromLTRB(
+                                                                    10,
+                                                                    0,
+                                                                    0,
+                                                                    0),
                                                             helperText:
                                                                 createListHelperText,
                                                             errorText:
                                                                 createListErrorText,
-                                                            labelText: 'Name')))
+                                                            labelText:
+                                                                'List name')))
                                               ],
                                             ),
                                           ])),
@@ -437,7 +519,7 @@ class _GameHelperState extends State<GameHelper> {
                 height: MediaQuery.of(context).size.height,
                 child: ElevatedButton(
                   onPressed: () async {
-                    List<GameThing>? allGames = [];
+                    List<GameThing>? chosenGames = [];
                     if (gamesFromFilter
                         .any((element) => element.values.first > 0)) {
                       for (var gameFromFilter in gamesFromFilter) {
@@ -445,16 +527,16 @@ class _GameHelperState extends State<GameHelper> {
                           for (var i = 0;
                               i < gameFromFilter.values.first;
                               i++) {
-                            allGames.add(gameFromFilter.keys.first);
+                            chosenGames.add(gameFromFilter.keys.first);
                           }
                         }
                       }
                     } else {
-                      allGames = await GameThingSQL.getAllGames();
+                      chosenGames = allGames;
                     }
                     List<GameThing> filteredGames = [];
-                    if (allGames == null) return;
-                    for (var game in allGames) {
+                    if (chosenGames == null) return;
+                    for (var game in chosenGames) {
                       if (isGameMatchChosenPlayersCount(
                           game, chosenPlayersCount, maxRangeValues)) {
                         if (onlyOwnedGames) {
