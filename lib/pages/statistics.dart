@@ -646,7 +646,10 @@ class _StatisticsState extends State<Statistics> {
                             plays = await getNewPlays();
                             setState(() {});
                           },
-                          label: const Text("New games"),
+                          label: const Text(
+                            "First plays",
+                            textAlign: TextAlign.center,
+                          ),
                         )),
                     Container(
                         color: Colors.brown,
@@ -656,7 +659,8 @@ class _StatisticsState extends State<Statistics> {
                           onPressed: () async {
                             exportCSV();
                           },
-                          label: const Text("Export table"),
+                          label: const Text("Export table",
+                              textAlign: TextAlign.center),
                         ))
                   ])),
           Flexible(

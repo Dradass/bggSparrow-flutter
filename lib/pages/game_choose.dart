@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/game_thing.dart';
+import 'package:flutter_application_1/models/custom_list_model.dart';
+import 'package:flutter_application_1/pages/login_screen.dart';
 import '../db/game_things_sql.dart';
+import '../db/custom_list_sql.dart';
+import '../widgets/common.dart';
 import 'dart:developer';
 
 class GameHelper extends StatefulWidget {
@@ -19,9 +23,70 @@ class _GameHelperState extends State<GameHelper> {
   List<Map<GameThing, int>> gamesFromFilter = [];
   List<Map<GameThing, int>> allItems = [];
   final SearchController searchController = SearchController();
+  Map<int, String> gamesList = {};
+  var chosenGameListId = 0;
+  String? createListErrorText;
+  String? createListHelperText;
+  final TextEditingController newCustimListNameController =
+      TextEditingController();
+
+  Future<void> updateGamesToAll() async {
+    var allGames = await GameThingSQL.getAllGames();
+    if (allGames == null) {
+      log("No games");
+      return;
+    }
+    allGames.sort((a, b) => a.name.compareTo(b.name));
+    gamesFromFilter.clear();
+    for (var game in allGames) {
+      if (onlyOwnedGames) {
+        if (game.owned == 0) continue;
+      }
+      if (isGameMatchChosenPlayersCount(
+          game, chosenPlayersCount, maxRangeValues)) {
+        gamesFromFilter.add({game: game.owned});
+      }
+    }
+  }
+
+  Future<void> updateCustomLists() async {
+    CustomListSQL.getAllCustomLists().then((lists) {
+      gamesList[0] = "All";
+      var customLists = (List.generate(
+          lists.length, (index) => CustomList.fromJson(lists[index])));
+      if (customLists == null) return;
+      for (var customList in customLists) {
+        gamesList[customList.id] = customList.name;
+      }
+    });
+  }
+
+  Future<void> updateGamesFromCustomList(int listId) async {
+    if (chosenGameListId == 0) {
+      await updateGamesToAll();
+      setState(() {});
+      return;
+    }
+    var customList = await CustomListSQL.selectCustomListById(chosenGameListId);
+    if (customList != null) {
+      print(customList.name);
+      var gamesString = customList.value;
+      print(gamesString);
+      if (gamesString != null) {
+        var gamesList = gamesString.split(';');
+        gamesFromFilter.clear();
+        for (var game in gamesList) {
+          var gameThing = await GameThingSQL.selectGameByID(int.parse(game));
+          gamesFromFilter.add({gameThing!: 1});
+        }
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    updateCustomLists();
+
     return Scaffold(
         body: SafeArea(
             child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
@@ -78,135 +143,293 @@ class _GameHelperState extends State<GameHelper> {
                   ],
                 ))),
         SizedBox(
-            width: MediaQuery.of(context).size.width,
-            height: MediaQuery.of(context).size.height * 0.05,
-            child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  SizedBox(
-                      width: MediaQuery.of(context).size.width * 0.5,
-                      height: double.maxFinite,
-                      child: ChoiceChip(
-                        label: SizedBox(
-                            width: double.infinity,
-                            height: MediaQuery.of(context).size.height * 1,
-                            child: const Text("Only owned games")),
-                        selected: onlyOwnedGames,
-                        onSelected: (bool value) {
-                          setState(() {
-                            onlyOwnedGames = value;
-                          });
-                        },
-                      )),
-                  Container(
-                      color: Colors.brown,
-                      width: MediaQuery.of(context).size.width * 0.5,
-                      height: double.maxFinite,
-                      child: ElevatedButton.icon(
-                        onPressed: () async {
-                          var allGames = await GameThingSQL.getAllGames();
-                          if (allGames == null) {
-                            log("No games");
-                            return;
-                          }
-                          allGames.sort((a, b) => a.name.compareTo(b.name));
-                          gamesFromFilter.clear();
-                          for (var game in allGames) {
-                            if (onlyOwnedGames) {
-                              if (game.owned == 0) continue;
-                            }
-                            if (isGameMatchChosenPlayersCount(
-                                game, chosenPlayersCount, maxRangeValues)) {
-                              gamesFromFilter.add({game: game.owned});
-                            }
-                          }
-                          showDialog(
-                              context: context,
-                              builder: (buildContext) {
-                                return StatefulBuilder(
-                                    builder: (context, setState) {
-                                  return AlertDialog(
-                                      content: Column(children: [
-                                    Row(
+          width: MediaQuery.of(context).size.width,
+          height: MediaQuery.of(context).size.height * 0.05,
+          child:
+              Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+            SizedBox(
+                width: MediaQuery.of(context).size.width * 0.5,
+                height: double.maxFinite,
+                child: ChoiceChip(
+                  label: SizedBox(
+                      width: double.infinity,
+                      height: MediaQuery.of(context).size.height * 1,
+                      child: const Text("Only owned games")),
+                  selected: onlyOwnedGames,
+                  onSelected: (bool value) {
+                    setState(() {
+                      onlyOwnedGames = value;
+                    });
+                  },
+                )),
+            Container(
+                color: Colors.brown,
+                width: MediaQuery.of(context).size.width * 0.5,
+                height: double.maxFinite,
+                child: ElevatedButton.icon(
+                  onPressed: () async {
+                    //await updateGamesToAll();
+                    await updateGamesFromCustomList(chosenGameListId);
+                    await updateCustomLists();
+                    showDialog(
+                        context: context,
+                        builder: (buildContext) {
+                          return StatefulBuilder(builder: (context, setState) {
+                            setState(() {});
+                            return AlertDialog(
+                                content: Column(children: [
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  const Text('Game'),
+                                  Container(
+                                      color: Colors.red,
+                                      width: MediaQuery.of(context).size.width *
+                                          0.3,
+                                      child: ElevatedButton(
+                                          onPressed: () {
+                                            for (var gameFromFilter
+                                                in gamesFromFilter) {
+                                              var game =
+                                                  gameFromFilter.keys.first;
+                                              gameFromFilter.update(
+                                                  game,
+                                                  (value2) => game.owned == 1
+                                                      ? value2 = 1
+                                                      : 0);
+                                            }
+                                            setState(() {});
+                                          },
+                                          child: const Text("Only owned"))),
+                                  Row(children: [
+                                    const Text('Votes'),
+                                    Checkbox(
+                                        value: gamesFilterNeedClear == 1,
+                                        onChanged: ((value) {
+                                          for (var gameFromFilter
+                                              in gamesFromFilter) {
+                                            gameFromFilter.update(
+                                                gameFromFilter.keys.first,
+                                                (value2) =>
+                                                    value2 = value! ? 1 : 0);
+                                          }
+                                          setState(
+                                            () {
+                                              gamesFilterNeedClear =
+                                                  value! ? 1 : 0;
+                                            },
+                                          );
+                                        }))
+                                  ]),
+                                ],
+                              ),
+                              Row(
+                                children: [
+                                  SizedBox(
+                                      width: MediaQuery.of(context).size.width *
+                                          0.6,
+                                      child: ExpansionTile(
+                                          title: const Text('Games lists'),
+                                          children: [
+                                            Row(children: [
+                                              ElevatedButton(
+                                                  onPressed: () async {
+                                                    // TODO Disable delete button
+                                                    if (chosenGameListId == 0) {
+                                                      showSnackBar(context,
+                                                          "Cant delete this list");
+                                                      return;
+                                                    }
+                                                    final customList =
+                                                        await CustomListSQL
+                                                            .selectCustomListById(
+                                                                chosenGameListId);
+                                                    if (customList == null) {
+                                                      return;
+                                                    }
+                                                    CustomListSQL
+                                                        .deleteCustomList(
+                                                            customList);
+                                                    //await updateCustomLists();
+                                                    gamesList
+                                                        .remove(customList.id);
+                                                    setState(() {});
+                                                    showSnackBar(context,
+                                                        "List was deleted");
+                                                  },
+                                                  child: Text('Delete')),
+                                              DropdownButton(
+                                                value: gamesList.isNotEmpty
+                                                    ? gamesList[
+                                                        chosenGameListId]
+                                                    : null,
+                                                onChanged:
+                                                    (String? value) async {
+                                                  chosenGameListId = gamesList
+                                                      .entries
+                                                      .firstWhere((entry) =>
+                                                          entry.value == value)
+                                                      .key;
+                                                  print(
+                                                      'chosenGameListId = $chosenGameListId');
+                                                  await updateGamesFromCustomList(
+                                                      chosenGameListId);
+                                                  setState(() {});
+                                                },
+                                                items: gamesList.values.map<
+                                                        DropdownMenuItem<
+                                                            String>>(
+                                                    (String value) {
+                                                  return DropdownMenuItem<
+                                                          String>(
+                                                      value: value,
+                                                      child: Text(value));
+                                                }).toList(),
+                                              )
+                                            ]),
+                                            Row(
+                                              children: [
+                                                ElevatedButton(
+                                                    onPressed: () async {
+                                                      setState(() {
+                                                        createListErrorText =
+                                                            null;
+                                                        createListHelperText =
+                                                            null;
+                                                      });
+                                                      final listName =
+                                                          newCustimListNameController
+                                                              .text;
+                                                      if (listName.isEmpty) {
+                                                        setState(() {
+                                                          createListErrorText =
+                                                              "Set the name of list";
+                                                        });
+                                                        return;
+                                                      }
+                                                      var listWithSameNameExists =
+                                                          await CustomListSQL
+                                                              .selectLocationByName(
+                                                                  listName);
+                                                      if (listWithSameNameExists !=
+                                                          null) {
+                                                        setState(() {
+                                                          createListErrorText =
+                                                              "List is already exists with same name";
+                                                        });
+                                                        return;
+                                                      }
+                                                      List<GameThing>
+                                                          selectedGames = [];
+                                                      for (var gameFromFilter
+                                                          in gamesFromFilter) {
+                                                        if (gameFromFilter
+                                                                .values.first >
+                                                            0) {
+                                                          selectedGames.add(
+                                                              gameFromFilter
+                                                                  .keys.first);
+                                                        }
+                                                      }
+                                                      if (selectedGames
+                                                          .isEmpty) {
+                                                        setState(() {
+                                                          createListErrorText =
+                                                              "Chose games to create list";
+                                                        });
+                                                        return;
+                                                      }
+                                                      selectedGames.sort((a,
+                                                              b) =>
+                                                          a.id.compareTo(b.id));
+                                                      final selectedGamesString =
+                                                          selectedGames
+                                                              .map((x) => x.id)
+                                                              .join(";");
+                                                      print(
+                                                          selectedGamesString);
+                                                      var someId = await CustomListSQL
+                                                          .addCustomListByName(
+                                                              listName,
+                                                              selectedGamesString);
+                                                      setState(() {
+                                                        createListHelperText =
+                                                            "List was created";
+                                                      });
+                                                      final customList =
+                                                          await CustomListSQL
+                                                              .selectCustomListById(
+                                                                  someId);
+                                                      if (customList == null) {
+                                                        return;
+                                                      }
+                                                      gamesList[someId] =
+                                                          listName;
+                                                      chosenGameListId = someId;
+                                                      await updateGamesFromCustomList(
+                                                          chosenGameListId);
+                                                      newCustimListNameController
+                                                          .text = '';
+                                                      setState(() {});
+                                                    },
+                                                    child: Text('Create')),
+                                                SizedBox(
+                                                    width:
+                                                        MediaQuery.of(context)
+                                                                .size
+                                                                .width *
+                                                            0.4,
+                                                    child: TextField(
+                                                        controller:
+                                                            newCustimListNameController,
+                                                        decoration: InputDecoration(
+                                                            helperText:
+                                                                createListHelperText,
+                                                            errorText:
+                                                                createListErrorText,
+                                                            labelText: 'Name')))
+                                              ],
+                                            ),
+                                          ])),
+                                ],
+                              ),
+                              const Divider(),
+                              Expanded(
+                                  child: SingleChildScrollView(
+                                      child: Column(
+                                          children: gamesFromFilter.map((game) {
+                                return ListTile(
+                                  contentPadding: EdgeInsets.zero,
+                                  title: Row(
                                       mainAxisAlignment:
                                           MainAxisAlignment.spaceBetween,
                                       children: [
-                                        const Text('Game'),
-                                        Container(
-                                            color: Colors.red,
-                                            width: MediaQuery.of(context)
-                                                    .size
-                                                    .width *
-                                                0.3,
-                                            child: ElevatedButton(
-                                                onPressed: () {
-                                                  for (var gameFromFilter
-                                                      in gamesFromFilter) {
-                                                    var game = gameFromFilter
-                                                        .keys.first;
-                                                    gameFromFilter.update(
-                                                        game,
-                                                        (value2) =>
-                                                            game.owned == 1
-                                                                ? value2 = 1
-                                                                : 0);
-                                                  }
-                                                  setState(() {});
-                                                },
-                                                child:
-                                                    const Text("Only owned"))),
-                                        Row(children: [
-                                          const Text('Votes'),
-                                          Checkbox(
-                                              value: gamesFilterNeedClear == 1,
-                                              onChanged: ((value) {
-                                                for (var gameFromFilter
-                                                    in gamesFromFilter) {
-                                                  gameFromFilter.update(
-                                                      gameFromFilter.keys.first,
-                                                      (value2) => value2 =
-                                                          value! ? 1 : 0);
-                                                }
-                                                setState(
-                                                  () {
-                                                    gamesFilterNeedClear =
-                                                        value! ? 1 : 0;
-                                                  },
-                                                );
-                                              }))
-                                        ]),
-                                      ],
-                                    ),
-                                    const Divider(),
-                                    Expanded(
-                                        child: SingleChildScrollView(
-                                            child: Column(
-                                                children:
-                                                    gamesFromFilter.map((game) {
-                                      return ListTile(
-                                        contentPadding: EdgeInsets.zero,
-                                        title: Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
-                                            children: [
-                                              Expanded(
-                                                  child: Text(
-                                                (game.keys.first).name,
-                                                overflow: TextOverflow.ellipsis,
-                                              )),
-                                              CustomCounter(
-                                                  game, gamesFromFilter)
-                                            ]),
-                                      );
-                                    }).toList())))
-                                  ]));
-                                });
-                              });
-                        },
-                        label: const Text('Filter'),
-                        icon: const Icon(Icons.filter_alt),
-                      ))
-                ])),
+                                        Expanded(
+                                            child: Text(
+                                          (game.keys.first).name,
+                                          overflow: TextOverflow.ellipsis,
+                                        )),
+                                        CustomCounter(game, gamesFromFilter)
+                                      ]),
+                                );
+                              }).toList())))
+                            ]));
+                          });
+                        });
+                  },
+                  label: const Text('Filter'),
+                  icon: const Icon(Icons.filter_alt),
+                ))
+          ]),
+          // Row(
+          //   children: [
+          //     ElevatedButton(
+          //         onPressed: () => {print('Create')},
+          //         child: Text('Create list'))
+          //   ],
+          // )
+        ),
         Flexible(
             flex: 1,
             child: SizedBox(

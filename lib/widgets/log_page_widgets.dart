@@ -746,7 +746,7 @@ class _GamePickerState extends State<GamePicker> {
                                           Theme.of(context)
                                               .colorScheme
                                               .secondary)),
-                                  child: const Text('Take a photo'))
+                                  child: const Text('Recognize'))
                               //)
                               )
                         ]),

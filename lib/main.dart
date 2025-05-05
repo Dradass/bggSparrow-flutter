@@ -9,12 +9,11 @@ import '../login_handler.dart';
 
 // TODO
 // 1. Debug mode for camera capture
-// 2. No borders to buttons
-// 3. Color picker
-// 4. Icons and background
-// 5. Games list
-// 6. Players list
-// 7. Edit play
+// 2. Color picker
+// 3. Icons and background
+// 4. Games list
+// 5. Players list
+// 6. Edit play
 
 late List<CameraDescription> cameras;
 const primaryTextColor = Color.fromARGB(255, 85, 92, 89);
