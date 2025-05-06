@@ -330,54 +330,54 @@ class _PlayersPickerState extends State<PlayersPicker> {
                   return AlertDialog(
                       //insetPadding: EdgeInsets.zero,
                       title: Column(children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            ElevatedButton(
-                              onPressed: () async => {
-                                _errorText = await addNotBggPlayer(
-                                    playerNameController.text, context),
-                                setState(() {})
-                              },
-                              style: ButtonStyle(
-                                  backgroundColor: WidgetStateProperty.all(
-                                      Theme.of(context).colorScheme.secondary),
-                                  shape:
-                                      WidgetStateProperty.all<OutlinedBorder>(
-                                    const RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.only(
-                                        topLeft: Radius.circular(20),
-                                      ),
+                        ExpansionTile(
+                            tilePadding: EdgeInsets.zero,
+                            shape: const Border(),
+                            title: const Text('Manage players'),
+                            children: [
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  ElevatedButton(
+                                    onPressed: () async => {
+                                      _errorText = await addNotBggPlayer(
+                                          playerNameController.text, context),
+                                      setState(() {})
+                                    },
+                                    style: ButtonStyle(
+                                      backgroundColor: WidgetStateProperty.all(
+                                          Theme.of(context)
+                                              .colorScheme
+                                              .secondary),
                                     ),
-                                  )),
-                              child: const Text("Add new player"),
-                            ),
-                            ElevatedButton(
-                              onPressed: () async => {
-                                _errorText = await addBggPlayer(
-                                    playerNameController.text, context),
-                                setState(() {})
-                              },
-                              style: ButtonStyle(
-                                  backgroundColor: WidgetStateProperty.all(
-                                      Theme.of(context).colorScheme.secondary),
-                                  shape:
-                                      WidgetStateProperty.all<OutlinedBorder>(
-                                          const RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.only(
-                                      topRight: Radius.circular(20),
+                                    child: const Text("Add new player"),
+                                  ),
+                                  ElevatedButton(
+                                    onPressed: () async => {
+                                      _errorText = await addBggPlayer(
+                                          playerNameController.text, context),
+                                      setState(() {})
+                                    },
+                                    style: ButtonStyle(
+                                      backgroundColor: WidgetStateProperty.all(
+                                          Theme.of(context)
+                                              .colorScheme
+                                              .secondary),
                                     ),
-                                  ))),
-                              child: const Text("Add bgg player"),
-                            ),
-                          ],
-                        ),
-                        TextField(
-                            controller: playerNameController,
-                            decoration: InputDecoration(
-                                labelText: 'Add new player',
-                                errorText: _errorText,
-                                hintText: 'Enter friend name or nickname'))
+                                    child: const Text("Add bgg player"),
+                                  ),
+                                ],
+                              ),
+                              TextField(
+                                  controller: playerNameController,
+                                  decoration: InputDecoration(
+                                      labelText: 'Add new player',
+                                      errorText: _errorText,
+                                      hintText:
+                                          'Enter friend name or nickname')),
+                              //Players list
+                            ]),
                       ]),
                       content: SingleChildScrollView(
                           child: Column(

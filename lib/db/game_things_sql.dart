@@ -25,7 +25,9 @@ class GameThingSQL {
     await db.execute(
         "CREATE TABLE SystemParameters(id INTEGER PRIMARY KEY, name TEXT NOT NULL, value TEXT);");
     await db.execute(
-        "CREATE TABLE CustomLists(id INTEGER PRIMARY KEY, name TEXT NOT NULL, value TEXT);");
+        "CREATE TABLE GameLists(id INTEGER PRIMARY KEY, name TEXT NOT NULL, value TEXT);");
+    await db.execute(
+        "CREATE TABLE PlayerLists(id INTEGER PRIMARY KEY, name TEXT NOT NULL, value TEXT);");
     log('TABLES WERE CREATED');
   }
 

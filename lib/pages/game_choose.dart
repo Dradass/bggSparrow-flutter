@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/game_thing.dart';
-import 'package:flutter_application_1/models/custom_list_model.dart';
+import 'package:flutter_application_1/models/game_list_model.dart';
 import '../db/game_things_sql.dart';
-import '../db/custom_list_sql.dart';
+import '../db/game_list_sql.dart';
 import 'dart:developer';
 
 class GameHelper extends StatefulWidget {
@@ -50,10 +50,10 @@ class _GameHelperState extends State<GameHelper> {
   }
 
   Future<void> updateCustomLists() async {
-    CustomListSQL.getAllCustomLists().then((lists) {
+    GameListSQL.getAllGameLists().then((lists) {
       gamesList[0] = "All";
       var customLists = (List.generate(
-          lists.length, (index) => CustomList.fromJson(lists[index])));
+          lists.length, (index) => GameList.fromJson(lists[index])));
       if (customLists.isEmpty) return;
       for (var customList in customLists) {
         gamesList[customList.id] = customList.name;
@@ -75,13 +75,13 @@ class _GameHelperState extends State<GameHelper> {
       List<GameThing> selectedGames, int listId) async {
     selectedGames.sort((a, b) => a.id.compareTo(b.id));
     final selectedGamesString = selectedGames.map((x) => x.id).join(";");
-    var existedList = await CustomListSQL.selectCustomListById(listId);
+    var existedList = await GameListSQL.selectCustomListById(listId);
     if (existedList == null) {
       return false;
     }
-    var newList = CustomList(
+    var newList = GameList(
         id: listId, name: existedList.name, value: selectedGamesString);
-    CustomListSQL.updateCustomList(newList);
+    GameListSQL.updateCustomList(newList);
     return true;
   }
 
@@ -91,7 +91,7 @@ class _GameHelperState extends State<GameHelper> {
       setState(() {});
       return;
     }
-    var customList = await CustomListSQL.selectCustomListById(chosenGameListId);
+    var customList = await GameListSQL.selectCustomListById(chosenGameListId);
     if (customList != null) {
       var gamesString = customList.value;
       if (gamesString != null) {
@@ -220,6 +220,12 @@ class _GameHelperState extends State<GameHelper> {
                                             }
                                             setState(() {});
                                           },
+                                          style: ButtonStyle(
+                                              backgroundColor:
+                                                  WidgetStateProperty.all(
+                                                      Theme.of(context)
+                                                          .colorScheme
+                                                          .secondary)),
                                           child: const Text("Show all games"))),
                                   Row(children: [
                                     const Text('Votes'),
@@ -249,7 +255,7 @@ class _GameHelperState extends State<GameHelper> {
                                       width: MediaQuery.of(context).size.width *
                                           0.68,
                                       child: ExpansionTile(
-                                          shape: Border(),
+                                          shape: const Border(),
                                           title: const Text('Games lists'),
                                           children: [
                                             Row(
@@ -291,11 +297,18 @@ class _GameHelperState extends State<GameHelper> {
                                                                           "List was updated";
                                                                     });
                                                                   },
+                                                        style: ButtonStyle(
+                                                            backgroundColor: WidgetStateProperty
+                                                                .all(Theme.of(
+                                                                        context)
+                                                                    .colorScheme
+                                                                    .secondary)),
                                                         child: const Text(
                                                             'Update')),
                                                     DropdownButton(
                                                       padding:
-                                                          EdgeInsets.all(10),
+                                                          const EdgeInsets.all(
+                                                              10),
                                                       value: gamesList
                                                               .isNotEmpty
                                                           ? gamesList[
@@ -345,14 +358,14 @@ class _GameHelperState extends State<GameHelper> {
                                                                   });
 
                                                                   final customList =
-                                                                      await CustomListSQL
+                                                                      await GameListSQL
                                                                           .selectCustomListById(
                                                                               chosenGameListId);
                                                                   if (customList ==
                                                                       null) {
                                                                     return;
                                                                   }
-                                                                  CustomListSQL
+                                                                  GameListSQL
                                                                       .deleteCustomList(
                                                                           customList);
                                                                   gamesList.remove(
@@ -365,6 +378,13 @@ class _GameHelperState extends State<GameHelper> {
                                                                         "List was deleted";
                                                                   });
                                                                 },
+                                                      style: ButtonStyle(
+                                                          backgroundColor:
+                                                              WidgetStateProperty
+                                                                  .all(Theme.of(
+                                                                          context)
+                                                                      .colorScheme
+                                                                      .secondary)),
                                                       child:
                                                           const Text('Delete')),
                                                 ]),
@@ -391,7 +411,7 @@ class _GameHelperState extends State<GameHelper> {
                                                         return;
                                                       }
                                                       var listWithSameNameExists =
-                                                          await CustomListSQL
+                                                          await GameListSQL
                                                               .selectLocationByName(
                                                                   listName);
                                                       if (listWithSameNameExists !=
@@ -420,7 +440,7 @@ class _GameHelperState extends State<GameHelper> {
                                                           selectedGames
                                                               .map((x) => x.id)
                                                               .join(";");
-                                                      var someId = await CustomListSQL
+                                                      var someId = await GameListSQL
                                                           .addCustomListByName(
                                                               listName,
                                                               selectedGamesString);
@@ -429,7 +449,7 @@ class _GameHelperState extends State<GameHelper> {
                                                             "List was created";
                                                       });
                                                       final customList =
-                                                          await CustomListSQL
+                                                          await GameListSQL
                                                               .selectCustomListById(
                                                                   someId);
                                                       if (customList == null) {
@@ -444,6 +464,13 @@ class _GameHelperState extends State<GameHelper> {
                                                           .text = '';
                                                       setState(() {});
                                                     },
+                                                    style: ButtonStyle(
+                                                        backgroundColor:
+                                                            WidgetStateProperty
+                                                                .all(Theme.of(
+                                                                        context)
+                                                                    .colorScheme
+                                                                    .secondary)),
                                                     child:
                                                         const Text('Create')),
                                                 SizedBox(
