@@ -61,6 +61,15 @@ class PlayersSQL {
     return Player.fromJson(result.first);
   }
 
+  static Future<Player?> selectPlayerById(int id) async {
+    final db = await _getDB();
+
+    List<Map<String, dynamic>> result =
+        await db.rawQuery("SELECT * FROM Players WHERE id=?", [id]);
+    if (result.isEmpty) return null;
+    return Player.fromJson(result.first);
+  }
+
   static Future<int> getMaxID() async {
     final db = await _getDB();
     List<Map<String, dynamic>> result =

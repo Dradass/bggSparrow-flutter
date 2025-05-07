@@ -15,6 +15,8 @@ import '../db/game_things_sql.dart';
 import 'package:image/image.dart' as image_dart;
 import '../db/players_sql.dart';
 import '../models/bgg_player_model.dart';
+import '../db/players_list_sql.dart';
+import '../models/player_list_model.dart';
 
 import 'package:flutter/services.dart';
 import 'package:flutter_pixelmatching/flutter_pixelmatching.dart';
@@ -263,6 +265,12 @@ class PlayersPicker extends StatefulWidget {
 class _PlayersPickerState extends State<PlayersPicker> {
   final playerNameController = TextEditingController();
   String? _errorText;
+  String? _listManageErrorText;
+  String? _listManageHintText;
+  final _newListNameController = TextEditingController();
+  bool isSystemDropDownItem = true;
+  Map<int, String> playersList = {};
+  var chosenPlayersListId = 0;
 
   Future<String?> addBggPlayer(String userName, context) async {
     final playerNameInfo = await getBggPlayerName(userName);
@@ -316,8 +324,79 @@ class _PlayersPickerState extends State<PlayersPicker> {
     return null;
   }
 
+  Future<void> updateCustomLists() async {
+    PlayerListSQL.getAllPlayerLists().then((lists) {
+      playersList[0] = "All";
+      var customLists = (List.generate(
+          lists.length, (index) => PlayersList.fromJson(lists[index])));
+      if (customLists.isEmpty) return;
+      for (var customList in customLists) {
+        playersList[customList.id] = customList.name;
+      }
+    });
+  }
+
+  Future<void> updatePlayersFromCustomList(int listId) async {
+    if (chosenPlayersListId == 0) {
+      widget.players = await getLocalPlayers();
+      setState(() {});
+      return;
+    }
+    var customList =
+        await PlayerListSQL.selectCustomListById(chosenPlayersListId);
+    if (customList != null) {
+      var playersString = customList.value;
+      if (playersString != null) {
+        var playersList = playersString.split(';');
+        widget.players.clear();
+        for (var playerId in playersList) {
+          var player = await PlayersSQL.selectPlayerById(int.parse(playerId));
+          if (player != null) {
+            widget.players.add({
+              'name': player.name,
+              'id': player.id,
+              'isChecked': false,
+              'win': false,
+              'excluded': false,
+              'username': player.username,
+              'userid': player.userid
+            });
+          } else {
+            log('Cant find player with id $playerId');
+          }
+        }
+        widget.players.sort((a, b) => a['id'].compareTo(b['id']));
+      }
+    }
+  }
+
+  List<Map> getSelectedPlayers() {
+    List<Map> selectedPlayers = [];
+    for (var player in widget.players) {
+      if (player['isChecked']) {
+        selectedPlayers.add(player);
+      }
+    }
+    return selectedPlayers;
+  }
+
+  Future<bool> updateCustomPlayersList(
+      List<int> selectedPlayersIds, int listId) async {
+    selectedPlayersIds.sort((a, b) => a.compareTo(b));
+    final selectedGamesString = selectedPlayersIds.join(";");
+    var existedList = await PlayerListSQL.selectCustomListById(listId);
+    if (existedList == null) {
+      return false;
+    }
+    var newList = PlayersList(
+        id: listId, name: existedList.name, value: selectedGamesString);
+    PlayerListSQL.updateCustomList(newList);
+    return true;
+  }
+
   @override
   Widget build(BuildContext context) {
+    updateCustomLists();
     return ElevatedButton.icon(
         onPressed: () async {
           if (widget.players.isEmpty) {
@@ -332,7 +411,6 @@ class _PlayersPickerState extends State<PlayersPicker> {
                       title: Column(children: [
                         ExpansionTile(
                             tilePadding: EdgeInsets.zero,
-                            shape: const Border(),
                             title: const Text('Manage players'),
                             children: [
                               Row(
@@ -377,6 +455,204 @@ class _PlayersPickerState extends State<PlayersPicker> {
                                       hintText:
                                           'Enter friend name or nickname')),
                               //Players list
+                              // TODO put in to class
+                              Row(children: [
+                                ElevatedButton(
+                                    onPressed: isSystemDropDownItem
+                                        ? null
+                                        : () async {
+                                            setState(() {
+                                              _listManageErrorText = null;
+                                              _listManageHintText = null;
+                                            });
+                                            var selectedPlayers =
+                                                getSelectedPlayers()
+                                                    .map((x) => x['id'] as int)
+                                                    .toList();
+                                            if (!await updateCustomPlayersList(
+                                                selectedPlayers,
+                                                chosenPlayersListId)) {
+                                              setState(() {
+                                                _listManageErrorText =
+                                                    "Cant update this list";
+                                              });
+                                              return;
+                                            }
+                                            _listManageHintText =
+                                                "List was updated";
+                                            await updatePlayersFromCustomList(
+                                                chosenPlayersListId);
+                                            setState(() {});
+                                          },
+                                    child: Text("Update")),
+                                DropdownButton(
+                                  padding: const EdgeInsets.all(10),
+                                  value: playersList.isNotEmpty
+                                      ? playersList[chosenPlayersListId]
+                                      : null,
+                                  onChanged: (String? value) async {
+                                    chosenPlayersListId = playersList.entries
+                                        .firstWhere(
+                                            (entry) => entry.value == value)
+                                        .key;
+                                    isSystemDropDownItem =
+                                        chosenPlayersListId == 0 ? true : false;
+
+                                    await updatePlayersFromCustomList(
+                                        chosenPlayersListId);
+                                    setState(() {});
+                                  },
+                                  items: playersList.values
+                                      .map<DropdownMenuItem<String>>(
+                                          (String value) {
+                                    return DropdownMenuItem<String>(
+                                        value: value, child: Text(value));
+                                  }).toList(),
+                                ),
+                                ElevatedButton(
+                                    onPressed: isSystemDropDownItem
+                                        ? null
+                                        : () async {
+                                            setState(() {
+                                              _listManageErrorText = null;
+                                              _listManageHintText = null;
+                                            });
+                                            final customList =
+                                                await PlayerListSQL
+                                                    .selectCustomListById(
+                                                        chosenPlayersListId);
+                                            if (customList == null) {
+                                              return;
+                                            }
+                                            PlayerListSQL.deleteCustomList(
+                                                customList);
+                                            playersList.remove(customList.id);
+                                            setState(() {});
+                                            setState(() {
+                                              _listManageHintText =
+                                                  "List was deleted";
+                                            });
+                                          },
+                                    child: const Text("Delete"))
+                              ]),
+                              Row(children: [
+                                ElevatedButton(
+                                    onPressed: () async {
+                                      setState(() {
+                                        _listManageErrorText = null;
+                                        _listManageHintText = null;
+                                      });
+                                      final listName =
+                                          _newListNameController.text;
+                                      if (listName.isEmpty) {
+                                        setState(() {
+                                          _listManageErrorText =
+                                              "Set the name of list";
+                                        });
+                                        return;
+                                      }
+
+                                      var listWithSameNameExists =
+                                          await PlayerListSQL
+                                              .selectLocationByName(listName);
+                                      if (listWithSameNameExists != null) {
+                                        setState(() {
+                                          _listManageErrorText =
+                                              "List is already exists with same name";
+                                        });
+                                        return;
+                                      }
+                                      List<Map> selectedPlayers =
+                                          getSelectedPlayers();
+                                      if (selectedPlayers.isEmpty) {
+                                        setState(() {
+                                          _listManageErrorText =
+                                              "Chose games to create list";
+                                        });
+                                        return;
+                                      }
+
+                                      selectedPlayers.sort(
+                                          (a, b) => a['id'].compareTo(b['id']));
+                                      final selectedPlayersIdsString =
+                                          selectedPlayers
+                                              .map((x) => x['id'])
+                                              .join(";");
+
+                                      var listId = await PlayerListSQL
+                                          .addCustomListByName(listName,
+                                              selectedPlayersIdsString);
+                                      setState(() {
+                                        _listManageHintText =
+                                            "List was created";
+                                      });
+                                      final customList = await PlayerListSQL
+                                          .selectCustomListById(listId);
+                                      if (customList == null) {
+                                        return;
+                                      }
+
+                                      //
+                                      playersList[listId] = listName;
+                                      chosenPlayersListId = listId;
+                                      await updatePlayersFromCustomList(
+                                          chosenPlayersListId);
+                                      _newListNameController.text = '';
+                                      isSystemDropDownItem =
+                                          chosenPlayersListId == 0
+                                              ? true
+                                              : false;
+                                      setState(() {});
+                                    },
+                                    child: const Text("Create")),
+                                SizedBox(
+                                    width: MediaQuery.of(context).size.width *
+                                        0.38,
+                                    child: TextField(
+                                        controller: _newListNameController,
+                                        decoration: InputDecoration(
+                                            border: InputBorder.none,
+                                            contentPadding:
+                                                const EdgeInsets.fromLTRB(
+                                                    10, 0, 0, 0),
+                                            helperText: _listManageHintText,
+                                            errorText: _listManageErrorText,
+                                            labelText: 'List name'))),
+                                SizedBox(
+                                    width:
+                                        MediaQuery.of(context).size.width * 0.1,
+                                    child: ElevatedButton.icon(
+                                        label: Text(''),
+                                        onPressed: () async {
+                                          widget.players =
+                                              await getLocalPlayers();
+
+                                          var customList = await PlayerListSQL
+                                              .selectCustomListById(
+                                                  chosenPlayersListId);
+                                          if (customList != null) {
+                                            var playersString =
+                                                customList.value;
+                                            if (playersString != null) {
+                                              var playersList =
+                                                  playersString.split(';');
+                                              for (var playerId
+                                                  in playersList) {
+                                                for (var player
+                                                    in widget.players) {
+                                                  if (player['id'] ==
+                                                      int.parse(playerId)) {
+                                                    player['isChecked'] = true;
+                                                  }
+                                                }
+                                              }
+                                            }
+                                          }
+                                          setState(() {});
+                                        },
+                                        icon: const Icon(
+                                            Icons.remove_red_eye_outlined)))
+                              ])
                             ]),
                       ]),
                       content: SingleChildScrollView(

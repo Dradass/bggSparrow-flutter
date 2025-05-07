@@ -462,6 +462,10 @@ class _GameHelperState extends State<GameHelper> {
                                                           chosenGameListId);
                                                       newCustimListNameController
                                                           .text = '';
+                                                      isSystemDropDownItem =
+                                                          chosenGameListId == 0
+                                                              ? true
+                                                              : false;
                                                       setState(() {});
                                                     },
                                                     style: ButtonStyle(
