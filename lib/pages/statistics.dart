@@ -274,7 +274,7 @@ class _StatisticsState extends State<Statistics> {
                         child: ElevatedButton.icon(
                           onPressed: () async {
                             if (players.isEmpty) {
-                              players = await getLocalPlayers();
+                              players = await getAllPlayers();
                             }
                             showDialog(
                                 context: context,

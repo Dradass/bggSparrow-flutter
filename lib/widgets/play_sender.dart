@@ -12,18 +12,23 @@ import '../globals.dart';
 import '../widgets/common.dart';
 import 'dart:async';
 
+import '../widgets/players_list.dart';
+
 import '../widgets/log_page_widgets.dart';
 
 class PlaySender extends StatefulWidget {
   static PlaySender? _singleton;
 
-  factory PlaySender(SearchController searchController) {
-    _singleton ??= PlaySender._internal(searchController);
+  factory PlaySender(SearchController searchController,
+      PlayersListWrapper playersListWrapper) {
+    _singleton ??= PlaySender._internal(searchController, playersListWrapper);
     return _singleton!;
   }
 
-  PlaySender._internal(this.searchController);
+  PlaySender._internal(this.searchController, this.playersListWrapper);
   final SearchController searchController;
+  PlayersListWrapper playersListWrapper;
+
   final logData = {
     "playdate": "2024-03-15",
     "comments": "#bggSparrow",
@@ -73,8 +78,7 @@ class _PlaySenderState extends State<PlaySender> {
                   return;
                 }
                 List<Map> bggPlayers = [];
-                for (var player in PlayersPicker()
-                    .players
+                for (var player in widget.playersListWrapper.players
                     .where((element) => element['isChecked'] == true)) {
                   bggPlayers.add({
                     'username': player['username'],

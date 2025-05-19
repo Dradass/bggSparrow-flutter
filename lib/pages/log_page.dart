@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/main.dart';
+import 'package:flutter_application_1/widgets/players_list.dart';
 import '../db/game_things_sql.dart';
 import '../db/system_table.dart';
 import '../bggApi/bgg_api.dart';
@@ -29,6 +30,7 @@ class _LogScaffoldState extends State<LogScaffold> {
   LoadingStatus loadingStatus = LoadingStatus();
   var searchHistory = [];
   final SearchController searchController = SearchController();
+  PlayersListWrapper playersListWrapper = PlayersListWrapper();
   var hasInternetConnection = false;
   String binaryImageData = "";
   bool isOnlineSearchModeDefault = true;
@@ -164,8 +166,8 @@ class _LogScaffoldState extends State<LogScaffold> {
                 FlexButton(LocationPicker(), 3),
                 FlexButton(Comments(), 5),
                 FlexButton(DurationSliderWidget(), 3),
-                FlexButton(PlaySender(searchController), 3),
-                FlexButton(PlayersPicker(), 3),
+                FlexButton(PlaySender(searchController, playersListWrapper), 3),
+                FlexButton(PlayersPicker(playersListWrapper), 3),
                 FlexButton(
                     GamePicker(searchController, cameras, _imagewidget), 3),
               ],

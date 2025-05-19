@@ -11,9 +11,9 @@ import '../login_handler.dart';
 // 1. Debug mode for camera capture
 // 2. Color picker
 // 3. Icons and background
-// 4. Games list
-// 5. Players list
-// 6. Edit play
+// 4. Default games list and players list
+// 5. Edit play
+// Bug offline mode no players + "Get plays" update
 
 late List<CameraDescription> cameras;
 const primaryTextColor = Color.fromARGB(255, 85, 92, 89);

@@ -342,7 +342,7 @@ Future<bool> checkLoginFromStorage() async {
   return await checkLoginByRequest(username, password);
 }
 
-Future<List<Map>> getLocalPlayers() async {
+Future<List<Map>> getAllPlayers() async {
   var playersMap = await PlayersSQL.getAllPlayers();
   return playersMap;
 }
