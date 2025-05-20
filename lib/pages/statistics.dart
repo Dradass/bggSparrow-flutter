@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/db/players_sql.dart';
 import 'package:intl/intl.dart';
 import '../db/plays_sql.dart';
+import '../db/location_sql.dart';
 import '../models/bgg_play_model.dart';
 import '../bggApi/bgg_api.dart';
 import '../db/game_things_sql.dart';
@@ -463,6 +464,12 @@ class _StatisticsState extends State<Statistics> {
                         height: double.maxFinite,
                         child: ElevatedButton.icon(
                           onPressed: () async {
+                            // Get last plays
+                            int maxPlayerId = await PlayersSQL.getMaxID();
+                            int maxLocationId = await LocationSQL.getMaxID();
+                            await getPlaysFromPage(
+                                1, maxPlayerId, maxLocationId);
+
                             List<BggPlay> allPlays = [];
                             plays.clear();
                             allPlays =

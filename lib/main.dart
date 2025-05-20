@@ -13,7 +13,7 @@ import '../login_handler.dart';
 // 3. Icons and background
 // 4. Default games list and players list
 // 5. Edit play
-// Bug offline mode no players + "Get plays" update
+// 6. Exclude deleted play from local plays
 
 late List<CameraDescription> cameras;
 const primaryTextColor = Color.fromARGB(255, 85, 92, 89);

@@ -108,6 +108,7 @@ class _PlaySenderState extends State<PlaySender> {
                 setState(() {
                   isRequestSending = true;
                 });
+                // Log offline if no internet connection
                 if (!hasInternetConnection) {
                   showSnackBar(context,
                       'Play has been saved locally and will be sent when the internet is available.');
@@ -128,7 +129,8 @@ class _PlaySenderState extends State<PlaySender> {
                           chosenLocation != null ? chosenLocation.name : "",
                       players: json.encode(bggPlayers),
                       winners: "",
-                      duration: duration);
+                      duration: duration,
+                      quantity: 1);
                   PlaysSQL.addPlay(play);
                   Timer(Duration(seconds: messageDuration + 1), () {
                     setState(() {
@@ -137,6 +139,7 @@ class _PlaySenderState extends State<PlaySender> {
                   });
                   return;
                 }
+                // Log online if internet connection
                 await sendLogRequest(stringData);
                 Timer(Duration(seconds: messageDuration + 1), () {
                   setState(() {

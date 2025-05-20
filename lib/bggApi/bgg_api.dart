@@ -403,7 +403,9 @@ Future<int> sendLogPlayToBGG(BggPlay bggPlay) async {
     "ajax": 1
   };
 
-  logData['players'] = bggPlay.players ?? "";
+  final players = bggPlay.players == null ? [] : json.decode(bggPlay.players!);
+
+  logData['players'] = players;
   logData['objectid'] = bggPlay.gameId;
   logData['length'] = bggPlay.duration ?? 0;
   logData['playdate'] = bggPlay.date;
@@ -535,6 +537,7 @@ Future<List<GameThing>?> searchGamesFromBGG(String searchString) async {
 }
 
 Future<bool> checkInternetConnection() async {
+  //return false;
   var connectivityResult = await (Connectivity().checkConnectivity());
   if (connectivityResult.contains(ConnectivityResult.mobile)) {
     return true;
