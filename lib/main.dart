@@ -12,8 +12,7 @@ import '../login_handler.dart';
 // 2. Color picker
 // 3. Icons and background
 // 4. Default games list and players list
-// 5. Edit play
-// 6. Exclude deleted play from local plays
+// 5. Edit / delete play
 
 late List<CameraDescription> cameras;
 const primaryTextColor = Color.fromARGB(255, 85, 92, 89);

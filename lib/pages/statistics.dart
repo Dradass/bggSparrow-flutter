@@ -78,7 +78,7 @@ class _StatisticsState extends State<Statistics> {
                     scrollDirection: Axis.vertical,
                     child: DataTable(
                       headingRowHeight: 0,
-                      columnSpacing: 20,
+                      columnSpacing: 5,
                       showCheckboxColumn: false,
                       dataRowMaxHeight: double.infinity,
                       columns: const <DataColumn>[
@@ -119,13 +119,18 @@ class _StatisticsState extends State<Statistics> {
                           cells: <DataCell>[
                             DataCell(SizedBox(
                               width: MediaQuery.of(context).size.width * 0.4,
-                              child: Text(plays[index].gameName),
+                              child: Text(plays[index].gameName,
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                  )),
                             )),
                             DataCell(Text(
                               plays[index].date,
                               textAlign: TextAlign.left,
                             )),
-                            DataCell(getPlayersColumn(plays[index])),
+                            DataCell(SizedBox(
+                                width: MediaQuery.of(context).size.width * 0.4,
+                                child: getPlayersColumn(plays[index]))),
                           ],
                         ),
                       ),
@@ -849,7 +854,6 @@ Column getPlayersColumn(BggPlay bggPlay) {
   } else {
     List<Widget> columnChildren = [];
     for (var playerInfo in players.split(';')) {
-      const int maxNameLength = 9;
       var playerName = playerInfo.split('|').last;
       if (bggPlay.winners != null && bggPlay.winners!.contains(playerName)) {
         columnChildren.add(Row(
@@ -857,8 +861,8 @@ Column getPlayersColumn(BggPlay bggPlay) {
           children: [
             const Icon(Icons.emoji_events, color: Colors.amber),
             Text(
-              playerName.length > maxNameLength
-                  ? "${playerName.substring(0, maxNameLength)}..."
+              playerName.length > maxColumnPlayerNameLength
+                  ? "${playerName.substring(0, maxColumnPlayerNameLength)}..."
                   : playerName,
               textAlign: TextAlign.left,
               overflow: TextOverflow.ellipsis,
@@ -869,8 +873,8 @@ Column getPlayersColumn(BggPlay bggPlay) {
         columnChildren
             .add(Row(mainAxisAlignment: MainAxisAlignment.center, children: [
           Text(
-              playerName.length > maxNameLength
-                  ? "${playerName.substring(0, maxNameLength)}..."
+              playerName.length > maxColumnPlayerNameLength
+                  ? "${playerName.substring(0, maxColumnPlayerNameLength)}..."
                   : playerName,
               textAlign: TextAlign.left,
               overflow: TextOverflow.ellipsis)
