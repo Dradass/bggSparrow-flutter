@@ -16,6 +16,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import '../task_checker.dart';
 import '../login_handler.dart';
+import '../globals.dart';
 import 'dart:developer';
 
 const maxPagesCount = 1000;
@@ -250,6 +251,7 @@ Future<bool> getPlaysFromPage(
   await fillLocalPlayers(uniquePlayers, maxPlayerId);
   await fillLocalLocations(uniqueLocations, maxLocationId);
   await fillLocalPlays(bggPlays);
+
   return true;
 }
 
@@ -302,6 +304,16 @@ Future<void> fillLocalPlays(List<BggPlay> bggPlays) async {
     } else {
       log("New play :${bggPlay.id}");
       PlaysSQL.addPlay(bggPlay);
+    }
+  }
+}
+
+Future<void> deleteObsoletePlays(List<BggPlay> bggPlays) async {
+  final localPlays = await PlaysSQL.getAllPlays(oldestDate, lastDate);
+  for (var localPlay in localPlays) {
+    if (!bggPlays.map((e) => e.id).contains(localPlay.id)) {
+      log("Delete obsolete play ${localPlay.id}");
+      PlaysSQL.deletePlay(localPlay);
     }
   }
 }

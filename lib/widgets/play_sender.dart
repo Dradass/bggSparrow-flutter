@@ -141,6 +141,7 @@ class _PlaySenderState extends State<PlaySender> {
                 }
                 // Log online if internet connection
                 await sendLogRequest(stringData);
+                needUpdatePlaysFromBgg = true;
                 Timer(Duration(seconds: messageDuration + 1), () {
                   setState(() {
                     isRequestSending = false;

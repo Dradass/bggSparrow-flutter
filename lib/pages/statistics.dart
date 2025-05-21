@@ -6,6 +6,7 @@ import '../db/location_sql.dart';
 import '../models/bgg_play_model.dart';
 import '../bggApi/bgg_api.dart';
 import '../db/game_things_sql.dart';
+import '../globals.dart';
 
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
@@ -465,10 +466,13 @@ class _StatisticsState extends State<Statistics> {
                         child: ElevatedButton.icon(
                           onPressed: () async {
                             // Get last plays
-                            int maxPlayerId = await PlayersSQL.getMaxID();
-                            int maxLocationId = await LocationSQL.getMaxID();
-                            await getPlaysFromPage(
-                                1, maxPlayerId, maxLocationId);
+                            if (needUpdatePlaysFromBgg) {
+                              int maxPlayerId = await PlayersSQL.getMaxID();
+                              int maxLocationId = await LocationSQL.getMaxID();
+                              await getPlaysFromPage(
+                                  1, maxPlayerId, maxLocationId);
+                              needUpdatePlaysFromBgg = false;
+                            }
 
                             List<BggPlay> allPlays = [];
                             plays.clear();
@@ -845,26 +849,32 @@ Column getPlayersColumn(BggPlay bggPlay) {
   } else {
     List<Widget> columnChildren = [];
     for (var playerInfo in players.split(';')) {
-      var playerName = limitName(playerInfo.split('|').last, 9);
+      const int maxNameLength = 9;
+      var playerName = playerInfo.split('|').last;
       if (bggPlay.winners != null && bggPlay.winners!.contains(playerName)) {
         columnChildren.add(Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const Icon(Icons.emoji_events, color: Colors.amber),
             Text(
-              playerName,
+              playerName.length > maxNameLength
+                  ? "${playerName.substring(0, maxNameLength)}..."
+                  : playerName,
               textAlign: TextAlign.left,
               overflow: TextOverflow.ellipsis,
             )
           ],
         ));
       } else {
-        columnChildren.add(Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(playerName,
-                  textAlign: TextAlign.left, overflow: TextOverflow.ellipsis)
-            ]));
+        columnChildren
+            .add(Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+          Text(
+              playerName.length > maxNameLength
+                  ? "${playerName.substring(0, maxNameLength)}..."
+                  : playerName,
+              textAlign: TextAlign.left,
+              overflow: TextOverflow.ellipsis)
+        ]));
       }
     }
     return Column(
@@ -877,7 +887,7 @@ String limitName(String name, int limit) {
   if (name.length <= limit) {
     return name;
   } else {
-    return "${name.substring(0, limit)}...";
+    return "${name.substring(0, limit)}";
   }
 }
 
