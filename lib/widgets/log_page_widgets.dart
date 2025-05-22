@@ -15,9 +15,6 @@ import '../db/game_things_sql.dart';
 import 'package:image/image.dart' as image_dart;
 import '../db/players_sql.dart';
 import '../models/bgg_player_model.dart';
-import '../db/players_list_sql.dart';
-import '../models/player_list_model.dart';
-
 import '../widgets/players_list.dart';
 
 import 'package:flutter/services.dart';
@@ -321,21 +318,9 @@ class _PlayersPickerState extends State<PlayersPicker> {
     return null;
   }
 
-  Future<void> updateCustomLists() async {
-    PlayerListSQL.getAllPlayerLists().then((lists) {
-      widget.playersListWrapper.playersList[0] = "All";
-      var customLists = (List.generate(
-          lists.length, (index) => PlayersList.fromJson(lists[index])));
-      if (customLists.isEmpty) return;
-      for (var customList in customLists) {
-        widget.playersListWrapper.playersList[customList.id] = customList.name;
-      }
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
-    updateCustomLists();
+    widget.playersListWrapper.updateCustomLists();
     return ElevatedButton.icon(
         onPressed: () async {
           if (widget.playersListWrapper.players.isEmpty) {

@@ -14,6 +14,51 @@ class PlayersListWrapper {
   List<Map> players = [];
   Map<int, String> playersList = {};
   final newListNameController = TextEditingController();
+
+  Future<void> updateCustomLists() async {
+    PlayerListSQL.getAllPlayerLists().then((lists) {
+      playersList[0] = "All";
+      var customLists = (List.generate(
+          lists.length, (index) => PlayersList.fromJson(lists[index])));
+      if (customLists.isEmpty) return;
+      for (var customList in customLists) {
+        playersList[customList.id] = customList.name;
+      }
+    });
+  }
+
+  Future<void> updatePlayersFromCustomList() async {
+    if (chosenPlayersListId == 0) {
+      players = await PlayersSQL.getAllPlayers();
+      return;
+    }
+    var customList =
+        await PlayerListSQL.selectCustomListById(chosenPlayersListId);
+    if (customList != null) {
+      var playersString = customList.value;
+      if (playersString != null) {
+        var playersList = playersString.split(';');
+        players.clear();
+        for (var playerId in playersList) {
+          var player = await PlayersSQL.selectPlayerById(int.parse(playerId));
+          if (player != null) {
+            players.add({
+              'name': player.name,
+              'id': player.id,
+              'isChecked': false,
+              'win': false,
+              'excluded': false,
+              'username': player.username,
+              'userid': player.userid
+            });
+          } else {
+            log('Cant find player with id $playerId');
+          }
+        }
+        players.sort((a, b) => a['id'].compareTo(b['id']));
+      }
+    }
+  }
 }
 
 List<Map> getSelectedPlayers(List<Map> players) {
@@ -38,40 +83,6 @@ Future<bool> updateCustomPlayersList(
       id: listId, name: existedList.name, value: selectedGamesString);
   PlayerListSQL.updateCustomList(newList);
   return true;
-}
-
-Future<void> updatePlayersFromCustomList(
-    PlayersListWrapper playersListWrapper) async {
-  if (playersListWrapper.chosenPlayersListId == 0) {
-    playersListWrapper.players = await PlayersSQL.getAllPlayers();
-    return;
-  }
-  var customList = await PlayerListSQL.selectCustomListById(
-      playersListWrapper.chosenPlayersListId);
-  if (customList != null) {
-    var playersString = customList.value;
-    if (playersString != null) {
-      var playersList = playersString.split(';');
-      playersListWrapper.players.clear();
-      for (var playerId in playersList) {
-        var player = await PlayersSQL.selectPlayerById(int.parse(playerId));
-        if (player != null) {
-          playersListWrapper.players.add({
-            'name': player.name,
-            'id': player.id,
-            'isChecked': false,
-            'win': false,
-            'excluded': false,
-            'username': player.username,
-            'userid': player.userid
-          });
-        } else {
-          log('Cant find player with id $playerId');
-        }
-      }
-      playersListWrapper.players.sort((a, b) => a['id'].compareTo(b['id']));
-    }
-  }
 }
 
 class UpdateButton extends StatefulWidget {
@@ -109,10 +120,10 @@ class _UpdateButtonState extends State<UpdateButton> {
                 }
                 widget.playersListWrapper.listManageHintText =
                     "List was updated";
-                await updatePlayersFromCustomList(widget.playersListWrapper);
+                await widget.playersListWrapper.updatePlayersFromCustomList();
                 widget.parentStateUpdate();
               },
-        child: Text("Update"));
+        child: const Text("Update"));
   }
 }
 
@@ -185,7 +196,7 @@ class _ChooseListDropdownState extends State<ChooseListDropdown> {
         widget.playersListWrapper.isSystemDropDownItem =
             widget.playersListWrapper.chosenPlayersListId == 0 ? true : false;
 
-        await updatePlayersFromCustomList(widget.playersListWrapper);
+        await widget.playersListWrapper.updatePlayersFromCustomList();
         widget.parentStateUpdate();
       },
       items: widget.playersListWrapper.playersList.values
@@ -259,7 +270,7 @@ class _CreateButtonState extends State<CreateButton> {
           //
           widget.playersListWrapper.playersList[listId] = listName;
           widget.playersListWrapper.chosenPlayersListId = listId;
-          await updatePlayersFromCustomList(widget.playersListWrapper);
+          await widget.playersListWrapper.updatePlayersFromCustomList();
           widget.playersListWrapper.newListNameController.text = '';
           widget.playersListWrapper.isSystemDropDownItem =
               widget.playersListWrapper.chosenPlayersListId == 0 ? true : false;
@@ -286,7 +297,7 @@ class _ShowAllPlayersButtonState extends State<ShowAllPlayersButton> {
   @override
   Widget build(BuildContext context) {
     return ElevatedButton.icon(
-        label: Text(''),
+        label: const Text(''),
         onPressed: () async {
           widget.playersListWrapper.players = await getAllPlayers();
 

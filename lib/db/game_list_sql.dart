@@ -78,19 +78,19 @@ class GameListSQL {
 
   static Future<List<Map<String, dynamic>>> getAllGameLists() async {
     final db = await _getDB();
-    List<Map<String, dynamic>> GameLists = [];
+    List<Map<String, dynamic>> gameLists = [];
     List<Map<String, dynamic>> result =
         await db.rawQuery('SELECT * FROM GameLists');
-    if (result.isEmpty) return GameLists;
+    if (result.isEmpty) return gameLists;
     for (var customListResult in result) {
       var customList = GameList.fromJson(customListResult);
-      GameLists.add({
+      gameLists.add({
         'name': customList.name,
         'id': customList.id,
         'value': customList.value
       });
     }
-    return GameLists;
+    return gameLists;
   }
 
   static Future<int> addOrEditCustomList(

@@ -263,8 +263,7 @@ class _GameHelperState extends State<GameHelper> {
                                                     MainAxisAlignment
                                                         .spaceBetween,
                                                 children: [
-                                                  Container(
-                                                      child: Row(children: [
+                                                  Row(children: [
                                                     ElevatedButton(
                                                         onPressed:
                                                             isSystemDropDownItem
@@ -344,7 +343,7 @@ class _GameHelperState extends State<GameHelper> {
                                                             child: Text(value));
                                                       }).toList(),
                                                     )
-                                                  ])),
+                                                  ]),
                                                   ElevatedButton(
                                                       onPressed:
                                                           isSystemDropDownItem

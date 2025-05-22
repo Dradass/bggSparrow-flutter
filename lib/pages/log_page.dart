@@ -35,6 +35,7 @@ class _LogScaffoldState extends State<LogScaffold> {
   String binaryImageData = "";
   bool isOnlineSearchModeDefault = true;
   final Image _imagewidget = Image.asset('assets/no_image.png');
+  PlayersListWrapper defaultPlayersListWrapper = PlayersListWrapper();
 
   @override
   void initState() {
@@ -55,50 +56,36 @@ class _LogScaffoldState extends State<LogScaffold> {
                   });
 
                   // Check "first time" system param
-                  SystemParameterSQL.selectSystemParameterById(1)
-                      .then((firstLaunchParam) {
-                    if (firstLaunchParam == null) {
-                      SystemParameterSQL.addSystemParameter(SystemParameter(
-                              id: 1, name: "firstLaunch", value: "1"))
-                          .then((value) {
-                        if (value == 0) log("Cant insert param");
-                      });
+                  getOrCreateSystemParameter(1, "firstLaunch", "1")
+                      .then((paramValue) {
+                    if (paramValue == "1") {
                       getAllPlaysFromServer();
-                    } else {
-                      log("Last launch = ${firstLaunchParam.value}");
-                    }
-                  });
-
-                  // Check "first player mode" system param
-                  SystemParameterSQL.selectSystemParameterById(3)
-                      .then((simpleIndicatorModeValue) {
-                    if (simpleIndicatorModeValue == null) {
-                      SystemParameterSQL.addSystemParameter(SystemParameter(
-                              id: 3, name: "simpleIndicatorMode", value: "1"))
-                          .then((value) {
-                        if (value == 0) log("Cant insert param");
-                      });
-                    } else {
-                      simpleIndicatorMode =
-                          simpleIndicatorModeValue.value == "1";
-                      log("simpleIndicatorMode = ${simpleIndicatorModeValue.value}");
+                      SystemParameterSQL.addOrEditParameter(
+                          1, "firstLaunch", "0");
                     }
                   });
 
                   // Check "search mode" system param
-                  SystemParameterSQL.selectSystemParameterById(2)
-                      .then((isSearchModeOnline) {
-                    if (isSearchModeOnline == null) {
-                      SystemParameterSQL.addSystemParameter(SystemParameter(
-                              id: 2, name: "isSearchModeOnline", value: "1"))
-                          .then((value) {
-                        if (value == 0) log("Cant insert param");
-                      });
-                    } else {
-                      isOnlineSearchModeDefault =
-                          isSearchModeOnline.value == "1";
-                      log("isSearchModeOnline = ${isSearchModeOnline.value}");
-                    }
+                  getOrCreateSystemParameter(2, "isSearchModeOnline", "1")
+                      .then((paramValue) {
+                    isOnlineSearchModeDefault = paramValue == "1";
+                  });
+
+                  // Check "first player mode" system param
+                  getOrCreateSystemParameter(3, "simpleIndicatorMode", "1")
+                      .then((paramValue) {
+                    simpleIndicatorMode = paramValue == "1";
+                  });
+
+                  // Check "Default players list" system param
+                  getOrCreateSystemParameter(4, "chosenPlayersListId", "0")
+                      .then((paramValue) {
+                    defaultPlayersListId = int.parse(paramValue ?? "0");
+                    defaultPlayersListWrapper.chosenPlayersListId =
+                        defaultPlayersListId;
+                    playersListWrapper.chosenPlayersListId =
+                        defaultPlayersListId;
+                    playersListWrapper.updatePlayersFromCustomList();
                   });
 
                   var initializeProgress =
@@ -123,8 +110,25 @@ class _LogScaffoldState extends State<LogScaffold> {
     });
   }
 
+  Future<String?> getOrCreateSystemParameter(
+      int paramId, String paramName, String defaultValue) async {
+    var paramValue =
+        await SystemParameterSQL.selectSystemParameterById(paramId);
+    if (paramValue == null) {
+      var addingResult = await SystemParameterSQL.addSystemParameter(
+          SystemParameter(id: paramId, name: paramName, value: defaultValue));
+      if (addingResult == 0) {
+        log("Cant insert param $paramName");
+      }
+      return defaultValue;
+    } else {
+      return paramValue.value ?? defaultValue;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    defaultPlayersListWrapper.updateCustomLists();
     return GestureDetector(
       onTap: () {
         FocusManager.instance.primaryFocus?.unfocus();
@@ -160,6 +164,7 @@ class _LogScaffoldState extends State<LogScaffold> {
                     IconButton(
                         onPressed: () {
                           _scaffoldKey.currentState?.openDrawer();
+                          defaultPlayersListWrapper.updateCustomLists();
                         },
                         icon: const Icon(Icons.settings)),
                     3),
@@ -239,6 +244,31 @@ class _LogScaffoldState extends State<LogScaffold> {
                           value: simpleIndicatorMode ? "1" : "0"))
                       .then((onValue) => {setState(() {})});
                 },
+              ),
+              ListTile(
+                title: Row(
+                  children: [
+                    Text("Default players list: "),
+                    ChooseListDropdown(
+                        playersListWrapper: defaultPlayersListWrapper,
+                        parentStateUpdate: () => {
+                              SystemParameterSQL.addOrEditParameter(
+                                  4,
+                                  "chosenPlayersListId",
+                                  defaultPlayersListWrapper.chosenPlayersListId
+                                      .toString()),
+                              setState(() {})
+                            }),
+                  ],
+                ),
+                onTap: null
+                // simpleIndicatorMode = !simpleIndicatorMode;
+                // SystemParameterSQL.updateSystemParameter(SystemParameter(
+                //         id: 3,
+                //         name: "simpleIndicatorMode",
+                //         value: simpleIndicatorMode ? "1" : "0"))
+                //     .then((onValue) => {setState(() {})});
+                ,
               ),
             ],
           ),

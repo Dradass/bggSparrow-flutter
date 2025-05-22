@@ -120,7 +120,7 @@ class _StatisticsState extends State<Statistics> {
                             DataCell(SizedBox(
                               width: MediaQuery.of(context).size.width * 0.4,
                               child: Text(plays[index].gameName,
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                     fontWeight: FontWeight.bold,
                                   )),
                             )),
@@ -884,14 +884,6 @@ Column getPlayersColumn(BggPlay bggPlay) {
     return Column(
       children: columnChildren,
     );
-  }
-}
-
-String limitName(String name, int limit) {
-  if (name.length <= limit) {
-    return name;
-  } else {
-    return "${name.substring(0, limit)}";
   }
 }
 

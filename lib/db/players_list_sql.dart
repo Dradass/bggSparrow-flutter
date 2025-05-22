@@ -79,19 +79,19 @@ class PlayerListSQL {
 
   static Future<List<Map<String, dynamic>>> getAllPlayerLists() async {
     final db = await _getDB();
-    List<Map<String, dynamic>> PlayerLists = [];
+    List<Map<String, dynamic>> playerLists = [];
     List<Map<String, dynamic>> result =
         await db.rawQuery('SELECT * FROM PlayerLists');
-    if (result.isEmpty) return PlayerLists;
+    if (result.isEmpty) return playerLists;
     for (var playersListResult in result) {
       var playersList = PlayersList.fromJson(playersListResult);
-      PlayerLists.add({
+      playerLists.add({
         'name': playersList.name,
         'id': playersList.id,
         'value': playersList.value
       });
     }
-    return PlayerLists;
+    return playerLists;
   }
 
   static Future<int> addOrEditCustomList(

@@ -162,7 +162,6 @@ class _PlaySenderState extends State<PlaySender> {
 }
 
 Future<int> sendLogRequest(String logData) async {
-  print("-----start sending");
   dynamic bodyLogin = json.encode({
     'credentials': {
       'username': LoginHandler().login,
