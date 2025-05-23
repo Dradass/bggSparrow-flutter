@@ -42,6 +42,61 @@ class _StatisticsState extends State<Statistics> {
   final SearchController searchController = SearchController();
   var chosenGameId = 0;
 
+  DataCell _buildDataCell(
+      int rowIndex, int colIndex, Widget child, double? width) {
+    return DataCell(
+      Container(
+          width: width,
+          child: Builder(
+            builder: (cellContext) => GestureDetector(
+              onLongPressStart: (details) {
+                log('long row press: ${plays[rowIndex].id}, playes = ${plays[rowIndex].players}');
+                final RenderBox overlay = Overlay.of(context)
+                    .context
+                    .findRenderObject()! as RenderBox;
+                final RelativeRect position = RelativeRect.fromRect(
+                  Rect.fromPoints(
+                    details.globalPosition,
+                    details.globalPosition + Offset(1, 1),
+                  ),
+                  overlay.localToGlobal(Offset.zero) & overlay.size,
+                );
+                _showContextMenu(context, position);
+              },
+              child: Container(
+                constraints: const BoxConstraints(minHeight: 45),
+                padding: const EdgeInsets.all(3),
+                child: child,
+              ),
+            ),
+          )),
+    );
+  }
+
+  void _showContextMenu(BuildContext context, RelativeRect position) {
+    showMenu<String>(
+      context: context,
+      position: position,
+      items: [
+        const PopupMenuItem<String>(
+          value: 'edit',
+          child: Text('Edit'),
+        ),
+        const PopupMenuItem<String>(
+          value: 'delete',
+          child: Text('Delete'),
+        ),
+      ],
+    ).then((value) {
+      if (value == 'delete') {
+        // _deleteRow(rowId);
+      }
+      if (value == 'edit') {
+        // _editRow(rowId);
+      }
+    });
+  }
+
   @override
   void dispose() {
     super.dispose();
@@ -77,8 +132,9 @@ class _StatisticsState extends State<Statistics> {
                 SingleChildScrollView(
                     scrollDirection: Axis.vertical,
                     child: DataTable(
+                      columnSpacing: 0,
+                      horizontalMargin: 0,
                       headingRowHeight: 0,
-                      columnSpacing: 5,
                       showCheckboxColumn: false,
                       dataRowMaxHeight: double.infinity,
                       columns: const <DataColumn>[
@@ -95,44 +151,64 @@ class _StatisticsState extends State<Statistics> {
                       rows: List<DataRow>.generate(
                         plays.length,
                         (int index) => DataRow(
-                          color: WidgetStateProperty.resolveWith<Color?>(
-                              (Set<WidgetState> states) {
-                            if (states.contains(WidgetState.selected)) {
-                              return Theme.of(context)
-                                  .colorScheme
-                                  .primary
-                                  .withOpacity(0.08);
-                            }
-                            if (index.isEven) {
-                              return Colors.grey.withOpacity(0.3);
-                            }
-                            return null;
-                          }),
-                          onLongPress: () {
-                            log('long row press: ${plays[index].id}, playes = ${plays[index].players}');
-                          },
-                          onSelectChanged: (selected) {
-                            if (selected!) {
-                              log('row-selected: ${plays[index].id}, playes = ${plays[index].players}');
-                            }
-                          },
-                          cells: <DataCell>[
-                            DataCell(SizedBox(
-                              width: MediaQuery.of(context).size.width * 0.4,
-                              child: Text(plays[index].gameName,
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                  )),
-                            )),
-                            DataCell(Text(
-                              plays[index].date,
-                              textAlign: TextAlign.left,
-                            )),
-                            DataCell(SizedBox(
-                                width: MediaQuery.of(context).size.width * 0.4,
-                                child: getPlayersColumn(plays[index]))),
-                          ],
-                        ),
+                            color: WidgetStateProperty.resolveWith<Color?>(
+                                (Set<WidgetState> states) {
+                              if (states.contains(WidgetState.selected)) {
+                                return Theme.of(context)
+                                    .colorScheme
+                                    .primary
+                                    .withOpacity(0.08);
+                              }
+                              if (index.isEven) {
+                                return Colors.grey.withOpacity(0.3);
+                              }
+                              return null;
+                            }),
+                            onSelectChanged: (selected) {
+                              if (selected!) {
+                                log('row-selected: ${plays[index].id}, playes = ${plays[index].players}');
+                              }
+                            },
+                            cells: [
+                              _buildDataCell(
+                                  index,
+                                  0,
+                                  Text(plays[index].gameName,
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                      )),
+                                  MediaQuery.of(context).size.width * 0.35),
+                              _buildDataCell(
+                                  index,
+                                  1,
+                                  Text(
+                                    plays[index].date,
+                                    textAlign: TextAlign.left,
+                                  ),
+                                  MediaQuery.of(context).size.width * 0.25),
+                              _buildDataCell(
+                                  index,
+                                  2,
+                                  getPlayersColumn(plays[index]),
+                                  MediaQuery.of(context).size.width * 0.4),
+                            ]
+                            // <DataCell>[
+                            //   DataCell(SizedBox(
+                            //     width: MediaQuery.of(context).size.width * 0.4,
+                            //     child: Text(plays[index].gameName,
+                            //         style: const TextStyle(
+                            //           fontWeight: FontWeight.bold,
+                            //         )),
+                            //   )),
+                            //   DataCell(Text(
+                            //     plays[index].date,
+                            //     textAlign: TextAlign.left,
+                            //   )),
+                            //   DataCell(SizedBox(
+                            //       width: MediaQuery.of(context).size.width * 0.4,
+                            //       child: getPlayersColumn(plays[index]))),
+                            // ],
+                            ),
                       ),
                     )),
                 SingleChildScrollView(
@@ -894,4 +970,80 @@ class _GamePlaysCount {
   String gameNameShort;
   int? count;
   int gameId;
+}
+
+// void _showContextMenu(
+//   BuildContext context,
+//   Offset position,
+//   int rowId,
+// ) {
+//   final RelativeRect menuPosition = RelativeRect.fromLTRB(
+//     position.dx,
+//     position.dy,
+//     position.dx,
+//     position.dy,
+//   );
+
+//   showMenu<String>(
+//     context: context,
+//     position: menuPosition,
+//     items: const [
+//       PopupMenuItem(value: 'delete', child: Text('Удалить')),
+//       PopupMenuItem(value: 'edit', child: Text('Редактировать')),
+//     ],
+//   ).then((value) {
+//     if (value == 'delete') {
+//       //_deleteRow(rowId);
+//     } else if (value == 'edit') {
+//       //_editRow(rowId);
+//     }
+//   });
+// }
+
+class _MeasuredCell extends StatefulWidget {
+  final Widget content;
+  final int rowIndex;
+  final Function(int, double) onHeightMeasured;
+  final double? maxHeight;
+
+  const _MeasuredCell({
+    required this.content,
+    required this.rowIndex,
+    required this.onHeightMeasured,
+    this.maxHeight,
+  });
+
+  @override
+  __MeasuredCellState createState() => __MeasuredCellState();
+}
+
+class __MeasuredCellState extends State<_MeasuredCell> {
+  final GlobalKey _contentKey = GlobalKey();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _measureHeight());
+  }
+
+  void _measureHeight() {
+    final renderBox =
+        _contentKey.currentContext?.findRenderObject() as RenderBox?;
+    if (renderBox != null) {
+      final height = renderBox.size.height;
+      widget.onHeightMeasured(widget.rowIndex, height);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      key: _contentKey,
+      height: widget.maxHeight,
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: widget.content,
+      ),
+    );
+  }
 }
