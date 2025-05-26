@@ -12,6 +12,7 @@ import '../login_handler.dart';
 // 2. Color picker
 // 3. Icons and background
 // 4. Edit / delete play
+// 5. Localization
 
 late List<CameraDescription> cameras;
 const primaryTextColor = Color.fromARGB(255, 85, 92, 89);

@@ -45,25 +45,25 @@ class _StatisticsState extends State<Statistics> {
   DataCell _buildDataCell(
       int rowIndex, int colIndex, Widget child, double? width) {
     return DataCell(
-      Container(
-          width: width,
-          child: Builder(
-            builder: (cellContext) => GestureDetector(
-              onLongPressStart: (details) {
-                log('long row press: ${plays[rowIndex].id}, playes = ${plays[rowIndex].players}');
-                final RenderBox overlay = Overlay.of(context)
-                    .context
-                    .findRenderObject()! as RenderBox;
-                final RelativeRect position = RelativeRect.fromRect(
-                  Rect.fromPoints(
-                    details.globalPosition,
-                    details.globalPosition + Offset(1, 1),
-                  ),
-                  overlay.localToGlobal(Offset.zero) & overlay.size,
-                );
-                _showContextMenu(context, position);
-              },
-              child: Container(
+      GestureDetector(
+          onLongPressStart: (details) {
+            log('long row press: ${plays[rowIndex].id}, playes = ${plays[rowIndex].players}');
+            final RenderBox overlay =
+                Overlay.of(context).context.findRenderObject()! as RenderBox;
+            final RelativeRect position = RelativeRect.fromRect(
+              Rect.fromPoints(
+                details.globalPosition,
+                details.globalPosition + Offset(1, 1),
+              ),
+              overlay.localToGlobal(Offset.zero) & overlay.size,
+            );
+            _showContextMenu(context, position);
+          },
+          child: Container(
+            //color: rowIndex.isEven ? Colors.grey[300] : Colors.white,
+            width: width,
+            child: Builder(
+              builder: (cellContext) => Container(
                 constraints: const BoxConstraints(minHeight: 45),
                 padding: const EdgeInsets.all(3),
                 child: child,
@@ -191,24 +191,7 @@ class _StatisticsState extends State<Statistics> {
                                   2,
                                   getPlayersColumn(plays[index]),
                                   MediaQuery.of(context).size.width * 0.4),
-                            ]
-                            // <DataCell>[
-                            //   DataCell(SizedBox(
-                            //     width: MediaQuery.of(context).size.width * 0.4,
-                            //     child: Text(plays[index].gameName,
-                            //         style: const TextStyle(
-                            //           fontWeight: FontWeight.bold,
-                            //         )),
-                            //   )),
-                            //   DataCell(Text(
-                            //     plays[index].date,
-                            //     textAlign: TextAlign.left,
-                            //   )),
-                            //   DataCell(SizedBox(
-                            //       width: MediaQuery.of(context).size.width * 0.4,
-                            //       child: getPlayersColumn(plays[index]))),
-                            // ],
-                            ),
+                            ]),
                       ),
                     )),
                 SingleChildScrollView(
@@ -240,7 +223,7 @@ class _StatisticsState extends State<Statistics> {
                             }
                             // Even rows will have a grey color.
                             if (index.isEven) {
-                              return Colors.grey.withOpacity(0.3);
+                              return Colors.grey[300];
                             }
                             return null;
                           }),
