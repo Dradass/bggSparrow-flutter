@@ -5,6 +5,7 @@ import '../models/player_list_model.dart';
 import '../db/players_sql.dart';
 import '../bggApi/bgg_api.dart';
 import 'dart:developer';
+import '../s.dart';
 
 class PlayersListWrapper {
   String? listManageErrorText;
@@ -114,16 +115,16 @@ class _UpdateButtonState extends State<UpdateButton> {
                 if (!await updateCustomPlayersList(selectedPlayers,
                     widget.playersListWrapper.chosenPlayersListId)) {
                   widget.playersListWrapper.listManageErrorText =
-                      "Cant update this list";
+                      S.of(context).cantUpdateThisListTryAgain;
                   widget.parentStateUpdate();
                   return;
                 }
                 widget.playersListWrapper.listManageHintText =
-                    "List was updated";
+                    S.of(context).listWasUpdated;
                 await widget.playersListWrapper.updatePlayersFromCustomList();
                 widget.parentStateUpdate();
               },
-        child: const Text("Update"));
+        child: Text(S.of(context).update));
   }
 }
 
@@ -159,10 +160,10 @@ class _DeleteButtonState extends State<DeleteButton> {
                 widget.playersListWrapper.playersList.remove(customList.id);
                 widget.playersListWrapper.chosenPlayersListId -= 1;
                 widget.playersListWrapper.listManageHintText =
-                    "List was deleted";
+                    S.of(context).listWasDeleted;
                 widget.parentStateUpdate();
               },
-        child: const Text("Delete"));
+        child: Text(S.of(context).delete));
   }
 }
 
@@ -231,7 +232,7 @@ class _CreateButtonState extends State<CreateButton> {
           final listName = widget.playersListWrapper.newListNameController.text;
           if (listName.isEmpty) {
             widget.playersListWrapper.listManageErrorText =
-                "Set the name of list";
+                S.of(context).setTheListName;
             widget.parentStateUpdate();
             return;
           }
@@ -240,7 +241,7 @@ class _CreateButtonState extends State<CreateButton> {
               await PlayerListSQL.selectLocationByName(listName);
           if (listWithSameNameExists != null) {
             widget.playersListWrapper.listManageErrorText =
-                "List is already exists with same name";
+                S.of(context).listIsAlreadyExistsWithSameName;
             widget.parentStateUpdate();
             return;
           }
@@ -248,7 +249,7 @@ class _CreateButtonState extends State<CreateButton> {
               getSelectedPlayers(widget.playersListWrapper.players);
           if (selectedPlayers.isEmpty) {
             widget.playersListWrapper.listManageErrorText =
-                "Chose games to create list";
+                S.of(context).pickTheGamesToCreateList;
             widget.parentStateUpdate();
             return;
           }
@@ -259,7 +260,8 @@ class _CreateButtonState extends State<CreateButton> {
 
           var listId = await PlayerListSQL.addCustomListByName(
               listName, selectedPlayersIdsString);
-          widget.playersListWrapper.listManageHintText = "List was created";
+          widget.playersListWrapper.listManageHintText =
+              S.of(context).listWasCreated;
           widget.parentStateUpdate();
           final customList = await PlayerListSQL.selectCustomListById(listId);
 
@@ -276,7 +278,7 @@ class _CreateButtonState extends State<CreateButton> {
               widget.playersListWrapper.chosenPlayersListId == 0 ? true : false;
           widget.parentStateUpdate();
         },
-        child: const Text("Create"));
+        child: Text(S.of(context).create));
   }
 }
 

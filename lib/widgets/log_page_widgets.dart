@@ -6,7 +6,7 @@ import 'package:flutter_application_1/models/bgg_location.dart';
 import 'package:flutter_application_1/models/game_thing.dart';
 import '../db/system_table.dart';
 import '../globals.dart';
-
+import '../s.dart';
 import 'package:camera/camera.dart';
 
 import 'dart:convert';
@@ -51,7 +51,7 @@ class _PlayDatePickerState extends State<PlayDatePicker> {
           }
         },
         label: Text(
-            "Playdate: ${DateFormat('yyyy-MM-dd').format(widget.playDate)}"),
+            "${S.of(context).playDate}: ${DateFormat('yyyy-MM-dd').format(widget.playDate)}"),
         icon: const Icon(Icons.calendar_today));
   }
 }
@@ -99,14 +99,14 @@ class _LocationPickerState extends State<LocationPicker> {
                 return StatefulBuilder(builder: (context, setState) {
                   return AlertDialog(
                       //insetPadding: EdgeInsets.zero,
-                      title: const Text("Your locations"),
+                      title: Text(S.of(context).yourLocations),
                       content: SingleChildScrollView(
                           child: Column(
                               children: widget.locations.map((location) {
                         return ElevatedButton(
                           child: Row(children: [
                             ChoiceChip(
-                              label: const Text("Default"),
+                              label: Text(S.of(context).defaultWord),
                               selected: location['isDefault'] == 1,
                               onSelected: (bool value) {
                                 setState(() {
@@ -157,7 +157,7 @@ class _LocationPickerState extends State<LocationPicker> {
                     borderRadius: BorderRadius.zero,
                     side: BorderSide(color: Colors.black12)))),
         label: Text(widget.selectedLocation.isEmpty
-            ? "Select location"
+            ? S.of(context).selectLocation
             : widget.selectedLocation),
         icon: const Icon(Icons.home));
   }
@@ -200,8 +200,8 @@ class _CommentsState extends State<Comments> {
           suffixIcon: IconButton(
               onPressed: widget.commentsController.clear,
               icon: const Icon(Icons.clear)),
-          labelText: 'Comments',
-          hintText: 'Enter your comments',
+          labelText: S.of(context).comments,
+          hintText: S.of(context).enterYourComments,
           border: const UnderlineInputBorder()),
     );
   }
@@ -240,7 +240,7 @@ class _DurationSliderWidgetState extends State<DurationSliderWidget> {
             });
           },
         ),
-        const Text("Duration")
+        Text(S.of(context).duration)
       ],
     );
   }
@@ -273,7 +273,7 @@ class _PlayersPickerState extends State<PlayersPicker> {
       final userId = playerNameInfo['id'];
       var foundResult = await PlayersSQL.selectPlayerByUserID(userId);
       if (foundResult != null) {
-        return 'This player is already in your firends list';
+        return S.of(context).playerIsAlreadyInFriendsList;
       } else {
         final maxId = await PlayersSQL.getMaxID();
         final newPlayer = Player(
@@ -294,14 +294,14 @@ class _PlayersPickerState extends State<PlayersPicker> {
       }
       return null;
     } else {
-      return 'No player with such nickname found';
+      return S.of(context).playerWithThisNicknameNotFound;
     }
   }
 
   Future<String?> addNotBggPlayer(String playerName, context) async {
     var foundResult = await PlayersSQL.selectPlayerByName(playerName);
     if (foundResult != null) {
-      return 'This player is already in your firends list';
+      return S.of(context).playerIsAlreadyInFriendsList;
     }
     final maxId = await PlayersSQL.getMaxID();
     widget.playersListWrapper.players.add({
@@ -335,7 +335,7 @@ class _PlayersPickerState extends State<PlayersPicker> {
                       title: Column(children: [
                         ExpansionTile(
                             tilePadding: EdgeInsets.zero,
-                            title: const Text('Manage players'),
+                            title: Text(S.of(context).managePlayers),
                             children: [
                               Row(
                                 mainAxisAlignment:
@@ -353,7 +353,7 @@ class _PlayersPickerState extends State<PlayersPicker> {
                                               .colorScheme
                                               .secondary),
                                     ),
-                                    child: const Text("Add new player"),
+                                    child: Text(S.of(context).addPlayer),
                                   ),
                                   ElevatedButton(
                                     onPressed: () async => {
@@ -367,17 +367,18 @@ class _PlayersPickerState extends State<PlayersPicker> {
                                               .colorScheme
                                               .secondary),
                                     ),
-                                    child: const Text("Add bgg player"),
+                                    child: Text(S.of(context).addBggPlayer),
                                   ),
                                 ],
                               ),
                               TextField(
                                   controller: playerNameController,
                                   decoration: InputDecoration(
-                                      labelText: 'Add new player',
+                                      labelText: S.of(context).newPlayerName,
                                       errorText: _errorText,
-                                      hintText:
-                                          'Enter friend name or nickname')),
+                                      hintText: S
+                                          .of(context)
+                                          .enterFriendNameOrNickname)),
                               //Players list
                               Row(children: [
                                 UpdateButton(
@@ -425,7 +426,7 @@ class _PlayersPickerState extends State<PlayersPicker> {
                               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                               children: [
                                 ChoiceChip(
-                                  label: const Text("Win?"),
+                                  label: Text(S.of(context).winQuestion),
                                   selected: player['win'],
                                   onSelected: (bool? value) {
                                     setState(() {
@@ -460,7 +461,7 @@ class _PlayersPickerState extends State<PlayersPicker> {
                 const RoundedRectangleBorder(
                     borderRadius: BorderRadius.zero,
                     side: BorderSide(color: Colors.black12)))),
-        label: const Text("Select players"),
+        label: Text(S.of(context).selectPlayers),
         icon: const Icon(Icons.people));
   }
 }
@@ -504,7 +505,7 @@ class _GamePickerState extends State<GamePicker> {
   @override
   void initState() {
     super.initState();
-    widget.searchController.text = "Select game";
+    //widget.searchController.text = "Select game";
 
     SystemParameterSQL.selectSystemParameterById(2)
         .then((onlineSearchModeParamValue) => {
@@ -724,8 +725,7 @@ class _GamePickerState extends State<GamePicker> {
                     context: context,
                     builder: (dialogBuilder) {
                       return AlertDialog(
-                        title:
-                            const Text('Place the top of the box in the frame'),
+                        title: Text(S.of(context).placeTheTopOfTheBoxInFrame),
                         content: Column(children: [
                           SizedBox(
                             width: MediaQuery.of(context).size.width * 0.8,
@@ -744,11 +744,11 @@ class _GamePickerState extends State<GamePicker> {
                                         .pop();
                                     setState(() {
                                       widget.searchController.text =
-                                          "Recognizing";
+                                          S.of(context).recognizing;
                                     });
                                     var gameId = await takePhoto();
                                     var recognizedGameName =
-                                        "Cant find similar game";
+                                        S.of(context).cantFindSimilarGame;
 
                                     if (gameId != null) {
                                       widget.recognizedGame =
@@ -783,7 +783,7 @@ class _GamePickerState extends State<GamePicker> {
                                           Theme.of(context)
                                               .colorScheme
                                               .secondary)),
-                                  child: const Text('Recognize'))
+                                  child: Text(S.of(context).recognize))
                               //)
                               )
                         ]),

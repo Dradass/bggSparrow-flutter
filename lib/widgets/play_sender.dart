@@ -11,6 +11,7 @@ import '../bggApi/bgg_api.dart';
 import '../globals.dart';
 import '../widgets/common.dart';
 import 'dart:async';
+import '../s.dart';
 
 import '../widgets/players_list.dart';
 
@@ -156,7 +157,7 @@ class _PlaySenderState extends State<PlaySender> {
                 const RoundedRectangleBorder(
                     borderRadius: BorderRadius.zero,
                     side: BorderSide(color: Colors.black12)))),
-        label: const Text("Log play"),
+        label: Text(S.of(context).logPlay),
         icon: const Icon(Icons.send_and_archive));
   }
 }

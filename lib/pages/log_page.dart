@@ -11,6 +11,7 @@ import '../widgets/common.dart';
 import '../task_checker.dart';
 import 'dart:developer';
 import '../globals.dart';
+import '../s.dart';
 
 class LoadingStatus {
   String status = "";
@@ -40,6 +41,7 @@ class _LogScaffoldState extends State<LogScaffold> {
   @override
   void initState() {
     super.initState();
+    //searchController.text = "Select game";
 
     checkInternetConnection().then((isConnected) => {
           if (!isConnected)
@@ -174,7 +176,11 @@ class _LogScaffoldState extends State<LogScaffold> {
                 FlexButton(PlaySender(searchController, playersListWrapper), 3),
                 FlexButton(PlayersPicker(playersListWrapper), 3),
                 FlexButton(
-                    GamePicker(searchController, cameras, _imagewidget), 3),
+                    GamePicker(
+                        searchController..text = S.of(context).selectGame,
+                        cameras,
+                        _imagewidget),
+                    3),
               ],
             )
           ],
@@ -261,14 +267,7 @@ class _LogScaffoldState extends State<LogScaffold> {
                             }),
                   ],
                 ),
-                onTap: null
-                // simpleIndicatorMode = !simpleIndicatorMode;
-                // SystemParameterSQL.updateSystemParameter(SystemParameter(
-                //         id: 3,
-                //         name: "simpleIndicatorMode",
-                //         value: simpleIndicatorMode ? "1" : "0"))
-                //     .then((onValue) => {setState(() {})});
-                ,
+                onTap: null,
               ),
             ],
           ),

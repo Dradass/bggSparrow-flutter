@@ -6,6 +6,7 @@ import '../pages/login_screen.dart';
 import 'bggApi/bgg_api.dart';
 import '../db/game_things_sql.dart';
 import '../login_handler.dart';
+import '../s.dart';
 
 // TODO
 // 1. Debug mode for camera capture
@@ -13,6 +14,8 @@ import '../login_handler.dart';
 // 3. Icons and background
 // 4. Edit / delete play
 // 5. Localization
+// Tutorial
+// Pretty locations select
 
 late List<CameraDescription> cameras;
 const primaryTextColor = Color.fromARGB(255, 85, 92, 89);
@@ -64,5 +67,8 @@ Future<void> main() async {
         )),
         sliderTheme:
             SliderThemeData(overlayShape: SliderComponentShape.noOverlay)),
+    supportedLocales: S.supportedLocales,
+    locale: S.locale,
+    localizationsDelegates: S.localizationDelegates,
   ));
 }
