@@ -33,5 +33,9 @@
   "setTheListName": "Заполните имя списка",
   "winQuestion": "Победа?",
   "update": "Обновить",
+  "updatingGameCollection": "Обновляю коллекцию игр",
+  "updatingPlaysInfo": "Обновляю информацию об игровых партиях",
+  "updatingGamePlayersInfo": "Обновляю информацию о количестве игроков в играх",
+  "updatingThumbnails": "Обновляю изображения игр",
   "yourLocations": "Ваши локации"
 }

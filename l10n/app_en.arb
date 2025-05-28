@@ -33,5 +33,9 @@
   "setTheListName": "Set the list name",
   "winQuestion": "Win?",
   "update": "Update",
+  "updatingGameCollection": "Updating game collection",
+  "updatingPlaysInfo": "Updating plays info",
+  "updatingGamePlayersInfo": "Updating game players count info",
+  "updatingThumbnails": "Updating game thumbnails",
   "yourLocations": "Your locations"
 }

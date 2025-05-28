@@ -18,6 +18,7 @@ import '../task_checker.dart';
 import '../login_handler.dart';
 import '../globals.dart';
 import 'dart:developer';
+import '../s.dart';
 
 const maxPagesCount = 1000;
 
@@ -76,7 +77,7 @@ Future<Map<String, dynamic>> getBggPlayerName(String username) async {
   }
 }
 
-Future<void> getGamesThumbnail(refreshProgress) async {
+Future<void> getGamesThumbnail(refreshProgress, dynamic context) async {
   final gettingAllGames = await GameThingSQL.getAllGames();
   if (gettingAllGames != null) {
     int gamesWithThumbCount = gettingAllGames
@@ -90,7 +91,7 @@ Future<void> getGamesThumbnail(refreshProgress) async {
       if (game.thumbBinary == null) {
         game.createBinaryThumb();
         refreshProgress(true,
-            "Creating thumbnails. $gamesWithThumbCount / ${gettingAllGames.length - 1}");
+            "${S.of(context).updatingThumbnails} $gamesWithThumbCount / ${gettingAllGames.length - 1}");
         gamesWithThumbCount += 1;
         // Anti DDOS
         await Future.delayed(const Duration(milliseconds: 2000));
@@ -114,7 +115,7 @@ Future<String> getGameThumbFromBGG(int gameId) async {
   }
 }
 
-Future<void> getGamesPlayersCount(refreshProgress) async {
+Future<void> getGamesPlayersCount(refreshProgress, dynamic context) async {
   final gettingAllGames = await GameThingSQL.getAllGames();
   if (gettingAllGames != null) {
     int gamesWithPlayerInfo = gettingAllGames
@@ -137,7 +138,7 @@ Future<void> getGamesPlayersCount(refreshProgress) async {
         game.maxPlayers = gameThingServer.maxPlayers;
         log("Update players count of game ${game.name} id = ${game.id}");
         refreshProgress(true,
-            "Update players game info. $gamesWithPlayerInfo / ${gettingAllGames.length - 1}");
+            "${S.of(context).updatingGamePlayersInfo} $gamesWithPlayerInfo / ${gettingAllGames.length - 1}");
         gamesWithPlayerInfo += 1;
         await GameThingSQL.updateGame(game);
         // Anti DDOS
@@ -382,18 +383,18 @@ Future<void> sendOfflinePlaysToBGG() async {
 }
 
 Future<void> initializeBggData(
-    LoadingStatus loadingStatus, refreshProgress) async {
-  loadingStatus.status = "Importing game collection from server.";
+    LoadingStatus loadingStatus, dynamic context, refreshProgress) async {
+  loadingStatus.status = S.of(context).updatingGameCollection;
 
   await importGameCollectionFromBGG(refreshProgress);
 
-  refreshProgress(true, "Getting plays info.");
+  refreshProgress(true, S.of(context).updatingPlaysInfo);
   int maxPlayerId = await PlayersSQL.getMaxID();
   int maxLocationId = await LocationSQL.getMaxID();
   await getPlaysFromPage(1, maxPlayerId, maxLocationId);
 
-  await getGamesThumbnail(refreshProgress);
-  await getGamesPlayersCount(refreshProgress);
+  await getGamesThumbnail(refreshProgress, context);
+  await getGamesPlayersCount(refreshProgress, context);
   TaskChecker().needCancel = false;
 }
 

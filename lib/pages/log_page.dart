@@ -89,9 +89,8 @@ class _LogScaffoldState extends State<LogScaffold> {
                         defaultPlayersListId;
                     playersListWrapper.updatePlayersFromCustomList();
                   });
-
-                  var initializeProgress =
-                      initializeBggData(loadingStatus, refreshProgress);
+                  var initializeProgress = initializeBggData(
+                      loadingStatus, context, refreshProgress);
                   initializeProgress.then((value) {
                     setState(() {
                       isProgressBarVisible = false;
