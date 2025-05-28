@@ -4,6 +4,7 @@ import 'package:flutter_application_1/task_checker.dart';
 import '../bggApi/bgg_api.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../widgets/common.dart';
+import '../s.dart';
 
 const userNameParamName = "username";
 const passwordParamName = "password";
@@ -31,7 +32,7 @@ class _LoginScreenState extends State<LoginScreen> {
   void checkLoginAndPassword() {
     if (loginTextController.text.isEmpty) {
       setState(() {
-        errorLoginText = 'Enter login';
+        errorLoginText = S.of(context).enterYourLogin;
         errorPasswordText = null;
       });
       return;
@@ -39,7 +40,7 @@ class _LoginScreenState extends State<LoginScreen> {
     if (passwordTextController.text.isEmpty) {
       setState(() {
         errorLoginText = null;
-        errorPasswordText = 'Enter password';
+        errorPasswordText = S.of(context).enterYourPassword;
       });
       return;
     }
@@ -53,14 +54,15 @@ class _LoginScreenState extends State<LoginScreen> {
                   }),
                   TaskChecker().needCancel = false,
                   Navigator.pushNamed(context, '/navigation'),
-                  showSnackBar(context, 'Welcome!'),
+                  showSnackBar(context, S.of(context).welcome),
                   updateLoginPassword(loginTextController.text,
                       passwordTextController.text, context)
                 }
               else
                 {
                   setState(() {
-                    errorPasswordText = 'Login or password is incorrect';
+                    errorPasswordText =
+                        S.of(context).loginOrPasswordIsIncorrect;
                   })
                 }
             });
@@ -74,7 +76,7 @@ class _LoginScreenState extends State<LoginScreen> {
         TextField(
           controller: loginTextController,
           decoration: InputDecoration(
-            labelText: 'Login',
+            labelText: S.of(context).login,
             errorText: errorLoginText,
           ),
         ),
@@ -82,7 +84,7 @@ class _LoginScreenState extends State<LoginScreen> {
             controller: passwordTextController,
             obscureText: true,
             decoration: InputDecoration(
-              labelText: 'Password',
+              labelText: S.of(context).password,
               errorText: errorPasswordText,
             )),
         SizedBox(
@@ -94,7 +96,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   backgroundColor: WidgetStateProperty.all(
                       Theme.of(context).colorScheme.secondary),
                 ),
-                child: const Text("Log in")))
+                child: Text(S.of(context).tologIn)))
       ]),
     );
   }

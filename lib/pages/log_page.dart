@@ -189,11 +189,11 @@ class _LogScaffoldState extends State<LogScaffold> {
             padding: EdgeInsets.zero,
             children: [
               const ListTile(title: Text('')),
-              const ListTile(title: Text('Settings')),
+              ListTile(title: Text(S.of(context).settings)),
               const Divider(),
               ListTile(
                 leading: const Icon(Icons.logout),
-                title: const Text('Log out'),
+                title: Text(S.of(context).logOut),
                 onTap: () {
                   _scaffoldKey.currentState?.closeDrawer();
                   TaskChecker().needCancel = true;
@@ -202,7 +202,7 @@ class _LogScaffoldState extends State<LogScaffold> {
               ),
               ListTile(
                 leading: const Icon(Icons.sync),
-                title: const Text('Load all data'),
+                title: Text(S.of(context).loadAllData),
                 onTap: () {
                   GameThingSQL.initTables();
                   getAllPlaysFromServer();
@@ -210,7 +210,7 @@ class _LogScaffoldState extends State<LogScaffold> {
               ),
               ListTile(
                 leading: const Icon(Icons.clear),
-                title: const Text('Wipe all data'),
+                title: Text(S.of(context).wipeAllLocalData),
                 onTap: () {
                   GameThingSQL.deleteDB();
                 },
@@ -220,7 +220,7 @@ class _LogScaffoldState extends State<LogScaffold> {
                 title: Row(
                   children: [
                     Text(
-                        "Default search mode: ${isOnlineSearchModeDefault ? 'Online' : 'Offline'}")
+                        "${S.of(context).defaultSearchMode}: ${isOnlineSearchModeDefault ? S.of(context).online : S.of(context).offline}")
                   ],
                 ),
                 onTap: () {
@@ -238,7 +238,7 @@ class _LogScaffoldState extends State<LogScaffold> {
                 title: Row(
                   children: [
                     Text(
-                        "First player mode: ${simpleIndicatorMode ? 'Circle' : 'Finger'}")
+                        "${S.of(context).firstPlayerMode}: ${simpleIndicatorMode ? S.of(context).circle : S.of(context).finger}")
                   ],
                 ),
                 onTap: () {
@@ -253,7 +253,7 @@ class _LogScaffoldState extends State<LogScaffold> {
               ListTile(
                 title: Row(
                   children: [
-                    Text("Default players list: "),
+                    Text("${S.of(context).defaultPlayersList}: "),
                     ChooseListDropdown(
                         playersListWrapper: defaultPlayersListWrapper,
                         parentStateUpdate: () => {
