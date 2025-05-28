@@ -16,9 +16,9 @@ class PlayersListWrapper {
   Map<int, String> playersList = {};
   final newListNameController = TextEditingController();
 
-  Future<void> updateCustomLists() async {
+  Future<void> updateCustomLists(dynamic context) async {
     PlayerListSQL.getAllPlayerLists().then((lists) {
-      playersList[0] = "All";
+      playersList[0] = S.of(context).all;
       var customLists = (List.generate(
           lists.length, (index) => PlayersList.fromJson(lists[index])));
       if (customLists.isEmpty) return;

@@ -129,7 +129,7 @@ class _LogScaffoldState extends State<LogScaffold> {
 
   @override
   Widget build(BuildContext context) {
-    defaultPlayersListWrapper.updateCustomLists();
+    defaultPlayersListWrapper.updateCustomLists(context);
     return GestureDetector(
       onTap: () {
         FocusManager.instance.primaryFocus?.unfocus();
@@ -165,7 +165,7 @@ class _LogScaffoldState extends State<LogScaffold> {
                     IconButton(
                         onPressed: () {
                           _scaffoldKey.currentState?.openDrawer();
-                          defaultPlayersListWrapper.updateCustomLists();
+                          defaultPlayersListWrapper.updateCustomLists(context);
                         },
                         icon: const Icon(Icons.settings)),
                     3),

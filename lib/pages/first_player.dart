@@ -6,6 +6,7 @@ import '../models/system_parameters.dart';
 import '../db/system_table.dart';
 import 'dart:developer' as developer;
 import '../globals.dart';
+import '../s.dart';
 
 class FirstPlayerChoser extends StatefulWidget {
   const FirstPlayerChoser({super.key});
@@ -22,7 +23,7 @@ class _FirstPlayerChoserState extends State<FirstPlayerChoser>
   var indicator;
   bool forceInReleaseMode = true;
   bool enabled = true;
-  var counter = "Touch the screen";
+  String? counter;
   double indicatorSize = 130;
   var indicatorColor = const Color.fromARGB(255, 32, 184, 19);
   final List<Color> colors = <Color>[
@@ -176,7 +177,7 @@ class _FirstPlayerChoserState extends State<FirstPlayerChoser>
     setState(() {
       touchPositions.remove(index);
       fingerPrintsOpacity = 1.0;
-      counter = "Touch the screen";
+      counter = S.of(context).touchTheScreen;
     });
   }
 
@@ -189,7 +190,7 @@ class _FirstPlayerChoserState extends State<FirstPlayerChoser>
           child: FittedBox(
               child: Text(
             selectionColor: Colors.tealAccent,
-            counter,
+            counter ?? S.of(context).touchTheScreen,
             textAlign: TextAlign.center,
           ))),
     );
@@ -233,7 +234,7 @@ class _FirstPlayerChoserState extends State<FirstPlayerChoser>
         });
       } else {
         setState(() {
-          counter = "Waiting your friends";
+          counter = S.of(context).touchTheScreen;
         });
       }
     } else {

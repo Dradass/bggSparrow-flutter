@@ -4,6 +4,7 @@ import 'package:flutter_application_1/models/game_list_model.dart';
 import '../db/game_things_sql.dart';
 import '../db/game_list_sql.dart';
 import 'dart:developer';
+import '../s.dart';
 
 class GameHelper extends StatefulWidget {
   const GameHelper({super.key});
@@ -14,7 +15,7 @@ class GameHelper extends StatefulWidget {
 
 class _GameHelperState extends State<GameHelper> {
   double chosenPlayersCount = 1;
-  String chosenGame = "Get some random game";
+  String? chosenGame;
   RangeValues maxRangeValues = const RangeValues(0, 0);
   bool onlyOwnedGames = true;
   int gamesFilterNeedClear = 0;
@@ -49,9 +50,9 @@ class _GameHelperState extends State<GameHelper> {
     }
   }
 
-  Future<void> updateCustomLists() async {
+  Future<void> updateCustomLists(dynamic context) async {
     GameListSQL.getAllGameLists().then((lists) {
-      gamesList[0] = "All";
+      gamesList[0] = S.of(context).all;
       var customLists = (List.generate(
           lists.length, (index) => GameList.fromJson(lists[index])));
       if (customLists.isEmpty) return;
@@ -109,7 +110,7 @@ class _GameHelperState extends State<GameHelper> {
 
   @override
   Widget build(BuildContext context) {
-    updateCustomLists();
+    updateCustomLists(context);
 
     return Scaffold(
         body: SafeArea(
@@ -141,7 +142,7 @@ class _GameHelperState extends State<GameHelper> {
                         });
                       },
                     ),
-                    const Text("Max players count"),
+                    Text(S.of(context).maxPlayersCount),
                   ],
                 ))),
         Flexible(
@@ -163,7 +164,7 @@ class _GameHelperState extends State<GameHelper> {
                         });
                       },
                     ),
-                    const Text("Players count"),
+                    Text(S.of(context).playersCount),
                   ],
                 ))),
         SizedBox(
@@ -178,7 +179,7 @@ class _GameHelperState extends State<GameHelper> {
                   label: SizedBox(
                       width: double.infinity,
                       height: MediaQuery.of(context).size.height * 1,
-                      child: const Text("Only owned games")),
+                      child: Text(S.of(context).onlyOwnedGames)),
                   selected: onlyOwnedGames,
                   onSelected: (bool value) {
                     setState(() {
@@ -193,7 +194,7 @@ class _GameHelperState extends State<GameHelper> {
                 child: ElevatedButton.icon(
                   onPressed: () async {
                     await updateGamesFromCustomList(chosenGameListId);
-                    await updateCustomLists();
+                    await updateCustomLists(context);
                     showDialog(
                         context: context,
                         builder: (buildContext) {
@@ -205,11 +206,10 @@ class _GameHelperState extends State<GameHelper> {
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
                                 children: [
-                                  const Text('Game'),
                                   Container(
                                       color: Colors.red,
                                       width: MediaQuery.of(context).size.width *
-                                          0.3,
+                                          0.4,
                                       child: ElevatedButton(
                                           onPressed: () {
                                             for (var game in allGames!) {
@@ -226,9 +226,10 @@ class _GameHelperState extends State<GameHelper> {
                                                       Theme.of(context)
                                                           .colorScheme
                                                           .secondary)),
-                                          child: const Text("Show all games"))),
+                                          child: Text(
+                                              S.of(context).showAllGames))),
                                   Row(children: [
-                                    const Text('Votes'),
+                                    Text(S.of(context).votes),
                                     Checkbox(
                                         value: gamesFilterNeedClear == 1,
                                         onChanged: ((value) {
@@ -256,7 +257,7 @@ class _GameHelperState extends State<GameHelper> {
                                           0.68,
                                       child: ExpansionTile(
                                           shape: const Border(),
-                                          title: const Text('Games lists'),
+                                          title: Text(S.of(context).gamesLists),
                                           children: [
                                             Row(
                                                 mainAxisAlignment:
@@ -283,8 +284,9 @@ class _GameHelperState extends State<GameHelper> {
                                                                         chosenGameListId)) {
                                                                       setState(
                                                                           () {
-                                                                        createListErrorText =
-                                                                            "Cant update this list";
+                                                                        createListErrorText = S
+                                                                            .of(context)
+                                                                            .cantUpdateThisListTryAgain;
                                                                       });
                                                                       return;
                                                                     }
@@ -292,8 +294,9 @@ class _GameHelperState extends State<GameHelper> {
                                                                         () {});
                                                                     setState(
                                                                         () {
-                                                                      createListHelperText =
-                                                                          "List was updated";
+                                                                      createListHelperText = S
+                                                                          .of(context)
+                                                                          .listWasUpdated;
                                                                     });
                                                                   },
                                                         style: ButtonStyle(
@@ -302,8 +305,9 @@ class _GameHelperState extends State<GameHelper> {
                                                                         context)
                                                                     .colorScheme
                                                                     .secondary)),
-                                                        child: const Text(
-                                                            'Update')),
+                                                        child: Text(S
+                                                            .of(context)
+                                                            .update)),
                                                     DropdownButton(
                                                       padding:
                                                           const EdgeInsets.all(
@@ -373,8 +377,9 @@ class _GameHelperState extends State<GameHelper> {
                                                                   setState(
                                                                       () {});
                                                                   setState(() {
-                                                                    createListHelperText =
-                                                                        "List was deleted";
+                                                                    createListHelperText = S
+                                                                        .of(context)
+                                                                        .listWasDeleted;
                                                                   });
                                                                 },
                                                       style: ButtonStyle(
@@ -384,8 +389,9 @@ class _GameHelperState extends State<GameHelper> {
                                                                           context)
                                                                       .colorScheme
                                                                       .secondary)),
-                                                      child:
-                                                          const Text('Delete')),
+                                                      child: Text(S
+                                                          .of(context)
+                                                          .delete)),
                                                 ]),
                                             Row(
                                               mainAxisAlignment:
@@ -404,8 +410,9 @@ class _GameHelperState extends State<GameHelper> {
                                                               .text;
                                                       if (listName.isEmpty) {
                                                         setState(() {
-                                                          createListErrorText =
-                                                              "Set the name of list";
+                                                          createListErrorText = S
+                                                              .of(context)
+                                                              .setTheListName;
                                                         });
                                                         return;
                                                       }
@@ -416,8 +423,9 @@ class _GameHelperState extends State<GameHelper> {
                                                       if (listWithSameNameExists !=
                                                           null) {
                                                         setState(() {
-                                                          createListErrorText =
-                                                              "List is already exists with same name";
+                                                          createListErrorText = S
+                                                              .of(context)
+                                                              .listIsAlreadyExistsWithSameName;
                                                         });
                                                         return;
                                                       }
@@ -427,8 +435,9 @@ class _GameHelperState extends State<GameHelper> {
                                                       if (selectedGames
                                                           .isEmpty) {
                                                         setState(() {
-                                                          createListErrorText =
-                                                              "Chose games to create list";
+                                                          createListErrorText = S
+                                                              .of(context)
+                                                              .pickTheGamesToCreateList;
                                                         });
                                                         return;
                                                       }
@@ -444,8 +453,9 @@ class _GameHelperState extends State<GameHelper> {
                                                               listName,
                                                               selectedGamesString);
                                                       setState(() {
-                                                        createListHelperText =
-                                                            "List was created";
+                                                        createListHelperText = S
+                                                            .of(context)
+                                                            .listWasCreated;
                                                       });
                                                       final customList =
                                                           await GameListSQL
@@ -474,8 +484,8 @@ class _GameHelperState extends State<GameHelper> {
                                                                         context)
                                                                     .colorScheme
                                                                     .secondary)),
-                                                    child:
-                                                        const Text('Create')),
+                                                    child: Text(
+                                                        S.of(context).create)),
                                                 SizedBox(
                                                     width:
                                                         MediaQuery.of(context)
@@ -499,8 +509,9 @@ class _GameHelperState extends State<GameHelper> {
                                                                 createListHelperText,
                                                             errorText:
                                                                 createListErrorText,
-                                                            labelText:
-                                                                'List name')))
+                                                            labelText: S
+                                                                .of(context)
+                                                                .listName)))
                                               ],
                                             ),
                                           ])),
@@ -530,17 +541,10 @@ class _GameHelperState extends State<GameHelper> {
                           });
                         });
                   },
-                  label: const Text('Filter'),
+                  label: Text(S.of(context).filters),
                   icon: const Icon(Icons.filter_alt),
                 ))
           ]),
-          // Row(
-          //   children: [
-          //     ElevatedButton(
-          //         onPressed: () => {print('Create')},
-          //         child: Text('Create list'))
-          //   ],
-          // )
         ),
         Flexible(
             flex: 1,
@@ -577,7 +581,8 @@ class _GameHelperState extends State<GameHelper> {
                     }
                     if (filteredGames.isEmpty) {
                       setState(() {
-                        chosenGame = "No game with chosen players count";
+                        chosenGame =
+                            S.of(context).gameNotFoundMatchingYourConditions;
                       });
                     } else {
                       setState(() {
@@ -592,7 +597,7 @@ class _GameHelperState extends State<GameHelper> {
                           const RoundedRectangleBorder(
                               borderRadius: BorderRadius.zero,
                               side: BorderSide(color: Colors.black12)))),
-                  child: const Text("Choose random game"),
+                  child: Text(S.of(context).chooseRandomGame),
                 ))),
         SizedBox(
             width: MediaQuery.of(context).size.width,
@@ -600,7 +605,7 @@ class _GameHelperState extends State<GameHelper> {
             child: FittedBox(
                 child: Text(
               selectionColor: Colors.tealAccent,
-              chosenGame,
+              chosenGame ?? S.of(context).chooseAnyGame,
               textAlign: TextAlign.center,
             ))),
       ])

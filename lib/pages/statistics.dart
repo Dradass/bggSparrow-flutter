@@ -7,6 +7,7 @@ import '../models/bgg_play_model.dart';
 import '../bggApi/bgg_api.dart';
 import '../db/game_things_sql.dart';
 import '../globals.dart';
+import '../s.dart';
 
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
@@ -105,7 +106,7 @@ class _StatisticsState extends State<Statistics> {
   @override
   Widget build(BuildContext context) {
     GameThingSQL.getAllGames().then((allGames) {
-      chosenGames[0] = "All games";
+      chosenGames[0] = S.of(context).allGames;
       if (allGames == null) return;
       for (var game in allGames) {
         chosenGames[game.id] = game.name;
@@ -119,11 +120,11 @@ class _StatisticsState extends State<Statistics> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          const TabBar(tabs: [
-            Tab(text: "Plays"),
-            Tab(text: "Table"),
-            Tab(text: "Histogram"),
-            Tab(text: "Piechart"),
+          TabBar(tabs: [
+            Tab(text: S.of(context).plays),
+            Tab(text: S.of(context).table),
+            Tab(text: S.of(context).histogram),
+            Tab(text: S.of(context).pieChart),
           ]),
           LayoutBuilder(builder: ((context, constraints) {
             return SizedBox(
@@ -137,15 +138,15 @@ class _StatisticsState extends State<Statistics> {
                       headingRowHeight: 0,
                       showCheckboxColumn: false,
                       dataRowMaxHeight: double.infinity,
-                      columns: const <DataColumn>[
+                      columns: <DataColumn>[
                         DataColumn(
-                          label: Text('Game'),
+                          label: Text(S.of(context).game),
                         ),
                         DataColumn(
-                          label: Text('Date'),
+                          label: Text(S.of(context).date),
                         ),
                         DataColumn(
-                          label: Text('Quantity'),
+                          label: Text(S.of(context).players),
                         ),
                       ],
                       rows: List<DataRow>.generate(
@@ -201,12 +202,12 @@ class _StatisticsState extends State<Statistics> {
                       columnSpacing: 20,
                       headingRowHeight: 0,
                       showCheckboxColumn: false,
-                      columns: const <DataColumn>[
+                      columns: <DataColumn>[
                         DataColumn(
-                          label: Text('Game'),
+                          label: Text(S.of(context).game),
                         ),
                         DataColumn(
-                          label: Text('Quantity'),
+                          label: Text(S.of(context).quantity),
                         ),
                       ],
                       rows: List<DataRow>.generate(
@@ -254,7 +255,7 @@ class _StatisticsState extends State<Statistics> {
                     ))),
                 SafeArea(
                   child: SfCartesianChart(
-                    title: const ChartTitle(text: "Games stats"),
+                    title: ChartTitle(text: S.of(context).gamesStats),
                     primaryXAxis: const CategoryAxis(
                       labelRotation: 270,
                       interval: 1,
@@ -275,7 +276,7 @@ class _StatisticsState extends State<Statistics> {
                 ),
                 SafeArea(
                   child: SfCircularChart(
-                    title: const ChartTitle(text: "Games stats"),
+                    title: ChartTitle(text: S.of(context).gamesStats),
                     margin: const EdgeInsets.all(0),
                     legend: const Legend(
                         isVisible: true, position: LegendPosition.bottom),
@@ -289,7 +290,7 @@ class _StatisticsState extends State<Statistics> {
                             labelPosition: ChartDataLabelPosition.outside,
                             useSeriesColor: true),
                         dataSource: gamePlays,
-                        name: "Games",
+                        name: S.of(context).games,
                         dataLabelMapper: (_GamePlaysCount data, _) =>
                             data.gameName,
                         xValueMapper: (_GamePlaysCount data, _) =>
@@ -322,8 +323,8 @@ class _StatisticsState extends State<Statistics> {
                     });
                   },
                 )),
-            const Text(
-              "Games limit",
+            Text(
+              S.of(context).gamesLimit,
               overflow: TextOverflow.ellipsis,
             )
           ]),
@@ -349,8 +350,8 @@ class _StatisticsState extends State<Statistics> {
                                       builder: (context, setState) {
                                     return AlertDialog(
                                         content: Column(children: [
-                                      const Text(
-                                        "Games limit",
+                                      Text(
+                                        S.of(context).game,
                                         overflow: TextOverflow.ellipsis,
                                       ),
                                       Column(
@@ -372,8 +373,8 @@ class _StatisticsState extends State<Statistics> {
                                               });
                                             },
                                           )),
-                                          const Text(
-                                            "Players count",
+                                          Text(
+                                            S.of(context).playersCount,
                                             overflow: TextOverflow.ellipsis,
                                           ),
                                           SizedBox(
@@ -422,7 +423,8 @@ class _StatisticsState extends State<Statistics> {
                                               }).toList(),
                                             ),
                                             ChoiceChip(
-                                              label: const Text("Winrate"),
+                                              label:
+                                                  Text(S.of(context).winRate),
                                               selected: winRate,
                                               onSelected: (bool value) {
                                                 setState(() {
@@ -437,8 +439,9 @@ class _StatisticsState extends State<Statistics> {
                                               ),
                                             ),
                                             ChoiceChip(
-                                              label: const Text(
-                                                  "Only chosen players"),
+                                              label: Text(S
+                                                  .of(context)
+                                                  .onlyChosenPlayers),
                                               selected: onlyChosenPlayers,
                                               onSelected: (bool value) {
                                                 setState(() {
@@ -453,8 +456,9 @@ class _StatisticsState extends State<Statistics> {
                                               ),
                                             ),
                                             ChoiceChip(
-                                              label: const Text(
-                                                  "Winner among chosen players"),
+                                              label: Text(S
+                                                  .of(context)
+                                                  .winnerAmongChosenPlayers),
                                               selected:
                                                   winnerAmongChosenPlayers,
                                               onSelected: (bool value) {
@@ -471,7 +475,7 @@ class _StatisticsState extends State<Statistics> {
                                               ),
                                             ),
                                           ]),
-                                      const Text("Players"),
+                                      Text(S.of(context).players),
                                       Expanded(
                                           child: SingleChildScrollView(
                                               child: Column(
@@ -484,7 +488,8 @@ class _StatisticsState extends State<Statistics> {
                                                   MainAxisAlignment.spaceEvenly,
                                               children: [
                                                 ChoiceChip(
-                                                  label: const Text("exclude?"),
+                                                  label: Text(
+                                                      S.of(context).exclude),
                                                   selected: player['excluded'],
                                                   onSelected: (bool? value) {
                                                     setState(() {
@@ -520,7 +525,7 @@ class _StatisticsState extends State<Statistics> {
                                   });
                                 });
                           },
-                          label: const Text("Filters"),
+                          label: Text(S.of(context).filters),
                           icon: const Icon(Icons.filter_alt),
                         )),
                     Container(
@@ -703,13 +708,13 @@ class _StatisticsState extends State<Statistics> {
 
                             setState(() {
                               statsSummary =
-                                  "Total plays: ${allGames.fold(0, (sum, item) => sum + item.count!)} total games: ${allGames.length}";
+                                  "${S.of(context).totalPlays}: ${allGames.fold(0, (sum, item) => sum + item.count!)} ${S.of(context).totalGames}}: ${allGames.length}";
                             });
                           },
                           style: ButtonStyle(
                               backgroundColor: WidgetStateProperty.all(
                                   Theme.of(context).colorScheme.secondary)),
-                          label: const Text("Get plays"),
+                          label: Text(S.of(context).drawUp),
                           icon: const Icon(Icons.leaderboard),
                         )),
                     Container(
@@ -721,8 +726,8 @@ class _StatisticsState extends State<Statistics> {
                             plays = await getNewPlays();
                             setState(() {});
                           },
-                          label: const Text(
-                            "First plays",
+                          label: Text(
+                            S.of(context).firstPlays,
                             textAlign: TextAlign.center,
                           ),
                         )),
@@ -734,7 +739,7 @@ class _StatisticsState extends State<Statistics> {
                           onPressed: () async {
                             exportCSV();
                           },
-                          label: const Text("Export table",
+                          label: Text(S.of(context).exportTable,
                               textAlign: TextAlign.center),
                         ))
                   ])),
@@ -760,7 +765,7 @@ class _StatisticsState extends State<Statistics> {
                           }
                         },
                         child: Text(
-                          "Period start ${dateFormat.format(startDate!)}",
+                          "${S.of(context).periodStart} ${dateFormat.format(startDate!)}",
                           textAlign: TextAlign.center,
                         )),
                   ),
@@ -775,7 +780,7 @@ class _StatisticsState extends State<Statistics> {
                         children: [
                           Expanded(
                               child: ElevatedButton(
-                                  child: const Text("This year"),
+                                  child: Text(S.of(context).thisYear),
                                   onPressed: () {
                                     setState(() {
                                       startDate = DateTime(DateTime.now().year);
@@ -784,7 +789,7 @@ class _StatisticsState extends State<Statistics> {
                                   })),
                           Expanded(
                               child: ElevatedButton(
-                            child: const Text("Last year"),
+                            child: Text(S.of(context).lastYear),
                             onPressed: () {
                               setState(() {
                                 startDate = DateTime(DateTime.now()
@@ -817,7 +822,7 @@ class _StatisticsState extends State<Statistics> {
                           }
                         },
                         child: Text(
-                          "Period end ${dateFormat.format(endDate!)}",
+                          "${S.of(context).periodEnd} ${dateFormat.format(endDate!)}",
                           textAlign: TextAlign.center,
                         )),
                   )
@@ -896,13 +901,13 @@ class _StatisticsState extends State<Statistics> {
 
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         action: SnackBarAction(
-          label: 'Open file',
+          label: S.of(context).openFile,
           onPressed: () async {
             final filePath = path;
             await OpenFile.open(filePath);
           },
         ),
-        content: Text("Table was exported to: '$folderName'")));
+        content: Text("${S.of(context).tableWasExportedTo}: '$folderName'")));
   }
 }
 

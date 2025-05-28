@@ -320,7 +320,7 @@ class _PlayersPickerState extends State<PlayersPicker> {
 
   @override
   Widget build(BuildContext context) {
-    widget.playersListWrapper.updateCustomLists();
+    widget.playersListWrapper.updateCustomLists(context);
     return ElevatedButton.icon(
         onPressed: () async {
           if (widget.playersListWrapper.players.isEmpty) {
