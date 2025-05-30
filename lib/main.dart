@@ -31,44 +31,68 @@ Future<void> main() async {
     await LoginHandler().readEncryptedPasswordFromSecureStorage();
   }
 
-  runApp(MaterialApp(
-    routes: {
-      '/login': (context) => const LoginScreen(),
-      '/navigation': (context) => const NavigationScreen(),
-    },
-    initialRoute: needLogin ? '/login' : '/navigation',
-    theme: ThemeData(
-        textTheme: const TextTheme()
-            .apply(bodyColor: primaryTextColor, displayColor: Colors.blue),
-        colorScheme: const ColorScheme(
-            brightness: Brightness.light,
-            primary: primaryTextColor,
-            onPrimary: Color.fromARGB(255, 183, 187, 187),
-            secondary: Color.fromARGB(255, 110, 235, 173),
-            onSecondary: primaryTextColor,
-            error: Colors.red,
-            onError: primaryTextColor,
-            surface: Color.fromARGB(255, 247, 255, 249),
-            onSurface: primaryTextColor),
-        secondaryHeaderColor: const Color.fromARGB(255, 43, 132, 190),
-        chipTheme: const ChipThemeData(
-          shape: RoundedRectangleBorder(
-            side: BorderSide(color: Colors.black12),
-            borderRadius: BorderRadius.zero,
-          ),
-        ),
-        elevatedButtonTheme: ElevatedButtonThemeData(
-            style: ElevatedButton.styleFrom(
-          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          padding: EdgeInsets.zero,
-          shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.zero),
-              side: BorderSide(color: Colors.black12)),
-        )),
-        sliderTheme:
-            SliderThemeData(overlayShape: SliderComponentShape.noOverlay)),
-    supportedLocales: S.supportedLocales,
-    locale: S.locale,
-    localizationsDelegates: S.localizationDelegates,
-  ));
+  runApp(const MyApp());
+}
+
+class MyApp extends StatefulWidget {
+  const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  void setLocale(Locale value) {
+    setState(() {
+      S.locale = value;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<Locale>(
+        valueListenable: S.notifier,
+        builder: (context, locale, child) {
+          return MaterialApp(
+            routes: {
+              '/login': (context) => const LoginScreen(),
+              '/navigation': (context) => const NavigationScreen(),
+            },
+            initialRoute: needLogin ? '/login' : '/navigation',
+            theme: ThemeData(
+                textTheme: const TextTheme().apply(
+                    bodyColor: primaryTextColor, displayColor: Colors.blue),
+                colorScheme: const ColorScheme(
+                    brightness: Brightness.light,
+                    primary: primaryTextColor,
+                    onPrimary: Color.fromARGB(255, 183, 187, 187),
+                    secondary: Color.fromARGB(255, 110, 235, 173),
+                    onSecondary: primaryTextColor,
+                    error: Colors.red,
+                    onError: primaryTextColor,
+                    surface: Color.fromARGB(255, 247, 255, 249),
+                    onSurface: primaryTextColor),
+                secondaryHeaderColor: const Color.fromARGB(255, 43, 132, 190),
+                chipTheme: const ChipThemeData(
+                  shape: RoundedRectangleBorder(
+                    side: BorderSide(color: Colors.black12),
+                    borderRadius: BorderRadius.zero,
+                  ),
+                ),
+                elevatedButtonTheme: ElevatedButtonThemeData(
+                    style: ElevatedButton.styleFrom(
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  padding: EdgeInsets.zero,
+                  shape: const RoundedRectangleBorder(
+                      borderRadius: BorderRadius.all(Radius.zero),
+                      side: BorderSide(color: Colors.black12)),
+                )),
+                sliderTheme: SliderThemeData(
+                    overlayShape: SliderComponentShape.noOverlay)),
+            supportedLocales: S.supportedLocales,
+            locale: locale,
+            localizationsDelegates: S.localizationDelegates,
+          );
+        });
+  }
 }

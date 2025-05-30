@@ -129,6 +129,7 @@ class _LogScaffoldState extends State<LogScaffold> {
 
   @override
   Widget build(BuildContext context) {
+    final currentLocale = S.currentLocale;
     defaultPlayersListWrapper.updateCustomLists(context);
     return GestureDetector(
       onTap: () {
@@ -267,6 +268,49 @@ class _LogScaffoldState extends State<LogScaffold> {
                   ],
                 ),
                 onTap: null,
+              ),
+              ListTile(
+                title: Row(
+                  children: [
+                    Text("${S.of(context).currentLanguage}: "),
+                    DropdownButton<Locale>(
+                      value: currentLocale,
+                      onChanged: (Locale? newLocale) {
+                        if (newLocale != null) {
+                          S.setLocale(newLocale);
+                        }
+                      },
+                      items: S.supportedLocales.map((Locale locale) {
+                        return DropdownMenuItem<Locale>(
+                          value: locale,
+                          child: Row(
+                            children: [
+                              Text(
+                                S.supportedLanguages[S.supportedLocales
+                                    .indexOf(locale)]['nativeName'],
+                                style: TextStyle(
+                                  fontWeight: currentLocale == locale
+                                      ? FontWeight.bold
+                                      : FontWeight.normal,
+                                  color: currentLocale == locale
+                                      ? Colors.blue
+                                      : Colors.black,
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ],
+                ),
+                onTap: () {
+                  // setState(() {
+                  //   S.locale = Locale('en');
+                  // });
+                  // setState(() {});
+                  S.toggleLocale();
+                },
               ),
             ],
           ),
