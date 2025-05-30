@@ -13,7 +13,6 @@ import '../s.dart';
 // 2. Color picker
 // 3. Icons and background
 // 4. Edit / delete play
-// 5. Localization
 // Tutorial
 // Pretty locations select
 
@@ -42,12 +41,6 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  void setLocale(Locale value) {
-    setState(() {
-      S.locale = value;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<Locale>(
@@ -89,7 +82,8 @@ class _MyAppState extends State<MyApp> {
                 )),
                 sliderTheme: SliderThemeData(
                     overlayShape: SliderComponentShape.noOverlay)),
-            supportedLocales: S.supportedLocales,
+            supportedLocales: S.supportedLanguages
+                .map((toElement) => Locale(toElement['code'])),
             locale: locale,
             localizationsDelegates: S.localizationDelegates,
           );

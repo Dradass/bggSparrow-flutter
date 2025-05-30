@@ -280,14 +280,19 @@ class _LogScaffoldState extends State<LogScaffold> {
                           S.setLocale(newLocale);
                         }
                       },
-                      items: S.supportedLocales.map((Locale locale) {
+                      items: S.supportedLanguages
+                          .map((toElement) => Locale(toElement['code']))
+                          .map((Locale locale) {
                         return DropdownMenuItem<Locale>(
                           value: locale,
                           child: Row(
                             children: [
                               Text(
-                                S.supportedLanguages[S.supportedLocales
-                                    .indexOf(locale)]['nativeName'],
+                                S.supportedLanguages.firstWhere(
+                                      (element) =>
+                                          Locale(element['code']) == locale,
+                                    )['nativeName'] ??
+                                    'English',
                                 style: TextStyle(
                                   fontWeight: currentLocale == locale
                                       ? FontWeight.bold
@@ -304,13 +309,6 @@ class _LogScaffoldState extends State<LogScaffold> {
                     ),
                   ],
                 ),
-                onTap: () {
-                  // setState(() {
-                  //   S.locale = Locale('en');
-                  // });
-                  // setState(() {});
-                  S.toggleLocale();
-                },
               ),
             ],
           ),
