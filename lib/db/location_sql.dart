@@ -77,6 +77,19 @@ class LocationSQL {
     return locations;
   }
 
+  static Future<List<Location>> getAllLocationsObj() async {
+    final db = await _getDB();
+    List<Location> locations = [];
+    List<Map<String, dynamic>> result =
+        await db.rawQuery('SELECT * FROM Locations');
+    if (result.isEmpty) return locations;
+    for (var locationResult in result) {
+      var location = Location.fromJson(locationResult);
+      locations.add(location);
+    }
+    return locations;
+  }
+
   static Future<Location?> getDefaultLocation() async {
     final db = await _getDB();
     List<Map> locations = [];
@@ -94,7 +107,7 @@ class LocationSQL {
     return Location.fromJson(result.first);
   }
 
-  static void updateDefaultLocation(Location location) async {
+  static Future<void> updateDefaultLocation(Location location) async {
     var defaultLocation = await getDefaultLocation();
 
     if (defaultLocation != null) {

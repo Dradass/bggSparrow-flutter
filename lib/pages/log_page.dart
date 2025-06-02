@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/main.dart';
+import 'package:flutter_application_1/models/bgg_location.dart';
 import 'package:flutter_application_1/widgets/players_list.dart';
 import '../db/game_things_sql.dart';
 import '../db/system_table.dart';
@@ -12,6 +13,8 @@ import '../task_checker.dart';
 import 'dart:developer';
 import '../globals.dart';
 import '../s.dart';
+
+import '../db/location_sql.dart';
 
 class LoadingStatus {
   String status = "";
@@ -37,11 +40,17 @@ class _LogScaffoldState extends State<LogScaffold> {
   bool isOnlineSearchModeDefault = true;
   final Image _imagewidget = Image.asset('assets/no_image.png');
   PlayersListWrapper defaultPlayersListWrapper = PlayersListWrapper();
+  List<Location> locations = [];
+  Location? chosenLocation;
 
   @override
   void initState() {
     super.initState();
-    //searchController.text = "Select game";
+    getLocalLocationsObj().then((locationsResult) {
+      if (locationsResult.isNotEmpty) {
+        locations = locationsResult;
+      }
+    });
 
     checkInternetConnection().then((isConnected) => {
           if (!isConnected)
@@ -250,6 +259,45 @@ class _LogScaffoldState extends State<LogScaffold> {
                           value: simpleIndicatorMode ? "1" : "0"))
                       .then((onValue) => {setState(() {})});
                 },
+              ),
+              ListTile(
+                title: Row(
+                  children: [
+                    Text("${S.of(context).defaultLocation}: "),
+                    DropdownButton<Location>(
+                      value: chosenLocation ??
+                          (locations.isNotEmpty &&
+                                  locations.any((x) => x.isDefault == 1)
+                              ? locations.where((x) => x.isDefault == 1).first
+                              : null),
+                      onChanged: (Location? changedLocation) {
+                        if (changedLocation != null) {
+                          var locationObject = Location(
+                              id: changedLocation.id,
+                              name: changedLocation.name,
+                              isDefault: 1);
+                          LocationSQL.updateDefaultLocation(locationObject)
+                              .then((onValue) {
+                            chosenLocation = changedLocation;
+                            setState(() {});
+                          });
+                        }
+                      },
+                      items: locations.map((location) {
+                        return DropdownMenuItem<Location>(
+                          value: location,
+                          child: Row(
+                            children: [
+                              Text(
+                                location.name,
+                              ),
+                            ],
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ],
+                ),
               ),
               ListTile(
                 title: Row(

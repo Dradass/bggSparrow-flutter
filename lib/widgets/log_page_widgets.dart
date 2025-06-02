@@ -76,7 +76,7 @@ class _LocationPickerState extends State<LocationPicker> {
   @override
   void initState() {
     super.initState();
-    var defaultLocationRes = fillLocationName();
+    var defaultLocationRes = getDefaultLocation();
     defaultLocationRes.then((defaultLocationValue) {
       if (defaultLocationValue != null) {
         setState(() {
@@ -98,53 +98,41 @@ class _LocationPickerState extends State<LocationPicker> {
               builder: (buildContext) {
                 return StatefulBuilder(builder: (context, setState) {
                   return AlertDialog(
-                      //insetPadding: EdgeInsets.zero,
                       title: Text(S.of(context).yourLocations),
                       content: SingleChildScrollView(
                           child: Column(
                               children: widget.locations.map((location) {
-                        return ElevatedButton(
-                          child: Row(children: [
-                            ChoiceChip(
-                              label: Text(S.of(context).defaultWord),
-                              selected: location['isDefault'] == 1,
-                              onSelected: (bool value) {
-                                setState(() {
-                                  for (var location in widget.locations) {
-                                    location['isDefault'] = 0;
-                                  }
-
-                                  location['isDefault'] = value ? 1 : 0;
-                                  log(value.toString());
-                                  var locationObject = Location(
-                                      id: location['id'],
-                                      name: location['name'],
-                                      isDefault: value ? 1 : 0);
-                                  LocationSQL.updateDefaultLocation(
-                                      locationObject);
-                                });
-                              },
-                              shape: const RoundedRectangleBorder(
-                                side: BorderSide(color: Colors.black12),
-                                borderRadius: BorderRadius.zero,
-                              ),
+                        return Column(children: [
+                          const Divider(),
+                          ElevatedButton(
+                            onPressed: () {
+                              Navigator.of(context, rootNavigator: true).pop();
+                              for (var checkedLocation in widget.locations) {
+                                checkedLocation['isChecked'] = false;
+                              }
+                              location['isChecked'] = true;
+                              widget.selectedLocation = location['name'];
+                            },
+                            style: ButtonStyle(
+                              shadowColor:
+                                  WidgetStateProperty.all(Colors.transparent),
+                              shape: WidgetStateProperty.all<
+                                      RoundedRectangleBorder>(
+                                  const RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.zero,
+                                      side: BorderSide.none)),
                             ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                                child: Text(
-                              location['name'],
-                              overflow: TextOverflow.ellipsis,
-                            ))
-                          ]),
-                          onPressed: () {
-                            Navigator.of(context, rootNavigator: true).pop();
-                            for (var checkedLocation in widget.locations) {
-                              checkedLocation['isChecked'] = false;
-                            }
-                            location['isChecked'] = true;
-                            widget.selectedLocation = location['name'];
-                          },
-                        );
+                            child: Row(children: [
+                              const SizedBox(width: 10),
+                              Expanded(
+                                  child: Text(
+                                textAlign: TextAlign.left,
+                                location['name'],
+                                overflow: TextOverflow.ellipsis,
+                              )),
+                            ]),
+                          )
+                        ]);
                       }).toList())));
                 });
               }).then((value) {
@@ -505,7 +493,6 @@ class _GamePickerState extends State<GamePicker> {
   @override
   void initState() {
     super.initState();
-    //widget.searchController.text = "Select game";
 
     SystemParameterSQL.selectSystemParameterById(2)
         .then((onlineSearchModeParamValue) => {

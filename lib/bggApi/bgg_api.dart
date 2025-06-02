@@ -365,7 +365,11 @@ Future<List<Map>> getLocalLocations() async {
   return locationsMap;
 }
 
-Future<Location?> fillLocationName() async {
+Future<List<Location>> getLocalLocationsObj() async {
+  return await LocationSQL.getAllLocationsObj();
+}
+
+Future<Location?> getDefaultLocation() async {
   return await LocationSQL.getDefaultLocation();
 }
 
