@@ -487,31 +487,38 @@ class _StatisticsState extends State<Statistics> {
                                               mainAxisAlignment:
                                                   MainAxisAlignment.spaceEvenly,
                                               children: [
-                                                ChoiceChip(
-                                                  label: Text(
-                                                      S.of(context).exclude),
-                                                  selected: player['excluded'],
-                                                  onSelected: (bool? value) {
+                                                ElevatedButton(
+                                                  child: player['excluded']
+                                                      ? const Icon(Icons
+                                                          .group_add_outlined)
+                                                      : const Icon(Icons
+                                                          .group_remove_outlined),
+                                                  onPressed: () {
                                                     setState(() {
                                                       player['excluded'] =
-                                                          value;
+                                                          !player['excluded'];
                                                     });
                                                   },
-                                                  shape:
-                                                      const RoundedRectangleBorder(
-                                                    side: BorderSide(
-                                                        color: Colors.black12),
-                                                    borderRadius:
-                                                        BorderRadius.zero,
-                                                  ),
                                                 ),
                                                 const SizedBox(width: 10),
                                                 Expanded(
-                                                    child: Text(
-                                                  player['name'],
-                                                  overflow:
-                                                      TextOverflow.ellipsis,
-                                                ))
+                                                  child: Text(player['name'],
+                                                      overflow:
+                                                          TextOverflow.ellipsis,
+                                                      style: player['excluded']
+                                                          ? TextStyle(
+                                                              color: Theme.of(
+                                                                      context)
+                                                                  .colorScheme
+                                                                  .onPrimary,
+                                                              decoration:
+                                                                  TextDecoration
+                                                                      .lineThrough,
+                                                              decorationStyle:
+                                                                  TextDecorationStyle
+                                                                      .solid)
+                                                          : const TextStyle()),
+                                                )
                                               ]),
                                           value: player['isChecked'],
                                           onChanged: (bool? value) {
