@@ -54,13 +54,13 @@ class _StatisticsState extends State<Statistics> {
             final RelativeRect position = RelativeRect.fromRect(
               Rect.fromPoints(
                 details.globalPosition,
-                details.globalPosition + Offset(1, 1),
+                details.globalPosition + const Offset(1, 1),
               ),
               overlay.localToGlobal(Offset.zero) & overlay.size,
             );
             _showContextMenu(context, position);
           },
-          child: Container(
+          child: SizedBox(
             //color: rowIndex.isEven ? Colors.grey[300] : Colors.white,
             width: width,
             child: Builder(

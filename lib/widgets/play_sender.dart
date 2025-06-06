@@ -133,7 +133,7 @@ class _PlaySenderState extends State<PlaySender> {
                       duration: duration,
                       quantity: 1);
                   PlaysSQL.addPlay(play);
-                  Timer(Duration(seconds: messageDuration + 1), () {
+                  Timer(const Duration(seconds: messageDuration + 1), () {
                     setState(() {
                       isRequestSending = false;
                     });
@@ -143,7 +143,7 @@ class _PlaySenderState extends State<PlaySender> {
                 // Log online if internet connection
                 await sendLogRequest(stringData);
                 needUpdatePlaysFromBgg = true;
-                Timer(Duration(seconds: messageDuration + 1), () {
+                Timer(const Duration(seconds: messageDuration + 1), () {
                   setState(() {
                     isRequestSending = false;
                   });
