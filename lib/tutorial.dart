@@ -6,10 +6,12 @@
 // import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
 // import '../s.dart';
 
-
 // class TutorialProvider {
+//   TutorialProvider({required this.parentContext, required this.setPageMethod});
+//   dynamic parentContext;
+//   dynamic setPageMethod;
 
-//     late TutorialCoachMark tutorialCoachMark;
+//   late TutorialCoachMark tutorialCoachMark;
 //   GlobalKey logKey = GlobalKey();
 //   GlobalKey logSelectGameKey = GlobalKey();
 //   GlobalKey logRecognizeGameKey = GlobalKey();
@@ -19,8 +21,16 @@
 //   final GlobalKey statsFiltersKey = GlobalKey();
 //   final GlobalKey statsFirstPlaysKey = GlobalKey();
 //   final GlobalKey statsExportTableKey = GlobalKey();
-  
-//     Future<void> _checkFirstLaunch() async {
+
+//   @override
+//   void initState() {
+//     super.initState();
+//     WidgetsBinding.instance.addPostFrameCallback((_) {
+//       _checkFirstLaunch();
+//     });
+//   }
+
+//   Future<void> _checkFirstLaunch() async {
 //     //final prefs = await SharedPreferences.getInstance();
 //     //bool isFirstLaunch = prefs.getBool('first_launch_nav') ?? true;
 //     bool isFirstLaunch = true;
@@ -29,9 +39,13 @@
 //       //await prefs.setBool('first_launch_nav', false);
 //       _createTutorial();
 //       Future.delayed(const Duration(milliseconds: 500), () {
-//         tutorialCoachMark.show(context: context);
+//         tutorialCoachMark.show(context: parentContext);
 //       });
 //     }
+//   }
+
+//   void setPageByIndex(int index) {
+//     setState(() => currentPageIndex = index);
 //   }
 
 //   void _createTutorial() {
@@ -140,9 +154,17 @@
 //     TutorialCoachMark(
 //       targets: _createStatisticsTargets(),
 //       colorShadow: Colors.green.withOpacity(0.8),
-//       textSkip: "Хватит",
+//       textSkip: "Skip",
 //       paddingFocus: 10,
-//     )..show(context: context);
+//       onClickTarget: (target) {
+//         if (target.identify == "stats_export_table") {
+//           setState(() => currentPageIndex = 2);
+//         }
+//         if (target.identify == "game_choose") {
+//           setState(() => currentPageIndex = 3);
+//         }
+//       },
+//     )..show(context: parentContext);
 //   }
 
 //   List<TargetFocus> _createStatisticsTargets() {
@@ -263,5 +285,4 @@
 //       ],
 //     );
 //   }
-
 // }

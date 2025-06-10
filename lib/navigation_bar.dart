@@ -5,6 +5,7 @@ import 'package:flutter_application_1/pages/first_player.dart';
 import 'package:flutter_application_1/pages/statistics.dart';
 import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
 import '../s.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class NavigationScreen extends StatefulWidget {
   const NavigationScreen({super.key});
@@ -36,12 +37,11 @@ class _NavigationScreenState extends State<NavigationScreen> {
   }
 
   Future<void> _checkFirstLaunch() async {
-    //final prefs = await SharedPreferences.getInstance();
-    //bool isFirstLaunch = prefs.getBool('first_launch_nav') ?? true;
-    bool isFirstLaunch = true;
+    final prefs = await SharedPreferences.getInstance();
+    bool isFirstLaunch = prefs.getBool('first_launch_nav') ?? true;
 
     if (isFirstLaunch) {
-      //await prefs.setBool('first_launch_nav', false);
+      await prefs.setBool('first_launch_nav', false);
       _createTutorial();
       Future.delayed(const Duration(milliseconds: 500), () {
         tutorialCoachMark.show(context: context);
@@ -53,16 +53,12 @@ class _NavigationScreenState extends State<NavigationScreen> {
     tutorialCoachMark = TutorialCoachMark(
       targets: _createTargets(),
       colorShadow: Colors.blue.withOpacity(0.8),
-      textSkip: "Skip",
+      textSkip: S.of(context).skip,
       paddingFocus: 10,
       opacityShadow: 0.8,
       onFinish: () {
-        print("finish");
         setState(() => currentPageIndex = 1);
         _switchToStatisticsAndShowTutorial();
-      },
-      onClickTarget: (target) {
-        print(target);
       },
     );
   }
@@ -76,13 +72,13 @@ class _NavigationScreenState extends State<NavigationScreen> {
           TargetContent(
             align: ContentAlign.top,
             builder: (context, controller) {
-              return const Column(
+              return Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    "Log your plays",
-                    style: TextStyle(
+                    S.of(context).saveYourResults,
+                    style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
                       fontSize: 20,
@@ -101,13 +97,13 @@ class _NavigationScreenState extends State<NavigationScreen> {
           TargetContent(
             align: ContentAlign.top,
             builder: (context, controller) {
-              return const Column(
+              return Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    "Select game to log play",
-                    style: TextStyle(
+                    S.of(context).selectGameFromList,
+                    style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
                       fontSize: 20,
@@ -126,13 +122,13 @@ class _NavigationScreenState extends State<NavigationScreen> {
           TargetContent(
             align: ContentAlign.top,
             builder: (context, controller) {
-              return const Column(
+              return Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    "Or recognize game to log play",
-                    style: TextStyle(
+                    S.of(context).orRecognizeGame,
+                    style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
                       fontSize: 20,
@@ -155,7 +151,7 @@ class _NavigationScreenState extends State<NavigationScreen> {
     TutorialCoachMark(
       targets: _createStatisticsTargets(),
       colorShadow: Colors.green.withOpacity(0.8),
-      textSkip: "Хватит",
+      textSkip: "Skip",
       paddingFocus: 10,
       onClickTarget: (target) {
         if (target.identify == "stats_export_table") {
@@ -165,7 +161,7 @@ class _NavigationScreenState extends State<NavigationScreen> {
           setState(() => currentPageIndex = 3);
         }
       },
-    )..show(context: context);
+    ).show(context: context);
   }
 
   List<TargetFocus> _createStatisticsTargets() {
@@ -178,7 +174,7 @@ class _NavigationScreenState extends State<NavigationScreen> {
             align: ContentAlign.top,
             builder: (context, controller) {
               return _buildTutorialContent(
-                "Get your play statistics",
+                S.of(context).checkYourGameStats,
                 "",
               );
             },
@@ -193,7 +189,7 @@ class _NavigationScreenState extends State<NavigationScreen> {
             align: ContentAlign.top,
             builder: (context, controller) {
               return _buildTutorialContent(
-                "Filter your statistics",
+                S.of(context).adjustFilters,
                 "",
               );
             },
@@ -208,7 +204,7 @@ class _NavigationScreenState extends State<NavigationScreen> {
             align: ContentAlign.top,
             builder: (context, controller) {
               return _buildTutorialContent(
-                "Get your first plays",
+                S.of(context).findYourFirstMatches,
                 "",
               );
             },
@@ -223,7 +219,7 @@ class _NavigationScreenState extends State<NavigationScreen> {
             align: ContentAlign.top,
             builder: (context, controller) {
               return _buildTutorialContent(
-                "Export your statistics as csv table",
+                S.of(context).exportYourStatsToCsv,
                 "",
               );
             },
@@ -231,7 +227,7 @@ class _NavigationScreenState extends State<NavigationScreen> {
         ],
       ),
       TargetFocus(
-        color: Colors.lime,
+        color: Colors.orange,
         identify: "game_choose",
         keyTarget: gameChoseKey,
         contents: [
@@ -239,15 +235,15 @@ class _NavigationScreenState extends State<NavigationScreen> {
             align: ContentAlign.top,
             builder: (context, controller) {
               return _buildTutorialContent(
-                "Choose random game to play",
-                "Players votes included",
+                S.of(context).chooseRandomGameToPlay,
+                S.of(context).playerVotesAreCounted,
               );
             },
           ),
         ],
       ),
       TargetFocus(
-        color: Colors.orange,
+        color: Colors.lime,
         identify: "first_player",
         keyTarget: firstPlayerKey,
         contents: [
@@ -255,7 +251,7 @@ class _NavigationScreenState extends State<NavigationScreen> {
             align: ContentAlign.top,
             builder: (context, controller) {
               return _buildTutorialContent(
-                "Choose first player to start a game",
+                S.of(context).chooseWhoGoesFirst,
                 "",
               );
             },
@@ -331,8 +327,8 @@ class _NavigationScreenState extends State<NavigationScreen> {
               filtersKey: statsFiltersKey,
               firstPlaysKey: statsFirstPlaysKey,
               exportTableKey: statsExportTableKey),
-          GameHelper(),
-          FirstPlayerChoser(),
+          const GameHelper(),
+          const FirstPlayerChoser(),
         ],
       ),
     );

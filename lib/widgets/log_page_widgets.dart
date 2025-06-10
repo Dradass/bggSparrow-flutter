@@ -612,7 +612,6 @@ class _GamePickerState extends State<GamePicker> {
           // height: MediaQuery.of(context).size.height *
           //     0.5,
           child: SearchAnchor(
-              key: widget.selectedGameKey,
               searchController: widget.searchController,
               builder: (context, searchController) {
                 return SearchBar(
@@ -621,7 +620,9 @@ class _GamePickerState extends State<GamePicker> {
                       side: BorderSide(color: Colors.black12))),
                   controller: searchController,
                   leading: IconButton(
-                      onPressed: () {}, icon: const Icon(Icons.search)),
+                      key: widget.selectedGameKey,
+                      onPressed: () {},
+                      icon: const Icon(Icons.search)),
                   onTap: () async {
                     widget.searchController.text = "";
                     isSearchOnline = await checkInternetConnection();
