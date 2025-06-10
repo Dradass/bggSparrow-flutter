@@ -23,7 +23,10 @@ class LoadingStatus {
 final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
 class LogScaffold extends StatefulWidget {
-  const LogScaffold({super.key});
+  LogScaffold(
+      {required this.selectGameKey, required this.recognizeGameKey, super.key});
+  GlobalKey selectGameKey;
+  GlobalKey recognizeGameKey;
 
   @override
   State<LogScaffold> createState() => _LogScaffoldState();
@@ -188,7 +191,9 @@ class _LogScaffoldState extends State<LogScaffold> {
                     GamePicker(
                         searchController..text = S.of(context).selectGame,
                         cameras,
-                        _imagewidget),
+                        _imagewidget,
+                        widget.selectGameKey,
+                        widget.recognizeGameKey),
                     3),
               ],
             )

@@ -18,9 +18,14 @@ class _NavigationScreenState extends State<NavigationScreen> {
 
   late TutorialCoachMark tutorialCoachMark;
   GlobalKey logKey = GlobalKey();
+  GlobalKey logSelectGameKey = GlobalKey();
+  GlobalKey logRecognizeGameKey = GlobalKey();
   GlobalKey statsKey = GlobalKey();
-  GlobalKey gameKey = GlobalKey();
-  GlobalKey playerKey = GlobalKey();
+  GlobalKey gameChoseKey = GlobalKey();
+  GlobalKey firstPlayerKey = GlobalKey();
+  final GlobalKey statsFiltersKey = GlobalKey();
+  final GlobalKey statsFirstPlaysKey = GlobalKey();
+  final GlobalKey statsExportTableKey = GlobalKey();
 
   @override
   void initState() {
@@ -51,16 +56,10 @@ class _NavigationScreenState extends State<NavigationScreen> {
       textSkip: "Skip",
       paddingFocus: 10,
       opacityShadow: 0.8,
-      onSkip: () {
-        // При нажатии "Skip" переключаем на вкладку Statistics
-        setState(() {
-          currentPageIndex = 1;
-        });
-        print("Tutorial skipped, switched to Statistics");
-        return true;
-      },
       onFinish: () {
-        print("Tutorial finished");
+        print("finish");
+        setState(() => currentPageIndex = 1);
+        _switchToStatisticsAndShowTutorial();
       },
       onClickTarget: (target) {
         print(target);
@@ -82,17 +81,12 @@ class _NavigationScreenState extends State<NavigationScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    "1111 HELLO",
+                    "Log your plays",
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
                       fontSize: 20,
                     ),
-                  ),
-                  SizedBox(height: 8),
-                  Text(
-                    "222",
-                    style: TextStyle(color: Colors.amber),
                   ),
                 ],
               );
@@ -101,28 +95,23 @@ class _NavigationScreenState extends State<NavigationScreen> {
         ],
       ),
       TargetFocus(
-        identify: "stats",
-        keyTarget: statsKey,
+        identify: "selectGame",
+        keyTarget: logSelectGameKey,
         contents: [
           TargetContent(
-            align: ContentAlign.bottom,
+            align: ContentAlign.top,
             builder: (context, controller) {
               return const Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    "123",
+                    "Select game to log play",
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
                       fontSize: 20,
                     ),
-                  ),
-                  SizedBox(height: 8),
-                  Text(
-                    "333",
-                    style: TextStyle(color: Colors.white),
                   ),
                 ],
               );
@@ -130,8 +119,172 @@ class _NavigationScreenState extends State<NavigationScreen> {
           ),
         ],
       ),
-      // Добавьте аналогичные TargetFocus для других элементов
+      TargetFocus(
+        identify: "recognizeGame",
+        keyTarget: logRecognizeGameKey,
+        contents: [
+          TargetContent(
+            align: ContentAlign.top,
+            builder: (context, controller) {
+              return const Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "Or recognize game to log play",
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                      fontSize: 20,
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
+        ],
+      ),
     ];
+  }
+
+  void _switchToStatisticsAndShowTutorial() {
+    _showStatisticsTutorial();
+  }
+
+  void _showStatisticsTutorial() {
+    TutorialCoachMark(
+      targets: _createStatisticsTargets(),
+      colorShadow: Colors.green.withOpacity(0.8),
+      textSkip: "Хватит",
+      paddingFocus: 10,
+      onClickTarget: (target) {
+        if (target.identify == "stats_export_table") {
+          setState(() => currentPageIndex = 2);
+        }
+        if (target.identify == "game_choose") {
+          setState(() => currentPageIndex = 3);
+        }
+      },
+    )..show(context: context);
+  }
+
+  List<TargetFocus> _createStatisticsTargets() {
+    return [
+      TargetFocus(
+        identify: "stats_global",
+        keyTarget: statsKey,
+        contents: [
+          TargetContent(
+            align: ContentAlign.top,
+            builder: (context, controller) {
+              return _buildTutorialContent(
+                "Get your play statistics",
+                "",
+              );
+            },
+          ),
+        ],
+      ),
+      TargetFocus(
+        identify: "stats_filters",
+        keyTarget: statsFiltersKey,
+        contents: [
+          TargetContent(
+            align: ContentAlign.top,
+            builder: (context, controller) {
+              return _buildTutorialContent(
+                "Filter your statistics",
+                "",
+              );
+            },
+          ),
+        ],
+      ),
+      TargetFocus(
+        identify: "stats_first_plays",
+        keyTarget: statsFirstPlaysKey,
+        contents: [
+          TargetContent(
+            align: ContentAlign.top,
+            builder: (context, controller) {
+              return _buildTutorialContent(
+                "Get your first plays",
+                "",
+              );
+            },
+          ),
+        ],
+      ),
+      TargetFocus(
+        identify: "stats_export_table",
+        keyTarget: statsExportTableKey,
+        contents: [
+          TargetContent(
+            align: ContentAlign.top,
+            builder: (context, controller) {
+              return _buildTutorialContent(
+                "Export your statistics as csv table",
+                "",
+              );
+            },
+          ),
+        ],
+      ),
+      TargetFocus(
+        color: Colors.lime,
+        identify: "game_choose",
+        keyTarget: gameChoseKey,
+        contents: [
+          TargetContent(
+            align: ContentAlign.top,
+            builder: (context, controller) {
+              return _buildTutorialContent(
+                "Choose random game to play",
+                "Players votes included",
+              );
+            },
+          ),
+        ],
+      ),
+      TargetFocus(
+        color: Colors.orange,
+        identify: "first_player",
+        keyTarget: firstPlayerKey,
+        contents: [
+          TargetContent(
+            align: ContentAlign.top,
+            builder: (context, controller) {
+              return _buildTutorialContent(
+                "Choose first player to start a game",
+                "",
+              );
+            },
+          ),
+        ],
+      ),
+    ];
+  }
+
+  Widget _buildTutorialContent(String title, String description) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+            fontSize: 20,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          description,
+          style: const TextStyle(color: Colors.white),
+        ),
+      ],
+    );
   }
 
   @override
@@ -152,27 +305,32 @@ class _NavigationScreenState extends State<NavigationScreen> {
             label: S.of(context).logPlayShort,
           ),
           NavigationDestination(
-            selectedIcon: const Icon(Icons.leaderboard),
-            icon: const Icon(Icons.leaderboard_outlined),
+            selectedIcon: Icon(Icons.leaderboard, key: statsKey),
+            icon: Icon(Icons.leaderboard_outlined, key: statsKey),
             label: S.of(context).statistics,
           ),
           NavigationDestination(
-            selectedIcon: const Icon(Icons.smart_toy),
-            icon: const Icon(Icons.casino_outlined),
+            selectedIcon: Icon(Icons.smart_toy, key: gameChoseKey),
+            icon: Icon(Icons.casino_outlined, key: gameChoseKey),
             label: S.of(context).chooseAGame,
           ),
           NavigationDestination(
-            selectedIcon: const Icon(Icons.insert_emoticon),
-            icon: const Icon(Icons.sentiment_satisfied_alt),
+            selectedIcon: Icon(Icons.insert_emoticon, key: firstPlayerKey),
+            icon: Icon(Icons.sentiment_satisfied_alt, key: firstPlayerKey),
             label: S.of(context).firstPlayer,
           ),
         ],
       ),
       body: IndexedStack(
         index: currentPageIndex,
-        children: const <Widget>[
-          LogScaffold(),
-          Statistics(),
+        children: <Widget>[
+          LogScaffold(
+              selectGameKey: logSelectGameKey,
+              recognizeGameKey: logRecognizeGameKey),
+          Statistics(
+              filtersKey: statsFiltersKey,
+              firstPlaysKey: statsFirstPlaysKey,
+              exportTableKey: statsExportTableKey),
           GameHelper(),
           FirstPlayerChoser(),
         ],

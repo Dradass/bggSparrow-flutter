@@ -455,13 +455,22 @@ class _PlayersPickerState extends State<PlayersPicker> {
 class GamePicker extends StatefulWidget {
   static GamePicker? _singleton;
 
-  factory GamePicker(SearchController searchController,
-      List<CameraDescription> cameras, Image imageWidget) {
-    _singleton ??= GamePicker._internal(searchController, cameras, imageWidget);
+  factory GamePicker(
+      SearchController searchController,
+      List<CameraDescription> cameras,
+      Image imageWidget,
+      GlobalKey selectedGameKey,
+      GlobalKey recognizedGameKey) {
+    _singleton ??= GamePicker._internal(searchController, cameras, imageWidget,
+        selectedGameKey, recognizedGameKey);
     return _singleton!;
   }
 
-  GamePicker._internal(this.searchController, this.cameras, this.imageWidget);
+  GamePicker._internal(this.searchController, this.cameras, this.imageWidget,
+      this.selectedGameKey, this.recognizedGameKey);
+
+  GlobalKey selectedGameKey = GlobalKey();
+  GlobalKey recognizedGameKey = GlobalKey();
 
   SearchController searchController;
   List<CameraDescription> cameras;
@@ -603,6 +612,7 @@ class _GamePickerState extends State<GamePicker> {
           // height: MediaQuery.of(context).size.height *
           //     0.5,
           child: SearchAnchor(
+              key: widget.selectedGameKey,
               searchController: widget.searchController,
               builder: (context, searchController) {
                 return SearchBar(
@@ -705,6 +715,7 @@ class _GamePickerState extends State<GamePicker> {
           padding: const EdgeInsets.only(right: 0),
           width: MediaQuery.of(context).size.width * 0.15,
           child: ElevatedButton.icon(
+              key: widget.recognizedGameKey,
               onPressed: () {
                 showDialog(
                     context: context,
