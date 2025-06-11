@@ -18,7 +18,11 @@ import 'dart:developer';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
 class Statistics extends StatefulWidget {
-  const Statistics({super.key});
+  Statistics(
+      {this.filtersKey, this.firstPlaysKey, this.exportTableKey, super.key});
+  GlobalKey? filtersKey = GlobalKey();
+  GlobalKey? firstPlaysKey = GlobalKey();
+  GlobalKey? exportTableKey = GlobalKey();
 
   @override
   State<Statistics> createState() => _StatisticsState();
@@ -54,13 +58,13 @@ class _StatisticsState extends State<Statistics> {
             final RelativeRect position = RelativeRect.fromRect(
               Rect.fromPoints(
                 details.globalPosition,
-                details.globalPosition + Offset(1, 1),
+                details.globalPosition + const Offset(1, 1),
               ),
               overlay.localToGlobal(Offset.zero) & overlay.size,
             );
             _showContextMenu(context, position);
           },
-          child: Container(
+          child: SizedBox(
             //color: rowIndex.isEven ? Colors.grey[300] : Colors.white,
             width: width,
             child: Builder(
@@ -339,6 +343,7 @@ class _StatisticsState extends State<Statistics> {
                         width: MediaQuery.of(context).size.width * 0.3,
                         height: double.maxFinite,
                         child: ElevatedButton.icon(
+                          key: widget.filtersKey,
                           onPressed: () async {
                             if (players.isEmpty) {
                               players = await getAllPlayers();
@@ -729,6 +734,7 @@ class _StatisticsState extends State<Statistics> {
                         width: MediaQuery.of(context).size.width * 0.15,
                         height: double.maxFinite,
                         child: ElevatedButton.icon(
+                          key: widget.firstPlaysKey,
                           onPressed: () async {
                             plays = await getNewPlays();
                             setState(() {});
@@ -743,6 +749,7 @@ class _StatisticsState extends State<Statistics> {
                         width: MediaQuery.of(context).size.width * 0.15,
                         height: double.maxFinite,
                         child: ElevatedButton.icon(
+                          key: widget.exportTableKey,
                           onPressed: () async {
                             exportCSV();
                           },

@@ -4,6 +4,8 @@ import 'package:flutter_application_1/pages/game_choose.dart';
 import 'package:flutter_application_1/pages/first_player.dart';
 import 'package:flutter_application_1/pages/statistics.dart';
 import '../s.dart';
+import 'globals.dart';
+import 'tutorial_handler.dart';
 
 class NavigationScreen extends StatefulWidget {
   const NavigationScreen({super.key});
@@ -13,12 +15,23 @@ class NavigationScreen extends StatefulWidget {
 }
 
 class _NavigationScreenState extends State<NavigationScreen> {
-  int currentPageIndex = 0;
+  late TutorialHandler tutorialHandler;
+
+  @override
+  void initState() {
+    super.initState();
+    tutorialHandler = TutorialHandler(
+        parentContext: context, setPageMethod: () => setState(() {}));
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      tutorialHandler.checkFirstLaunch();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       bottomNavigationBar: NavigationBar(
+        key: const ValueKey('nav_bar'),
         onDestinationSelected: (int index) {
           setState(() {
             currentPageIndex = index;
@@ -27,34 +40,45 @@ class _NavigationScreenState extends State<NavigationScreen> {
         selectedIndex: currentPageIndex,
         destinations: <Widget>[
           NavigationDestination(
-            selectedIcon: const Icon(Icons.archive),
-            icon: const Icon(Icons.archive_outlined),
+            selectedIcon: Icon(Icons.archive, key: tutorialHandler.logKey),
+            icon: Icon(Icons.archive_outlined, key: tutorialHandler.logKey),
             label: S.of(context).logPlayShort,
           ),
           NavigationDestination(
-            selectedIcon: const Icon(Icons.leaderboard),
-            icon: const Icon(Icons.leaderboard_outlined),
+            selectedIcon:
+                Icon(Icons.leaderboard, key: tutorialHandler.statsKey),
+            icon:
+                Icon(Icons.leaderboard_outlined, key: tutorialHandler.statsKey),
             label: S.of(context).statistics,
           ),
           NavigationDestination(
-            selectedIcon: const Icon(Icons.smart_toy),
-            icon: const Icon(Icons.casino_outlined),
+            selectedIcon:
+                Icon(Icons.smart_toy, key: tutorialHandler.gameChoseKey),
+            icon:
+                Icon(Icons.casino_outlined, key: tutorialHandler.gameChoseKey),
             label: S.of(context).chooseAGame,
           ),
           NavigationDestination(
-            selectedIcon: const Icon(Icons.insert_emoticon),
-            icon: const Icon(Icons.sentiment_satisfied_alt),
+            selectedIcon: Icon(Icons.insert_emoticon,
+                key: tutorialHandler.firstPlayerKey),
+            icon: Icon(Icons.sentiment_satisfied_alt,
+                key: tutorialHandler.firstPlayerKey),
             label: S.of(context).firstPlayer,
           ),
         ],
       ),
       body: IndexedStack(
         index: currentPageIndex,
-        children: const <Widget>[
-          LogScaffold(),
-          Statistics(),
-          GameHelper(),
-          FirstPlayerChoser(),
+        children: <Widget>[
+          LogScaffold(
+              selectGameKey: tutorialHandler.logSelectGameKey,
+              recognizeGameKey: tutorialHandler.logRecognizeGameKey),
+          Statistics(
+              filtersKey: tutorialHandler.statsFiltersKey,
+              firstPlaysKey: tutorialHandler.statsFirstPlaysKey,
+              exportTableKey: tutorialHandler.statsExportTableKey),
+          const GameHelper(),
+          const FirstPlayerChoser(),
         ],
       ),
     );

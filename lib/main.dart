@@ -13,7 +13,6 @@ import '../s.dart';
 // 2. Color picker
 // 3. Icons and background
 // 4. Edit / delete play
-// Tutorial
 
 late List<CameraDescription> cameras;
 const primaryTextColor = Color.fromARGB(255, 85, 92, 89);

@@ -50,7 +50,7 @@ class FlexButtonSettings extends StatelessWidget {
 void showSnackBar(BuildContext context, String message) {
   ScaffoldMessenger.of(context).showSnackBar(
     SnackBar(
-      duration: Duration(seconds: messageDuration),
+      duration: const Duration(seconds: messageDuration),
       content: Text(message),
     ),
   );

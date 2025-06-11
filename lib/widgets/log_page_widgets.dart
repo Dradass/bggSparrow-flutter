@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../bggApi/bgg_api.dart';
-import '../db/location_sql.dart';
-import 'package:flutter_application_1/models/bgg_location.dart';
 import 'package:flutter_application_1/models/game_thing.dart';
 import '../db/system_table.dart';
 import '../globals.dart';
@@ -457,13 +455,22 @@ class _PlayersPickerState extends State<PlayersPicker> {
 class GamePicker extends StatefulWidget {
   static GamePicker? _singleton;
 
-  factory GamePicker(SearchController searchController,
-      List<CameraDescription> cameras, Image imageWidget) {
-    _singleton ??= GamePicker._internal(searchController, cameras, imageWidget);
+  factory GamePicker(
+      SearchController searchController,
+      List<CameraDescription> cameras,
+      Image imageWidget,
+      GlobalKey selectedGameKey,
+      GlobalKey recognizedGameKey) {
+    _singleton ??= GamePicker._internal(searchController, cameras, imageWidget,
+        selectedGameKey, recognizedGameKey);
     return _singleton!;
   }
 
-  GamePicker._internal(this.searchController, this.cameras, this.imageWidget);
+  GamePicker._internal(this.searchController, this.cameras, this.imageWidget,
+      this.selectedGameKey, this.recognizedGameKey);
+
+  GlobalKey selectedGameKey = GlobalKey();
+  GlobalKey recognizedGameKey = GlobalKey();
 
   SearchController searchController;
   List<CameraDescription> cameras;
@@ -613,7 +620,9 @@ class _GamePickerState extends State<GamePicker> {
                       side: BorderSide(color: Colors.black12))),
                   controller: searchController,
                   leading: IconButton(
-                      onPressed: () {}, icon: const Icon(Icons.search)),
+                      key: widget.selectedGameKey,
+                      onPressed: () {},
+                      icon: const Icon(Icons.search)),
                   onTap: () async {
                     widget.searchController.text = "";
                     isSearchOnline = await checkInternetConnection();
@@ -707,6 +716,7 @@ class _GamePickerState extends State<GamePicker> {
           padding: const EdgeInsets.only(right: 0),
           width: MediaQuery.of(context).size.width * 0.15,
           child: ElevatedButton.icon(
+              key: widget.recognizedGameKey,
               onPressed: () {
                 showDialog(
                     context: context,
