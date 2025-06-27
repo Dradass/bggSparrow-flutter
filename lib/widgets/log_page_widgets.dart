@@ -495,6 +495,7 @@ class _GamePickerState extends State<GamePicker> {
   void dispose() {
     super.dispose();
     widget.searchController.dispose();
+    widget._controller.dispose();
   }
 
   @override
