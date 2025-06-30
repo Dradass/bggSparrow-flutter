@@ -490,6 +490,8 @@ class _GamePickerState extends State<GamePicker> {
   bool isSearchOnline = false;
   bool onlineSearchModeFromDB = true;
   bool onlineSearchMode = true;
+  bool _isCameraInitialized = false;
+  late final AppLifecycleListener listener;
 
   @override
   void dispose() {
@@ -501,6 +503,9 @@ class _GamePickerState extends State<GamePicker> {
   @override
   void initState() {
     super.initState();
+    listener = AppLifecycleListener(
+      onStateChange: _onStateChanged,
+    );
 
     SystemParameterSQL.selectSystemParameterById(2)
         .then((onlineSearchModeParamValue) => {
@@ -512,26 +517,41 @@ class _GamePickerState extends State<GamePicker> {
                 }
             });
 
-    widget._controller = CameraController(
-        widget.cameras.first, ResolutionPreset.max,
-        enableAudio: false);
-    widget._controller.initialize().then((_) {
-      if (!mounted) {
-        return;
-      }
-      setState(() {});
-    }).catchError((Object e) {
-      if (e is CameraException) {
-        switch (e.code) {
-          case 'CameraAccessDenied':
-            log("access was denied");
-            break;
-          default:
-            log(e.description.toString());
-            break;
+    _initializeCamera();
+  }
+
+  void _onStateChanged(AppLifecycleState state) {
+    switch (state) {
+      case AppLifecycleState.detached:
+        () => {};
+      case AppLifecycleState.resumed:
+        if (!_isCameraInitialized) {
+          _initializeCamera();
         }
+      case AppLifecycleState.inactive:
+        () => {};
+      case AppLifecycleState.hidden:
+        () => {};
+      case AppLifecycleState.paused:
+        _isCameraInitialized = false;
+    }
+  }
+
+  Future<void> _initializeCamera() async {
+    try {
+      final cameras = await availableCameras();
+      widget._controller = CameraController(cameras[0], ResolutionPreset.max,
+          enableAudio: false);
+      await widget._controller.initialize();
+      if (mounted) {
+        setState(() {});
       }
-    });
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Camera initialization error: $e')));
+      }
+    }
   }
 
   Future<int?> takePhoto() async {

@@ -57,7 +57,6 @@ class _LogScaffoldState extends State<LogScaffold> {
 
     checkInternetConnection().then((isConnected) => {
           if (!isConnected)
-            //{showSnackBar(context, 'No internet connection')}
             log('No internet connection')
           else
             {

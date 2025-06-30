@@ -75,7 +75,7 @@ class _PlaySenderState extends State<PlaySender> {
                 final hasInternetConnection = await checkInternetConnection();
 
                 if (selectedGameId <= 0) {
-                  showSnackBar(context, 'No game was chosen to log play');
+                  showSnackBar(context, S.of(context).chooseAnyGame);
                   return;
                 }
                 List<Map> bggPlayers = [];
@@ -112,7 +112,7 @@ class _PlaySenderState extends State<PlaySender> {
                 // Log offline if no internet connection
                 if (!hasInternetConnection) {
                   showSnackBar(context,
-                      'Play has been saved locally and will be sent when the internet is available.');
+                      S.of(context).resultsAreSavedLocallyAndWillBeSent);
                   final gameThing = await GameThingSQL.selectGameByID(gameId);
                   final minFreeId = await PlaysSQL.getMinFreeOfflinePlayId();
                   if (minFreeId == null) {
@@ -148,7 +148,7 @@ class _PlaySenderState extends State<PlaySender> {
                     isRequestSending = false;
                   });
                 });
-                showSnackBar(context, "Play was successfully logged!");
+                showSnackBar(context, S.of(context).playResultsWasSaved);
               },
         style: ButtonStyle(
             backgroundColor: WidgetStateProperty.all(
