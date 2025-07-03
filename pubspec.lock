@@ -45,10 +45,10 @@ packages:
     dependency: "direct main"
     description:
       name: camera
-      sha256: "26ff41045772153f222ffffecba711a206f670f5834d40ebf5eed3811692f167"
+      sha256: dfa8fc5a1adaeb95e7a54d86a5bd56f4bb0e035515354c8ac6d262e35cec2ec8
       url: "https://pub.dev"
     source: hosted
-    version: "0.11.0+2"
+    version: "0.10.6"
   camera_android:
     dependency: "direct overridden"
     description:
@@ -56,14 +56,6 @@ packages:
       relative: true
     source: path
     version: "0.10.8+16"
-  camera_android_camerax:
-    dependency: transitive
-    description:
-      name: camera_android_camerax
-      sha256: abcfa1ac32bd03116b4cfda7e8223ab391f01966e65823c064afe388550d1b3d
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.6.10+3"
   camera_avfoundation:
     dependency: transitive
     description:
@@ -262,10 +254,10 @@ packages:
     dependency: "direct main"
     description:
       name: flutter_pixelmatching
-      sha256: "426b29825afee367c9dfd989e55ca6222db4c08d9e04ac317ddb49f37b94ff36"
+      sha256: "5e672511784d4e8df3a9de942b466d1199e51762bbd326eec6a426547280b9fe"
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.1"
+    version: "1.0.0"
   flutter_plugin_android_lifecycle:
     dependency: transitive
     description:
@@ -376,10 +368,10 @@ packages:
     dependency: transitive
     description:
       name: image_picker
-      sha256: "021834d9c0c3de46bf0fe40341fa07168407f694d9b2bb18d532dc1261867f7a"
+      sha256: b6951e25b795d053a6ba03af5f710069c99349de9341af95155d52665cb4607c
       url: "https://pub.dev"
     source: hosted
-    version: "1.1.2"
+    version: "0.8.9"
   image_picker_android:
     dependency: transitive
     description:

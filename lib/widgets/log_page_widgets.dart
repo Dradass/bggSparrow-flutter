@@ -529,7 +529,7 @@ class _GamePickerState extends State<GamePicker> {
           _initializeCamera();
         }
       case AppLifecycleState.inactive:
-        () => {};
+        () {widget._controller.dispose();};
       case AppLifecycleState.hidden:
         () => {};
       case AppLifecycleState.paused:

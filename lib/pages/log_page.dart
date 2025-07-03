@@ -16,6 +16,8 @@ import '../s.dart';
 
 import '../db/location_sql.dart';
 
+int swipeDelta = 35;
+
 class LoadingStatus {
   String status = "";
 }
@@ -55,6 +57,12 @@ class _LogScaffoldState extends State<LogScaffold> {
       }
     });
 
+    if (!backgroundLoading) {
+      initDataFromServer();
+    }
+  }
+
+  void initDataFromServer() {
     checkInternetConnection().then((isConnected) => {
           if (!isConnected)
             log('No internet connection')
@@ -145,6 +153,13 @@ class _LogScaffoldState extends State<LogScaffold> {
     return GestureDetector(
       onTap: () {
         FocusManager.instance.primaryFocus?.unfocus();
+      },
+      onVerticalDragUpdate: (details) {
+        if (details.delta.dy > swipeDelta) {
+          if (!backgroundLoading) {
+            initDataFromServer();
+          }
+        }
       },
       child: Scaffold(
         key: _scaffoldKey,
