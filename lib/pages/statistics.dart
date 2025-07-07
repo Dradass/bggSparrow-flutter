@@ -720,7 +720,7 @@ class _StatisticsState extends State<Statistics> {
 
                             setState(() {
                               statsSummary =
-                                  "${S.of(context).totalPlays}: ${allGames.fold(0, (sum, item) => sum + item.count!)} ${S.of(context).totalGames}}: ${allGames.length}";
+                                  "${S.of(context).totalPlays}: ${allGames.fold(0, (sum, item) => sum + item.count!)} ${S.of(context).totalGames}: ${allGames.length}";
                             });
                           },
                           style: ButtonStyle(

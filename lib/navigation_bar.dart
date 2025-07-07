@@ -70,7 +70,7 @@ class _NavigationScreenState extends State<NavigationScreen> {
       body: IndexedStack(
         index: currentPageIndex,
         children: <Widget>[
-          LogScaffold(
+          LogPage(
               selectGameKey: tutorialHandler.logSelectGameKey,
               recognizeGameKey: tutorialHandler.logRecognizeGameKey),
           Statistics(

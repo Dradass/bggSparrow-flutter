@@ -16,7 +16,7 @@ import '../s.dart';
 
 import '../db/location_sql.dart';
 
-int swipeDelta = 35;
+int swipeDelta = 30;
 
 class LoadingStatus {
   String status = "";
@@ -24,17 +24,17 @@ class LoadingStatus {
 
 final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
-class LogScaffold extends StatefulWidget {
-  LogScaffold(
+class LogPage extends StatefulWidget {
+  LogPage(
       {required this.selectGameKey, required this.recognizeGameKey, super.key});
   GlobalKey selectGameKey;
   GlobalKey recognizeGameKey;
 
   @override
-  State<LogScaffold> createState() => _LogScaffoldState();
+  State<LogPage> createState() => _LogPageState();
 }
 
-class _LogScaffoldState extends State<LogScaffold> {
+class _LogPageState extends State<LogPage> {
   bool isProgressBarVisible = false;
   LoadingStatus loadingStatus = LoadingStatus();
   var searchHistory = [];
