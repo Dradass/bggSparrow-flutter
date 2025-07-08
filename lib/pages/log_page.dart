@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/main.dart';
 import 'package:flutter_application_1/models/bgg_location.dart';
+import 'package:flutter_application_1/tutorial_handler.dart';
 import 'package:flutter_application_1/widgets/players_list.dart';
 import '../db/game_things_sql.dart';
 import '../db/system_table.dart';
@@ -22,19 +23,18 @@ class LoadingStatus {
   String status = "";
 }
 
-final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-
 class LogPage extends StatefulWidget {
-  LogPage(
-      {required this.selectGameKey, required this.recognizeGameKey, super.key});
-  GlobalKey selectGameKey;
-  GlobalKey recognizeGameKey;
+  LogPage({super.key});
+  // GlobalKey selectGameKeyLog;
+  // GlobalKey recognizeGameKeyLog;
 
   @override
   State<LogPage> createState() => _LogPageState();
 }
 
 class _LogPageState extends State<LogPage> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
   bool isProgressBarVisible = false;
   LoadingStatus loadingStatus = LoadingStatus();
   var searchHistory = [];
@@ -205,9 +205,7 @@ class _LogPageState extends State<LogPage> {
                     GamePicker(
                         searchController..text = S.of(context).selectGame,
                         cameras,
-                        _imagewidget,
-                        widget.selectGameKey,
-                        widget.recognizeGameKey),
+                        _imagewidget),
                     3),
               ],
             )

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/db/players_sql.dart';
+import 'package:flutter_application_1/tutorial_handler.dart';
 import 'package:intl/intl.dart';
 import '../db/plays_sql.dart';
 import '../db/location_sql.dart';
@@ -18,11 +19,7 @@ import 'dart:developer';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
 class Statistics extends StatefulWidget {
-  Statistics(
-      {this.filtersKey, this.firstPlaysKey, this.exportTableKey, super.key});
-  GlobalKey? filtersKey = GlobalKey();
-  GlobalKey? firstPlaysKey = GlobalKey();
-  GlobalKey? exportTableKey = GlobalKey();
+  Statistics({super.key});
 
   @override
   State<Statistics> createState() => _StatisticsState();
@@ -342,204 +339,214 @@ class _StatisticsState extends State<Statistics> {
                         color: Colors.brown,
                         width: MediaQuery.of(context).size.width * 0.3,
                         height: double.maxFinite,
-                        child: ElevatedButton.icon(
-                          key: widget.filtersKey,
-                          onPressed: () async {
-                            if (players.isEmpty) {
-                              players = await getAllPlayers();
-                            }
-                            showDialog(
-                                context: context,
-                                builder: (buildContext) {
-                                  return StatefulBuilder(
-                                      builder: (context, setState) {
-                                    return AlertDialog(
-                                        content: Column(children: [
-                                      Text(
-                                        S.of(context).game,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                      Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          SizedBox(
-                                              child: Slider(
-                                            value: firstGamesCount,
-                                            min: 0,
-                                            max: 25,
-                                            divisions: 26,
-                                            label: firstGamesCount
-                                                .round()
-                                                .toString(),
-                                            onChanged: (double value) {
-                                              setState(() {
-                                                firstGamesCount = value;
-                                              });
-                                            },
-                                          )),
-                                          Text(
-                                            S.of(context).playersCount,
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                          SizedBox(
-                                            child: RangeSlider(
-                                              values: maxRangeValues,
-                                              max: 10,
-                                              divisions: 10,
-                                              labels: RangeLabels(
-                                                  maxRangeValues.start
-                                                      .round()
-                                                      .toString(),
-                                                  maxRangeValues.end
-                                                      .round()
-                                                      .toString()),
-                                              onChanged: (RangeValues values) {
-                                                setState(() {
-                                                  maxRangeValues = values;
-                                                });
-                                              },
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      Column(
+                        child: Builder(builder: (context2) {
+                          TutorialHandler.statsFiltersKeyContext = context2;
+                          return ElevatedButton.icon(
+                            onPressed: () async {
+                              if (players.isEmpty) {
+                                players = await getAllPlayers();
+                              }
+                              showDialog(
+                                  context: context,
+                                  builder: (buildContext) {
+                                    return StatefulBuilder(
+                                        builder: (context, setState) {
+                                      return AlertDialog(
+                                          content: Column(children: [
+                                        Text(
+                                          S.of(context).game,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                        Column(
                                           mainAxisAlignment:
                                               MainAxisAlignment.spaceBetween,
                                           children: [
-                                            DropdownButton(
-                                              value: chosenGames.isNotEmpty
-                                                  ? chosenGames[chosenGameId]
-                                                  : null,
-                                              onChanged: (String? value) {
-                                                chosenGameId = chosenGames
-                                                    .entries
-                                                    .firstWhere((entry) =>
-                                                        entry.value == value)
-                                                    .key;
-                                                setState(() {});
-                                              },
-                                              items: chosenGames.values.map<
-                                                      DropdownMenuItem<String>>(
-                                                  (String value) {
-                                                return DropdownMenuItem<String>(
-                                                    value: value,
-                                                    child: Text(value));
-                                              }).toList(),
-                                            ),
-                                            ChoiceChip(
-                                              label:
-                                                  Text(S.of(context).winRate),
-                                              selected: winRate,
-                                              onSelected: (bool value) {
+                                            SizedBox(
+                                                child: Slider(
+                                              value: firstGamesCount,
+                                              min: 0,
+                                              max: 25,
+                                              divisions: 26,
+                                              label: firstGamesCount
+                                                  .round()
+                                                  .toString(),
+                                              onChanged: (double value) {
                                                 setState(() {
-                                                  winRate = value;
+                                                  firstGamesCount = value;
                                                 });
                                               },
-                                              shape:
-                                                  const RoundedRectangleBorder(
-                                                side: BorderSide(
-                                                    color: Colors.black12),
-                                                borderRadius: BorderRadius.zero,
+                                            )),
+                                            Text(
+                                              S.of(context).playersCount,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                            SizedBox(
+                                              child: RangeSlider(
+                                                values: maxRangeValues,
+                                                max: 10,
+                                                divisions: 10,
+                                                labels: RangeLabels(
+                                                    maxRangeValues.start
+                                                        .round()
+                                                        .toString(),
+                                                    maxRangeValues.end
+                                                        .round()
+                                                        .toString()),
+                                                onChanged:
+                                                    (RangeValues values) {
+                                                  setState(() {
+                                                    maxRangeValues = values;
+                                                  });
+                                                },
                                               ),
                                             ),
-                                            ChoiceChip(
-                                              label: Text(S
-                                                  .of(context)
-                                                  .onlyChosenPlayers),
-                                              selected: onlyChosenPlayers,
-                                              onSelected: (bool value) {
-                                                setState(() {
-                                                  onlyChosenPlayers = value;
-                                                });
-                                              },
-                                              shape:
-                                                  const RoundedRectangleBorder(
-                                                side: BorderSide(
-                                                    color: Colors.black12),
-                                                borderRadius: BorderRadius.zero,
+                                          ],
+                                        ),
+                                        Column(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              DropdownButton(
+                                                value: chosenGames.isNotEmpty
+                                                    ? chosenGames[chosenGameId]
+                                                    : null,
+                                                onChanged: (String? value) {
+                                                  chosenGameId = chosenGames
+                                                      .entries
+                                                      .firstWhere((entry) =>
+                                                          entry.value == value)
+                                                      .key;
+                                                  setState(() {});
+                                                },
+                                                items: chosenGames.values.map<
+                                                        DropdownMenuItem<
+                                                            String>>(
+                                                    (String value) {
+                                                  return DropdownMenuItem<
+                                                          String>(
+                                                      value: value,
+                                                      child: Text(value));
+                                                }).toList(),
                                               ),
-                                            ),
-                                            ChoiceChip(
-                                              label: Text(S
-                                                  .of(context)
-                                                  .winnerAmongChosenPlayers),
-                                              selected:
-                                                  winnerAmongChosenPlayers,
-                                              onSelected: (bool value) {
-                                                setState(() {
-                                                  winnerAmongChosenPlayers =
-                                                      value;
-                                                });
-                                              },
-                                              shape:
-                                                  const RoundedRectangleBorder(
-                                                side: BorderSide(
-                                                    color: Colors.black12),
-                                                borderRadius: BorderRadius.zero,
-                                              ),
-                                            ),
-                                          ]),
-                                      Text(S.of(context).players),
-                                      Expanded(
-                                          child: SingleChildScrollView(
-                                              child: Column(
-                                                  children:
-                                                      players.map((player) {
-                                        return CheckboxListTile(
-                                          contentPadding: EdgeInsets.zero,
-                                          title: Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.spaceEvenly,
-                                              children: [
-                                                ElevatedButton(
-                                                  child: player['excluded']
-                                                      ? const Icon(Icons
-                                                          .group_add_outlined)
-                                                      : const Icon(Icons
-                                                          .group_remove_outlined),
-                                                  onPressed: () {
-                                                    setState(() {
-                                                      player['excluded'] =
-                                                          !player['excluded'];
-                                                    });
-                                                  },
+                                              ChoiceChip(
+                                                label:
+                                                    Text(S.of(context).winRate),
+                                                selected: winRate,
+                                                onSelected: (bool value) {
+                                                  setState(() {
+                                                    winRate = value;
+                                                  });
+                                                },
+                                                shape:
+                                                    const RoundedRectangleBorder(
+                                                  side: BorderSide(
+                                                      color: Colors.black12),
+                                                  borderRadius:
+                                                      BorderRadius.zero,
                                                 ),
-                                                const SizedBox(width: 10),
-                                                Expanded(
-                                                  child: Text(player['name'],
-                                                      overflow:
-                                                          TextOverflow.ellipsis,
-                                                      style: player['excluded']
-                                                          ? TextStyle(
-                                                              color: Theme.of(
-                                                                      context)
-                                                                  .colorScheme
-                                                                  .onPrimary,
-                                                              decoration:
-                                                                  TextDecoration
-                                                                      .lineThrough,
-                                                              decorationStyle:
-                                                                  TextDecorationStyle
-                                                                      .solid)
-                                                          : const TextStyle()),
-                                                )
-                                              ]),
-                                          value: player['isChecked'],
-                                          onChanged: (bool? value) {
-                                            setState(() {
-                                              player['isChecked'] = value;
-                                            });
-                                          },
-                                        );
-                                      }).toList())))
-                                    ]));
+                                              ),
+                                              ChoiceChip(
+                                                label: Text(S
+                                                    .of(context)
+                                                    .onlyChosenPlayers),
+                                                selected: onlyChosenPlayers,
+                                                onSelected: (bool value) {
+                                                  setState(() {
+                                                    onlyChosenPlayers = value;
+                                                  });
+                                                },
+                                                shape:
+                                                    const RoundedRectangleBorder(
+                                                  side: BorderSide(
+                                                      color: Colors.black12),
+                                                  borderRadius:
+                                                      BorderRadius.zero,
+                                                ),
+                                              ),
+                                              ChoiceChip(
+                                                label: Text(S
+                                                    .of(context)
+                                                    .winnerAmongChosenPlayers),
+                                                selected:
+                                                    winnerAmongChosenPlayers,
+                                                onSelected: (bool value) {
+                                                  setState(() {
+                                                    winnerAmongChosenPlayers =
+                                                        value;
+                                                  });
+                                                },
+                                                shape:
+                                                    const RoundedRectangleBorder(
+                                                  side: BorderSide(
+                                                      color: Colors.black12),
+                                                  borderRadius:
+                                                      BorderRadius.zero,
+                                                ),
+                                              ),
+                                            ]),
+                                        Text(S.of(context).players),
+                                        Expanded(
+                                            child: SingleChildScrollView(
+                                                child: Column(
+                                                    children:
+                                                        players.map((player) {
+                                          return CheckboxListTile(
+                                            contentPadding: EdgeInsets.zero,
+                                            title: Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceEvenly,
+                                                children: [
+                                                  ElevatedButton(
+                                                    child: player['excluded']
+                                                        ? const Icon(Icons
+                                                            .group_add_outlined)
+                                                        : const Icon(Icons
+                                                            .group_remove_outlined),
+                                                    onPressed: () {
+                                                      setState(() {
+                                                        player['excluded'] =
+                                                            !player['excluded'];
+                                                      });
+                                                    },
+                                                  ),
+                                                  const SizedBox(width: 10),
+                                                  Expanded(
+                                                    child: Text(player['name'],
+                                                        overflow: TextOverflow
+                                                            .ellipsis,
+                                                        style: player[
+                                                                'excluded']
+                                                            ? TextStyle(
+                                                                color: Theme.of(
+                                                                        context)
+                                                                    .colorScheme
+                                                                    .onPrimary,
+                                                                decoration:
+                                                                    TextDecoration
+                                                                        .lineThrough,
+                                                                decorationStyle:
+                                                                    TextDecorationStyle
+                                                                        .solid)
+                                                            : const TextStyle()),
+                                                  )
+                                                ]),
+                                            value: player['isChecked'],
+                                            onChanged: (bool? value) {
+                                              setState(() {
+                                                player['isChecked'] = value;
+                                              });
+                                            },
+                                          );
+                                        }).toList())))
+                                      ]));
+                                    });
                                   });
-                                });
-                          },
-                          label: Text(S.of(context).filters),
-                          icon: const Icon(Icons.filter_alt),
-                        )),
+                            },
+                            label: Text(S.of(context).filters),
+                            icon: const Icon(Icons.filter_alt),
+                          );
+                        })),
                     Container(
                         color: Colors.brown,
                         width: MediaQuery.of(context).size.width * 0.4,
@@ -733,29 +740,33 @@ class _StatisticsState extends State<Statistics> {
                         color: Colors.brown,
                         width: MediaQuery.of(context).size.width * 0.15,
                         height: double.maxFinite,
-                        child: ElevatedButton.icon(
-                          key: widget.firstPlaysKey,
-                          onPressed: () async {
-                            plays = await getNewPlays();
-                            setState(() {});
-                          },
-                          label: Text(
-                            S.of(context).firstPlays,
-                            textAlign: TextAlign.center,
-                          ),
-                        )),
+                        child: Builder(builder: (context2) {
+                          TutorialHandler.statsFirstPlaysKeyContext = context2;
+                          return ElevatedButton.icon(
+                            onPressed: () async {
+                              plays = await getNewPlays();
+                              setState(() {});
+                            },
+                            label: Text(
+                              S.of(context).firstPlays,
+                              textAlign: TextAlign.center,
+                            ),
+                          );
+                        })),
                     Container(
                         color: Colors.brown,
                         width: MediaQuery.of(context).size.width * 0.15,
                         height: double.maxFinite,
-                        child: ElevatedButton.icon(
-                          key: widget.exportTableKey,
-                          onPressed: () async {
-                            exportCSV();
-                          },
-                          label: Text(S.of(context).exportTable,
-                              textAlign: TextAlign.center),
-                        ))
+                        child: Builder(builder: (context2) {
+                          TutorialHandler.statsExportTableKeyContext = context2;
+                          return ElevatedButton.icon(
+                            onPressed: () async {
+                              exportCSV();
+                            },
+                            label: Text(S.of(context).exportTable,
+                                textAlign: TextAlign.center),
+                          );
+                        }))
                   ])),
           Flexible(
               flex: 1,

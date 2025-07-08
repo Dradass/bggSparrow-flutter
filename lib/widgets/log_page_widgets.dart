@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/tutorial_handler.dart';
 import 'package:intl/intl.dart';
 import '../bggApi/bgg_api.dart';
 import 'package:flutter_application_1/models/game_thing.dart';
@@ -456,21 +457,15 @@ class GamePicker extends StatefulWidget {
   static GamePicker? _singleton;
 
   factory GamePicker(
-      SearchController searchController,
-      List<CameraDescription> cameras,
-      Image imageWidget,
-      GlobalKey selectedGameKey,
-      GlobalKey recognizedGameKey) {
-    _singleton ??= GamePicker._internal(searchController, cameras, imageWidget,
-        selectedGameKey, recognizedGameKey);
+    SearchController searchController,
+    List<CameraDescription> cameras,
+    Image imageWidget,
+  ) {
+    _singleton ??= GamePicker._internal(searchController, cameras, imageWidget);
     return _singleton!;
   }
 
-  GamePicker._internal(this.searchController, this.cameras, this.imageWidget,
-      this.selectedGameKey, this.recognizedGameKey);
-
-  GlobalKey selectedGameKey = GlobalKey();
-  GlobalKey recognizedGameKey = GlobalKey();
+  GamePicker._internal(this.searchController, this.cameras, this.imageWidget);
 
   SearchController searchController;
   List<CameraDescription> cameras;
@@ -529,7 +524,9 @@ class _GamePickerState extends State<GamePicker> {
           _initializeCamera();
         }
       case AppLifecycleState.inactive:
-        () {widget._controller.dispose();};
+        () {
+          widget._controller.dispose();
+        };
       case AppLifecycleState.hidden:
         () => {};
       case AppLifecycleState.paused:
@@ -634,16 +631,15 @@ class _GamePickerState extends State<GamePicker> {
           //     0.5,
           child: SearchAnchor(
               searchController: widget.searchController,
-              builder: (context, searchController) {
+              builder: (context2, searchController) {
+                TutorialHandler.selectGameButtonContext = context2;
                 return SearchBar(
                   shape: WidgetStateProperty.all(const RoundedRectangleBorder(
                       borderRadius: BorderRadius.zero,
                       side: BorderSide(color: Colors.black12))),
                   controller: searchController,
                   leading: IconButton(
-                      key: widget.selectedGameKey,
-                      onPressed: () {},
-                      icon: const Icon(Icons.search)),
+                      onPressed: () {}, icon: const Icon(Icons.search)),
                   onTap: () async {
                     widget.searchController.text = "";
                     isSearchOnline = await checkInternetConnection();
@@ -734,90 +730,100 @@ class _GamePickerState extends State<GamePicker> {
               }),
         ),
         Container(
-          padding: const EdgeInsets.only(right: 0),
-          width: MediaQuery.of(context).size.width * 0.15,
-          child: ElevatedButton.icon(
-              key: widget.recognizedGameKey,
-              onPressed: () {
-                showDialog(
-                    context: context,
-                    builder: (dialogBuilder) {
-                      return AlertDialog(
-                        title: Text(S.of(context).placeTheTopOfTheBoxInFrame),
-                        content: Column(children: [
-                          SizedBox(
-                            width: MediaQuery.of(context).size.width * 0.8,
-                            height: MediaQuery.of(context).size.height * 0.5,
-                            child: CameraPreview(widget._controller),
-                          ),
-                          SizedBox(
-                              width: MediaQuery.of(context).size.width,
-                              //height: MediaQuery.of(context).size.height * 0.3,
-                              // child:
-                              // Expanded(
-                              child: ElevatedButton(
-                                  onPressed: () async {
-                                    widget.recognizedGameId = 0;
-                                    Navigator.of(context, rootNavigator: true)
-                                        .pop();
-                                    setState(() {
-                                      widget.searchController.text =
-                                          S.of(context).recognizing;
-                                    });
-                                    var gameId = await takePhoto();
-                                    var recognizedGameName =
-                                        S.of(context).cantFindSimilarGame;
+            padding: const EdgeInsets.only(right: 0),
+            width: MediaQuery.of(context).size.width * 0.15,
+            child: Builder(builder: (context3) {
+              TutorialHandler.recognizeGameButtonContext = context3;
 
-                                    if (gameId != null) {
-                                      widget.recognizedGame =
-                                          await GameThingSQL.selectGameByID(
-                                              gameId);
-                                      if (widget.recognizedGame != null) {
-                                        widget.recognizedGameId =
-                                            widget.recognizedGame!.id;
+              return ElevatedButton.icon(
+                  //recognizeGameButtonContext
+                  //key: TutorialHandler.logRecognizeGameKey,
+                  onPressed: () {
+                    showDialog(
+                        context: context,
+                        builder: (dialogBuilder) {
+                          return AlertDialog(
+                            title:
+                                Text(S.of(context).placeTheTopOfTheBoxInFrame),
+                            content: Column(children: [
+                              SizedBox(
+                                width: MediaQuery.of(context).size.width * 0.8,
+                                height:
+                                    MediaQuery.of(context).size.height * 0.5,
+                                child: CameraPreview(widget._controller),
+                              ),
+                              SizedBox(
+                                  width: MediaQuery.of(context).size.width,
+                                  //height: MediaQuery.of(context).size.height * 0.3,
+                                  // child:
+                                  // Expanded(
+                                  child: ElevatedButton(
+                                      onPressed: () async {
+                                        widget.recognizedGameId = 0;
+                                        Navigator.of(context,
+                                                rootNavigator: true)
+                                            .pop();
+                                        setState(() {
+                                          widget.searchController.text =
+                                              S.of(context).recognizing;
+                                        });
+                                        var gameId = await takePhoto();
+                                        var recognizedGameName =
+                                            S.of(context).cantFindSimilarGame;
 
-                                        recognizedGameName =
-                                            widget.recognizedGame!.name;
-                                      }
-                                    }
+                                        if (gameId != null) {
+                                          widget.recognizedGame =
+                                              await GameThingSQL.selectGameByID(
+                                                  gameId);
+                                          if (widget.recognizedGame != null) {
+                                            widget.recognizedGameId =
+                                                widget.recognizedGame!.id;
 
-                                    setState(() {
-                                      widget.searchController.text =
-                                          recognizedGameName;
-                                      if (widget.recognizedGame?.thumbBinary !=
-                                          null) {
-                                        widget.imageWidget = Image.memory(
-                                            base64Decode(widget
-                                                .recognizedGame!.thumbBinary
-                                                .toString()));
-                                      }
-                                    });
+                                            recognizedGameName =
+                                                widget.recognizedGame!.name;
+                                          }
+                                        }
 
-                                    selectedGameId = widget.recognizedGameId;
-                                    selectedGame = widget.recognizedGame;
-                                  },
-                                  style: ButtonStyle(
-                                      backgroundColor: WidgetStateProperty.all(
-                                          Theme.of(context)
-                                              .colorScheme
-                                              .secondary)),
-                                  child: Text(S.of(context).recognize))
-                              //)
-                              )
-                        ]),
-                      );
-                    });
-              },
-              style: ButtonStyle(
-                  // backgroundColor: MaterialStateProperty.all(
-                  //     Theme.of(context).primaryColor),
-                  shape: WidgetStateProperty.all<RoundedRectangleBorder>(
-                      const RoundedRectangleBorder(
-                          borderRadius: BorderRadius.zero,
-                          side: BorderSide(color: Colors.black12)))),
-              label: const Text(""),
-              icon: const Icon(Icons.document_scanner)),
-        ),
+                                        setState(() {
+                                          widget.searchController.text =
+                                              recognizedGameName;
+                                          if (widget.recognizedGame
+                                                  ?.thumbBinary !=
+                                              null) {
+                                            widget.imageWidget = Image.memory(
+                                                base64Decode(widget
+                                                    .recognizedGame!.thumbBinary
+                                                    .toString()));
+                                          }
+                                        });
+
+                                        selectedGameId =
+                                            widget.recognizedGameId;
+                                        selectedGame = widget.recognizedGame;
+                                      },
+                                      style: ButtonStyle(
+                                          backgroundColor:
+                                              WidgetStateProperty.all(
+                                                  Theme.of(context)
+                                                      .colorScheme
+                                                      .secondary)),
+                                      child: Text(S.of(context).recognize))
+                                  //)
+                                  )
+                            ]),
+                          );
+                        });
+                  },
+                  style: ButtonStyle(
+                      // backgroundColor: MaterialStateProperty.all(
+                      //     Theme.of(context).primaryColor),
+                      shape: WidgetStateProperty.all<RoundedRectangleBorder>(
+                          const RoundedRectangleBorder(
+                              borderRadius: BorderRadius.zero,
+                              side: BorderSide(color: Colors.black12)))),
+                  label: const Text(""),
+                  icon: const Icon(Icons.document_scanner));
+            })),
         Container(
             padding: const EdgeInsets.only(right: 0),
             width: MediaQuery.of(context).size.width * 0.15,

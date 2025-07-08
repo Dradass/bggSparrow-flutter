@@ -41,14 +41,13 @@ class _NavigationScreenState extends State<NavigationScreen> {
         destinations: <Widget>[
           NavigationDestination(
             selectedIcon: Icon(Icons.archive, key: tutorialHandler.logKey),
-            icon: Icon(Icons.archive_outlined, key: tutorialHandler.logKey),
+            icon: Icon(Icons.archive_outlined),
             label: S.of(context).logPlayShort,
           ),
           NavigationDestination(
             selectedIcon:
                 Icon(Icons.leaderboard, key: tutorialHandler.statsKey),
-            icon:
-                Icon(Icons.leaderboard_outlined, key: tutorialHandler.statsKey),
+            icon: Icon(Icons.leaderboard_outlined),
             label: S.of(context).statistics,
           ),
           NavigationDestination(
@@ -61,8 +60,7 @@ class _NavigationScreenState extends State<NavigationScreen> {
           NavigationDestination(
             selectedIcon: Icon(Icons.insert_emoticon,
                 key: tutorialHandler.firstPlayerKey),
-            icon: Icon(Icons.sentiment_satisfied_alt,
-                key: tutorialHandler.firstPlayerKey),
+            icon: Icon(Icons.sentiment_satisfied_alt),
             label: S.of(context).firstPlayer,
           ),
         ],
@@ -70,13 +68,8 @@ class _NavigationScreenState extends State<NavigationScreen> {
       body: IndexedStack(
         index: currentPageIndex,
         children: <Widget>[
-          LogPage(
-              selectGameKey: tutorialHandler.logSelectGameKey,
-              recognizeGameKey: tutorialHandler.logRecognizeGameKey),
-          Statistics(
-              filtersKey: tutorialHandler.statsFiltersKey,
-              firstPlaysKey: tutorialHandler.statsFirstPlaysKey,
-              exportTableKey: tutorialHandler.statsExportTableKey),
+          LogPage(),
+          Statistics(),
           const GameHelper(),
           const FirstPlayerChoser(),
         ],

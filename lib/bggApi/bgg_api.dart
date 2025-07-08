@@ -91,7 +91,7 @@ Future<void> getGamesThumbnail(refreshProgress, dynamic context) async {
       if (game.thumbBinary == null) {
         game.createBinaryThumb();
         refreshProgress(true,
-            "${S.of(context).updatingThumbnails} $gamesWithThumbCount / ${gettingAllGames.length - 1}");
+            "(${S.of(context).readyToUse}) ${S.of(context).updatingThumbnails} $gamesWithThumbCount / ${gettingAllGames.length - 1}");
         gamesWithThumbCount += 1;
         // Anti DDOS
         await Future.delayed(const Duration(milliseconds: 2000));
@@ -138,7 +138,7 @@ Future<void> getGamesPlayersCount(refreshProgress, dynamic context) async {
         game.maxPlayers = gameThingServer.maxPlayers;
         log("Update players count of game ${game.name} id = ${game.id}");
         refreshProgress(true,
-            "${S.of(context).updatingGamePlayersInfo} $gamesWithPlayerInfo / ${gettingAllGames.length - 1}");
+            "(${S.of(context).readyToUse}) ${S.of(context).updatingGamePlayersInfo} $gamesWithPlayerInfo / ${gettingAllGames.length - 1}");
         gamesWithPlayerInfo += 1;
         await GameThingSQL.updateGame(game);
         // Anti DDOS

@@ -9,20 +9,22 @@ class TutorialHandler {
   dynamic parentContext;
   dynamic setPageMethod;
 
+  static BuildContext? selectGameButtonContext;
+  static BuildContext? recognizeGameButtonContext;
+  static BuildContext? statsFiltersKeyContext;
+  static BuildContext? statsFirstPlaysKeyContext;
+  static BuildContext? statsExportTableKeyContext;
+
   late TutorialCoachMark tutorialCoachMark;
-  GlobalKey logKey = GlobalKey();
-  GlobalKey logSelectGameKey = GlobalKey();
-  GlobalKey logRecognizeGameKey = GlobalKey();
-  GlobalKey statsKey = GlobalKey();
-  GlobalKey gameChoseKey = GlobalKey();
-  GlobalKey firstPlayerKey = GlobalKey();
-  final GlobalKey statsFiltersKey = GlobalKey();
-  final GlobalKey statsFirstPlaysKey = GlobalKey();
-  final GlobalKey statsExportTableKey = GlobalKey();
+  GlobalKey logKey = GlobalKey(debugLabel: 'logKey');
+  GlobalKey statsKey = GlobalKey(debugLabel: 'statsKey');
+  GlobalKey gameChoseKey = GlobalKey(debugLabel: 'gameChoseKey');
+  GlobalKey firstPlayerKey = GlobalKey(debugLabel: 'firstPlayerKey');
 
   Future<void> checkFirstLaunch() async {
     final prefs = await SharedPreferences.getInstance();
     bool isFirstLaunch = prefs.getBool('first_launch_nav') ?? true;
+    isFirstLaunch = true;
 
     if (isFirstLaunch) {
       await prefs.setBool('first_launch_nav', false);
@@ -53,7 +55,7 @@ class TutorialHandler {
   }
 
   List<TargetFocus> _createTargets() {
-    return [
+    List<TargetFocus> targets = [
       TargetFocus(
         identify: "log",
         keyTarget: logKey,
@@ -78,58 +80,83 @@ class TutorialHandler {
             },
           ),
         ],
-      ),
-      TargetFocus(
-        identify: "selectGame",
-        keyTarget: logSelectGameKey,
-        contents: [
-          TargetContent(
-            align: ContentAlign.top,
-            builder: (context, controller) {
-              return Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    S.of(context).selectGameFromList,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                      fontSize: 20,
-                    ),
-                  ),
-                ],
-              );
-            },
-          ),
-        ],
-      ),
-      TargetFocus(
-        identify: "recognizeGame",
-        keyTarget: logRecognizeGameKey,
-        contents: [
-          TargetContent(
-            align: ContentAlign.top,
-            builder: (context, controller) {
-              return Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    S.of(context).orRecognizeGame,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                      fontSize: 20,
-                    ),
-                  ),
-                ],
-              );
-            },
-          ),
-        ],
-      ),
+      )
     ];
+
+    if (selectGameButtonContext != null) {
+      final buttonBox =
+          selectGameButtonContext!.findRenderObject() as RenderBox?;
+      if (buttonBox != null && buttonBox.hasSize) {
+        targets.add(TargetFocus(
+          identify: "selectGame",
+          targetPosition: TargetPosition(
+            buttonBox.size,
+            buttonBox.localToGlobal(Offset.zero),
+          ),
+          radius: 12,
+          contents: [
+            TargetContent(
+              align: ContentAlign.top,
+              builder: (context, controller) {
+                return Transform.translate(
+                    offset: const Offset(0, -80), // Сдвигаем на 40px вверх
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          S.of(context).selectGameFromList,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                            fontSize: 20,
+                          ),
+                        ),
+                      ],
+                    ));
+              },
+            ),
+          ],
+        ));
+      }
+    }
+
+    if (recognizeGameButtonContext != null) {
+      final buttonBox =
+          recognizeGameButtonContext!.findRenderObject() as RenderBox?;
+      if (buttonBox != null && buttonBox.hasSize) {
+        targets.add(TargetFocus(
+          identify: "recognizeGame",
+          targetPosition: TargetPosition(
+            buttonBox.size,
+            buttonBox.localToGlobal(Offset.zero),
+          ),
+          radius: 12,
+          contents: [
+            TargetContent(
+              align: ContentAlign.top,
+              builder: (context, controller) {
+                return Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      S.of(context).orRecognizeGame,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        fontSize: 20,
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
+          ],
+        ));
+      }
+    }
+    return targets;
   }
 
   void _switchToStatisticsAndShowTutorial() {
@@ -154,7 +181,7 @@ class TutorialHandler {
   }
 
   List<TargetFocus> _createStatisticsTargets() {
-    return [
+    List<TargetFocus> targets = [
       TargetFocus(
         identify: "stats_global",
         keyTarget: statsKey,
@@ -169,85 +196,118 @@ class TutorialHandler {
             },
           ),
         ],
-      ),
-      TargetFocus(
-        identify: "stats_filters",
-        keyTarget: statsFiltersKey,
-        contents: [
-          TargetContent(
-            align: ContentAlign.top,
-            builder: (context, controller) {
-              return _buildTutorialContent(
-                S.of(context).adjustFilters,
-                "",
-              );
-            },
-          ),
-        ],
-      ),
-      TargetFocus(
-        identify: "stats_first_plays",
-        keyTarget: statsFirstPlaysKey,
-        contents: [
-          TargetContent(
-            align: ContentAlign.top,
-            builder: (context, controller) {
-              return _buildTutorialContent(
-                S.of(context).findYourFirstMatches,
-                "",
-              );
-            },
-          ),
-        ],
-      ),
-      TargetFocus(
-        identify: "stats_export_table",
-        keyTarget: statsExportTableKey,
-        contents: [
-          TargetContent(
-            align: ContentAlign.top,
-            builder: (context, controller) {
-              return _buildTutorialContent(
-                S.of(context).exportYourStatsToCsv,
-                "",
-              );
-            },
-          ),
-        ],
-      ),
-      TargetFocus(
-        color: Colors.orange,
-        identify: "game_choose",
-        keyTarget: gameChoseKey,
-        contents: [
-          TargetContent(
-            align: ContentAlign.top,
-            builder: (context, controller) {
-              return _buildTutorialContent(
-                S.of(context).chooseRandomGameToPlay,
-                S.of(context).playerVotesAreCounted,
-              );
-            },
-          ),
-        ],
-      ),
-      TargetFocus(
-        color: Colors.lime,
-        identify: "first_player",
-        keyTarget: firstPlayerKey,
-        contents: [
-          TargetContent(
-            align: ContentAlign.top,
-            builder: (context, controller) {
-              return _buildTutorialContent(
-                S.of(context).chooseWhoGoesFirst,
-                "",
-              );
-            },
-          ),
-        ],
-      ),
+      )
     ];
+
+    if (statsFiltersKeyContext != null) {
+      final buttonBox =
+          statsFiltersKeyContext!.findRenderObject() as RenderBox?;
+      if (buttonBox != null && buttonBox.hasSize) {
+        targets.add(TargetFocus(
+          identify: "statsFiltersKey",
+          targetPosition: TargetPosition(
+            buttonBox.size,
+            buttonBox.localToGlobal(Offset.zero),
+          ),
+          radius: 12,
+          contents: [
+            TargetContent(
+              align: ContentAlign.top,
+              builder: (context, controller) {
+                return _buildTutorialContent(
+                  S.of(context).adjustFilters,
+                  "",
+                );
+              },
+            ),
+          ],
+        ));
+      }
+    }
+    if (statsFirstPlaysKeyContext != null) {
+      final buttonBox =
+          statsFirstPlaysKeyContext!.findRenderObject() as RenderBox?;
+      if (buttonBox != null && buttonBox.hasSize) {
+        targets.add(TargetFocus(
+          identify: "stats_first_plays",
+          targetPosition: TargetPosition(
+            buttonBox.size,
+            buttonBox.localToGlobal(Offset.zero),
+          ),
+          radius: 12,
+          contents: [
+            TargetContent(
+              align: ContentAlign.top,
+              builder: (context, controller) {
+                return _buildTutorialContent(
+                  S.of(context).findYourFirstMatches,
+                  "",
+                );
+              },
+            ),
+          ],
+        ));
+      }
+    }
+    if (statsExportTableKeyContext != null) {
+      final buttonBox =
+          statsExportTableKeyContext!.findRenderObject() as RenderBox?;
+      if (buttonBox != null && buttonBox.hasSize) {
+        targets.add(TargetFocus(
+          identify: "stats_export_table",
+          targetPosition: TargetPosition(
+            buttonBox.size,
+            buttonBox.localToGlobal(Offset.zero),
+          ),
+          radius: 12,
+          contents: [
+            TargetContent(
+              align: ContentAlign.top,
+              builder: (context, controller) {
+                return _buildTutorialContent(
+                  S.of(context).exportYourStatsToCsv,
+                  "",
+                );
+              },
+            ),
+          ],
+        ));
+      }
+    }
+
+    targets.add(TargetFocus(
+      color: Colors.orange,
+      identify: "game_choose",
+      keyTarget: gameChoseKey,
+      contents: [
+        TargetContent(
+          align: ContentAlign.top,
+          builder: (context, controller) {
+            return _buildTutorialContent(
+              S.of(context).chooseRandomGameToPlay,
+              S.of(context).playerVotesAreCounted,
+            );
+          },
+        ),
+      ],
+    ));
+    targets.add(TargetFocus(
+      color: Colors.lime,
+      identify: "first_player",
+      keyTarget: firstPlayerKey,
+      contents: [
+        TargetContent(
+          align: ContentAlign.top,
+          builder: (context, controller) {
+            return _buildTutorialContent(
+              S.of(context).chooseWhoGoesFirst,
+              "",
+            );
+          },
+        ),
+      ],
+    ));
+    return targets;
   }
 
   Widget _buildTutorialContent(String title, String description) {
