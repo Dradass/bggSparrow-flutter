@@ -25,6 +25,8 @@ class _FirstPlayerChoserState extends State<FirstPlayerChoser>
   bool enabled = true;
   String? counter;
   double indicatorSize = 130;
+  bool countInProgress = false;
+  bool needToStopCount = false;
   var indicatorColor = const Color.fromARGB(255, 32, 184, 19);
   final List<Color> colors = <Color>[
     Colors.redAccent,
@@ -206,6 +208,9 @@ class _FirstPlayerChoserState extends State<FirstPlayerChoser>
 
     return Listener(
       onPointerDown: (opm) {
+        if (countInProgress) {
+          needToStopCount = true;
+        }
         savePointerPosition(opm.pointer, opm.position);
         checkTouchPositions(touchPositions.length);
       },
@@ -224,15 +229,23 @@ class _FirstPlayerChoserState extends State<FirstPlayerChoser>
       if (touchPositions.length > 1) {
         setState(() {
           counter = "3";
+          countInProgress = true;
         });
       } else {
         setState(() {
           counter = S.of(context).waitingForYourFriends;
         });
+        countInProgress = false;
         return;
       }
     }
+
     await Future.delayed(const Duration(seconds: 1));
+    if (needToStopCount) {
+      needToStopCount = false;
+      return;
+    }
+
     if (touchPositions.length == firstPositionsCount) {
       if (touchPositions.length > 1) {
         setState(() {
@@ -244,18 +257,32 @@ class _FirstPlayerChoserState extends State<FirstPlayerChoser>
         });
       }
     } else {
+      countInProgress = false;
       return;
     }
+
     await Future.delayed(const Duration(seconds: 1));
+    if (needToStopCount) {
+      needToStopCount = false;
+      return;
+    }
+
     if (touchPositions.length == firstPositionsCount &&
         touchPositions.length > 1) {
       setState(() {
         counter = "1";
       });
     } else {
+      countInProgress = false;
       return;
     }
+
     await Future.delayed(const Duration(seconds: 1));
+    if (needToStopCount) {
+      needToStopCount = false;
+      return;
+    }
+
     if (touchPositions.length == firstPositionsCount) {
       if (touchPositions.length > 1) {
         randomPlayer = ((touchPositions.keys).toList()..shuffle()).first;
@@ -263,6 +290,7 @@ class _FirstPlayerChoserState extends State<FirstPlayerChoser>
           counter = "";
           fingerPrintsOpacity = 0.0;
         });
+        countInProgress = true;
       }
     } else {
       return;
