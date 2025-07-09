@@ -57,7 +57,7 @@
   "login": "Login",
   "tologIn": "Log in",
   "logOut": "Log out",
-  "loginOrPasswordIsIncorrect": "Неправильный логин или пароль",
+  "loginOrPasswordIsIncorrect": "Login or password is incorrect",
   "managePlayers": "Manage players",
   "maxPlayersCount": "Maximum players count",
   "newPlayerName": "New player name",
