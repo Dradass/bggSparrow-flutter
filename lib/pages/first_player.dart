@@ -220,11 +220,17 @@ class _FirstPlayerChoserState extends State<FirstPlayerChoser>
   }
 
   void checkTouchPositions(int firstPositionsCount) async {
-    if (touchPositions.length == firstPositionsCount &&
-        touchPositions.length > 1) {
-      setState(() {
-        counter = "3";
-      });
+    if (touchPositions.length == firstPositionsCount) {
+      if (touchPositions.length > 1) {
+        setState(() {
+          counter = "3";
+        });
+      } else {
+        setState(() {
+          counter = S.of(context).waitingForYourFriends;
+        });
+        return;
+      }
     }
     await Future.delayed(const Duration(seconds: 1));
     if (touchPositions.length == firstPositionsCount) {
