@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/main.dart';
 import 'package:flutter_application_1/models/bgg_location.dart';
-import 'package:flutter_application_1/tutorial_handler.dart';
 import 'package:flutter_application_1/widgets/players_list.dart';
 import '../db/game_things_sql.dart';
 import '../db/system_table.dart';
@@ -24,9 +23,7 @@ class LoadingStatus {
 }
 
 class LogPage extends StatefulWidget {
-  LogPage({super.key});
-  // GlobalKey selectGameKeyLog;
-  // GlobalKey recognizeGameKeyLog;
+  const LogPage({super.key});
 
   @override
   State<LogPage> createState() => _LogPageState();

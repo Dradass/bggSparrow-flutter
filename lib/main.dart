@@ -9,7 +9,6 @@ import '../login_handler.dart';
 import '../s.dart';
 
 // TODO
-// 1. Debug mode for camera capture
 // 2. Color picker
 // 3. Icons and background
 // 4. Edit / delete play

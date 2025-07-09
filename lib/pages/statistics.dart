@@ -19,7 +19,7 @@ import 'dart:developer';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
 class Statistics extends StatefulWidget {
-  Statistics({super.key});
+  const Statistics({super.key});
 
   @override
   State<Statistics> createState() => _StatisticsState();
