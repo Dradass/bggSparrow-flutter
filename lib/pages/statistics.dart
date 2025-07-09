@@ -763,8 +763,8 @@ class _StatisticsState extends State<Statistics> {
                             onPressed: () async {
                               exportCSV();
                             },
-                            label: Text(S.of(context).exportTable,
-                                textAlign: TextAlign.center),
+                            icon: const Icon(Icons.upload_file),
+                            label: const Text(""),
                           );
                         }))
                   ])),

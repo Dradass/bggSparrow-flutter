@@ -632,14 +632,16 @@ class _GamePickerState extends State<GamePicker> {
           child: SearchAnchor(
               searchController: widget.searchController,
               builder: (context2, searchController) {
-                TutorialHandler.selectGameButtonContext = context2;
                 return SearchBar(
                   shape: WidgetStateProperty.all(const RoundedRectangleBorder(
                       borderRadius: BorderRadius.zero,
                       side: BorderSide(color: Colors.black12))),
                   controller: searchController,
-                  leading: IconButton(
-                      onPressed: () {}, icon: const Icon(Icons.search)),
+                  leading: Builder(builder: (context3) {
+                    TutorialHandler.selectGameButtonContext = context3;
+                    return IconButton(
+                        onPressed: () {}, icon: const Icon(Icons.search));
+                  }),
                   onTap: () async {
                     widget.searchController.text = "";
                     isSearchOnline = await checkInternetConnection();

@@ -24,7 +24,6 @@ class TutorialHandler {
   Future<void> checkFirstLaunch() async {
     final prefs = await SharedPreferences.getInstance();
     bool isFirstLaunch = prefs.getBool('first_launch_nav') ?? true;
-    isFirstLaunch = true;
 
     if (isFirstLaunch) {
       await prefs.setBool('first_launch_nav', false);
@@ -98,22 +97,20 @@ class TutorialHandler {
             TargetContent(
               align: ContentAlign.top,
               builder: (context, controller) {
-                return Transform.translate(
-                    offset: const Offset(0, -80), // Сдвигаем на 40px вверх
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          S.of(context).selectGameFromList,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                            fontSize: 20,
-                          ),
-                        ),
-                      ],
-                    ));
+                return Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      S.of(context).selectGameFromList,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        fontSize: 20,
+                      ),
+                    ),
+                  ],
+                );
               },
             ),
           ],
