@@ -229,13 +229,16 @@ class _LogPageState extends State<LogPage> {
                 title: Text(S.of(context).loadAllData),
                 onTap: () {
                   GameThingSQL.initTables();
-                  getAllPlaysFromServer();
+                  if (!backgroundLoading) {
+                    initDataFromServer();
+                  }
                 },
               ),
               ListTile(
                 leading: const Icon(Icons.clear),
                 title: Text(S.of(context).wipeAllLocalData),
                 onTap: () {
+                  TaskChecker().needCancel = true;
                   GameThingSQL.deleteDB();
                 },
               ),
