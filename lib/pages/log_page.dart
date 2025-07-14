@@ -22,6 +22,12 @@ class LoadingStatus {
   String status = "";
 }
 
+class DownloadProgress {
+  final String status;
+
+  DownloadProgress({required this.status});
+}
+
 class LogPage extends StatefulWidget {
   const LogPage({super.key});
 
@@ -44,6 +50,9 @@ class _LogPageState extends State<LogPage> {
   PlayersListWrapper defaultPlayersListWrapper = PlayersListWrapper();
   List<Location> locations = [];
   Location? chosenLocation;
+
+  final ValueNotifier<DownloadProgress> progressNotifier =
+      ValueNotifier(DownloadProgress(status: ""));
 
   @override
   void initState() {
@@ -121,10 +130,7 @@ class _LogPageState extends State<LogPage> {
 
   void refreshProgress(bool needShowProgressBar, String statusState) {
     log("refresh proress: $statusState");
-    setState(() {
-      isProgressBarVisible = needShowProgressBar;
-      loadingStatus.status = statusState;
-    });
+    progressNotifier.value = DownloadProgress(status: statusState);
   }
 
   Future<String?> getOrCreateSystemParameter(
@@ -180,8 +186,11 @@ class _LogPageState extends State<LogPage> {
                                     Theme.of(context).colorScheme.surface,
                               ),
                             if (isProgressBarVisible)
-                              Text(loadingStatus.status,
-                                  overflow: TextOverflow.ellipsis)
+                              ValueListenableBuilder<DownloadProgress>(
+                                  valueListenable: progressNotifier,
+                                  builder: (_, progress, __) {
+                                    return Text(progress.status);
+                                  })
                           ],
                         ))),
                 FlexButtonSettings(
