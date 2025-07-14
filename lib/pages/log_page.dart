@@ -13,6 +13,10 @@ import '../task_checker.dart';
 import 'dart:developer';
 import '../globals.dart';
 import '../s.dart';
+import 'package:provider/provider.dart';
+import '../theme_manager.dart';
+
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 
 import '../db/location_sql.dart';
 
@@ -66,6 +70,88 @@ class _LogPageState extends State<LogPage> {
     if (!backgroundLoading) {
       initDataFromServer();
     }
+  }
+
+  // void _changeColor(Color color) async {
+  //   // Обновляем глобальный цвет
+  //   main_app.secondaryColorNotifier.value = color;
+
+  //   // Сохраняем цвет в SharedPreferences
+  //   final prefs = await SharedPreferences.getInstance();
+  //   await prefs.setInt('secondaryColor', color.value);
+  // }
+  Widget _buildColorButton({
+    required BuildContext context,
+    required Color color,
+    required String tooltip,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 0.0),
+      child: Tooltip(
+        message: tooltip,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(20),
+          child: Container(
+            width: 32,
+            height: 32,
+            decoration: BoxDecoration(
+              color: color,
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+                width: 1,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showColorPickerDialog({
+    required String title,
+    required Color currentColor,
+    required ValueChanged<Color> onColorChanged,
+  }) {
+    Color tempColor = currentColor;
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          content: SingleChildScrollView(
+            child: Column(
+              children: [
+                ColorPicker(
+                  pickerColor: currentColor,
+                  onColorChanged: (color) => tempColor = color,
+                  pickerAreaHeightPercent: 1,
+                  enableAlpha: false,
+                  displayThumbColor: true,
+                ),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () {
+                    onColorChanged(tempColor);
+                    Navigator.of(context).pop();
+                  },
+                  child: Text("Apply"),
+                ),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text("Reset all colors"),
+              onPressed: () {
+                Provider.of<ThemeManager>(context, listen: false).resetColors();
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   void initDataFromServer() {
@@ -151,6 +237,7 @@ class _LogPageState extends State<LogPage> {
 
   @override
   Widget build(BuildContext context) {
+    final themeManager = Provider.of<ThemeManager>(context);
     final currentLocale = S.currentLocale;
     defaultPlayersListWrapper.updateCustomLists(context);
     return GestureDetector(
@@ -252,7 +339,56 @@ class _LogPageState extends State<LogPage> {
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.wifi),
+                leading: _buildColorButton(
+                  context: context,
+                  color: themeManager.surfaceColor,
+                  tooltip: "Pick surface color",
+                ),
+                title: Text("Pick surface color"),
+                onTap: () {
+                  _showColorPickerDialog(
+                    title: "Pick surface color",
+                    currentColor: themeManager.surfaceColor,
+                    onColorChanged: (color) =>
+                        themeManager.surfaceColor = color,
+                  );
+                },
+              ),
+              ListTile(
+                leading: _buildColorButton(
+                  context: context,
+                  color: themeManager.secondaryColor,
+                  tooltip: "Pick secondary color",
+                ),
+                title: Text("Pick secondary color"),
+                onTap: () {
+                  _showColorPickerDialog(
+                    title: "Pick secondary color",
+                    currentColor: themeManager.secondaryColor,
+                    onColorChanged: (color) =>
+                        themeManager.secondaryColor = color,
+                  );
+                },
+              ),
+              ListTile(
+                leading: _buildColorButton(
+                  context: context,
+                  color: themeManager.textColor,
+                  tooltip: "Pick text color",
+                ),
+                title: Text("Pick text color"),
+                onTap: () {
+                  _showColorPickerDialog(
+                    title: "Pick text color",
+                    currentColor: themeManager.textColor,
+                    onColorChanged: (color) => themeManager.textColor = color,
+                  );
+                },
+              ),
+              ListTile(
+                leading: isOnlineSearchModeDefault
+                    ? Icon(Icons.wifi)
+                    : Icon(Icons.wifi_off),
                 title: Row(
                   children: [
                     Text(
@@ -285,6 +421,44 @@ class _LogPageState extends State<LogPage> {
                           value: simpleIndicatorMode ? "1" : "0"))
                       .then((onValue) => {setState(() {})});
                 },
+              ),
+              ListTile(
+                title: Row(
+                  children: [
+                    Text("${S.of(context).currentLanguage}: "),
+                    DropdownButton<Locale>(
+                      value: currentLocale,
+                      onChanged: (Locale? newLocale) {
+                        if (newLocale != null) {
+                          S.setLocale(newLocale);
+                        }
+                      },
+                      items: S.supportedLanguages
+                          .map((toElement) => Locale(toElement['code']))
+                          .map((Locale locale) {
+                        return DropdownMenuItem<Locale>(
+                          value: locale,
+                          child: Row(
+                            children: [
+                              Text(
+                                S.supportedLanguages.firstWhere(
+                                      (element) =>
+                                          Locale(element['code']) == locale,
+                                    )['nativeName'] ??
+                                    'English',
+                                style: TextStyle(
+                                  fontWeight: currentLocale == locale
+                                      ? FontWeight.bold
+                                      : FontWeight.normal,
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ],
+                ),
               ),
               ListTile(
                 title: Row(
@@ -342,47 +516,6 @@ class _LogPageState extends State<LogPage> {
                   ],
                 ),
                 onTap: null,
-              ),
-              ListTile(
-                title: Row(
-                  children: [
-                    Text("${S.of(context).currentLanguage}: "),
-                    DropdownButton<Locale>(
-                      value: currentLocale,
-                      onChanged: (Locale? newLocale) {
-                        if (newLocale != null) {
-                          S.setLocale(newLocale);
-                        }
-                      },
-                      items: S.supportedLanguages
-                          .map((toElement) => Locale(toElement['code']))
-                          .map((Locale locale) {
-                        return DropdownMenuItem<Locale>(
-                          value: locale,
-                          child: Row(
-                            children: [
-                              Text(
-                                S.supportedLanguages.firstWhere(
-                                      (element) =>
-                                          Locale(element['code']) == locale,
-                                    )['nativeName'] ??
-                                    'English',
-                                style: TextStyle(
-                                  fontWeight: currentLocale == locale
-                                      ? FontWeight.bold
-                                      : FontWeight.normal,
-                                  color: currentLocale == locale
-                                      ? Colors.blue
-                                      : Colors.black,
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      }).toList(),
-                    ),
-                  ],
-                ),
               ),
             ],
           ),
