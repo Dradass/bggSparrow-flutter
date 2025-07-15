@@ -183,12 +183,20 @@ class _CommentsState extends State<Comments> {
       keyboardType: TextInputType.multiline,
       maxLines: 5,
       decoration: InputDecoration(
+          prefixIconColor: Theme.of(context).colorScheme.primary,
           contentPadding: const EdgeInsets.all(10.0),
           suffixIcon: IconButton(
               onPressed: widget.commentsController.clear,
               icon: const Icon(Icons.clear)),
+          suffixIconColor: Theme.of(context).colorScheme.primary,
           labelText: S.of(context).comments,
+          labelStyle: TextStyle(
+            color: Theme.of(context).colorScheme.primary,
+          ),
           hintText: S.of(context).enterYourComments,
+          hintStyle: TextStyle(
+            color: Theme.of(context).colorScheme.primary,
+          ),
           border: const UnderlineInputBorder()),
     );
   }
@@ -227,7 +235,9 @@ class _DurationSliderWidgetState extends State<DurationSliderWidget> {
             });
           },
         ),
-        Text(S.of(context).duration)
+        Text(
+          S.of(context).duration,
+        )
       ],
     );
   }
@@ -321,8 +331,12 @@ class _PlayersPickerState extends State<PlayersPicker> {
                       //insetPadding: EdgeInsets.zero,
                       title: Column(children: [
                         ExpansionTile(
+                            collapsedIconColor:
+                                Theme.of(context).colorScheme.primary,
                             tilePadding: EdgeInsets.zero,
-                            title: Text(S.of(context).managePlayers),
+                            title: Text(S.of(context).managePlayers,
+                                style: TextStyle(
+                                    color: Theme.of(context).primaryColor)),
                             children: [
                               Row(
                                 mainAxisAlignment:
@@ -413,7 +427,11 @@ class _PlayersPickerState extends State<PlayersPicker> {
                               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                               children: [
                                 ChoiceChip(
-                                  label: Text(S.of(context).winQuestion),
+                                  label: Text(
+                                    S.of(context).winQuestion,
+                                    style: TextStyle(
+                                        color: Theme.of(context).primaryColor),
+                                  ),
                                   selected: player['win'],
                                   onSelected: (bool? value) {
                                     setState(() {
@@ -427,10 +445,11 @@ class _PlayersPickerState extends State<PlayersPicker> {
                                 ),
                                 const SizedBox(width: 10),
                                 Expanded(
-                                    child: Text(
-                                  player['name'],
-                                  overflow: TextOverflow.ellipsis,
-                                ))
+                                    child: Text(player['name'],
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                            color: Theme.of(context)
+                                                .primaryColor)))
                               ]),
                           value: player['isChecked'],
                           onChanged: (bool? value) {
@@ -627,8 +646,6 @@ class _GamePickerState extends State<GamePicker> {
           padding: const EdgeInsets.only(right: 0),
           width: MediaQuery.of(context).size.width * 0.5,
           height: MediaQuery.of(context).size.height,
-          // height: MediaQuery.of(context).size.height *
-          //     0.5,
           child: SearchAnchor(
               searchController: widget.searchController,
               builder: (context2, searchController) {
@@ -637,10 +654,14 @@ class _GamePickerState extends State<GamePicker> {
                       borderRadius: BorderRadius.zero,
                       side: BorderSide(color: Colors.black12))),
                   controller: searchController,
+                  textStyle: WidgetStateProperty.all<TextStyle>(
+                      TextStyle(color: Theme.of(context).colorScheme.primary)),
                   leading: Builder(builder: (context3) {
                     TutorialHandler.selectGameButtonContext = context3;
                     return IconButton(
-                        onPressed: () {}, icon: const Icon(Icons.search));
+                        color: Theme.of(context).colorScheme.primary,
+                        onPressed: () {},
+                        icon: const Icon(Icons.search));
                   }),
                   onTap: () async {
                     widget.searchController.text = "";
@@ -672,6 +693,7 @@ class _GamePickerState extends State<GamePicker> {
                   return gameItem != null
                       ? Column(children: [
                           ListTile(
+                              textColor: Theme.of(context).colorScheme.primary,
                               title: gameItem.yearpublished == null
                                   ? Text(gameItem.name,
                                       overflow: TextOverflow.ellipsis,
@@ -804,6 +826,10 @@ class _GamePickerState extends State<GamePicker> {
                                         selectedGame = widget.recognizedGame;
                                       },
                                       style: ButtonStyle(
+                                          iconColor: WidgetStateProperty.all(
+                                              Theme.of(context)
+                                                  .colorScheme
+                                                  .primary),
                                           backgroundColor:
                                               WidgetStateProperty.all(
                                                   Theme.of(context)
@@ -835,8 +861,10 @@ class _GamePickerState extends State<GamePicker> {
               label: SizedBox(
                   width: MediaQuery.of(context).size.width * 0.1,
                   child: onlineSearchMode
-                      ? const Icon(Icons.wifi)
-                      : const Icon(Icons.wifi_off)),
+                      ? Icon(Icons.wifi,
+                          color: Theme.of(context).colorScheme.primary)
+                      : Icon(Icons.wifi_off,
+                          color: Theme.of(context).colorScheme.primary)),
               selected: onlineSearchMode,
               onSelected: (bool value) {
                 setState(() {

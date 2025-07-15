@@ -54,10 +54,30 @@ class _MyAppState extends State<MyApp> {
                 },
                 initialRoute: needLogin ? '/login' : '/navigation',
                 theme: ThemeData(
-                  textTheme: const TextTheme().apply(
-                    bodyColor: primaryTextColor,
-                    displayColor: Colors.blue,
+                  textTheme: TextTheme(
+                    bodyLarge: TextStyle(
+                        color: themeManager.textColor), // Основной текст
+                    bodyMedium: TextStyle(color: themeManager.textColor),
+                    bodySmall: TextStyle(color: themeManager.textColor),
+                    displayLarge: TextStyle(color: themeManager.textColor),
+                    displayMedium: TextStyle(color: themeManager.textColor),
+                    displaySmall: TextStyle(color: themeManager.textColor),
+                    headlineLarge: TextStyle(color: themeManager.textColor),
+                    headlineMedium: TextStyle(color: themeManager.textColor),
+                    headlineSmall: TextStyle(color: themeManager.textColor),
+                    titleLarge: TextStyle(
+                        color: themeManager.textColor), // Заголовки AppBar
+                    titleMedium: TextStyle(color: themeManager.textColor),
+                    titleSmall: TextStyle(color: themeManager.textColor),
+                    labelLarge:
+                        TextStyle(color: themeManager.textColor), // Кнопки
+                    labelMedium: TextStyle(color: themeManager.textColor),
+                    labelSmall: TextStyle(color: themeManager.textColor),
+                  ).apply(
+                    bodyColor: themeManager.textColor,
+                    displayColor: themeManager.textColor,
                   ),
+                  primaryTextTheme: TextTheme().apply(bodyColor: Colors.blue),
                   colorScheme: ColorScheme(
                       brightness: Brightness.light,
                       primary: themeManager.textColor,
@@ -85,9 +105,18 @@ class _MyAppState extends State<MyApp> {
                       ),
                     ),
                   ),
+                  checkboxTheme: CheckboxThemeData(
+                      side: BorderSide(color: themeManager.textColor)),
+                  navigationBarTheme: NavigationBarThemeData(
+                      labelTextStyle: WidgetStateProperty.all(TextStyle(
+                    color: themeManager.textColor,
+                  ))),
                   sliderTheme: SliderThemeData(
                     overlayShape: SliderComponentShape.noOverlay,
                   ),
+                  inputDecorationTheme: InputDecorationTheme(
+                      helperStyle: TextStyle(color: themeManager.textColor),
+                      labelStyle: TextStyle(color: themeManager.textColor)),
                 ),
                 supportedLocales: S.supportedLanguages
                     .map((toElement) => Locale(toElement['code'])),

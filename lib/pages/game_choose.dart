@@ -176,10 +176,15 @@ class _GameHelperState extends State<GameHelper> {
                 width: MediaQuery.of(context).size.width * 0.5,
                 height: double.maxFinite,
                 child: ChoiceChip(
+                  checkmarkColor: Theme.of(context).colorScheme.primary,
                   label: SizedBox(
                       width: double.infinity,
                       height: MediaQuery.of(context).size.height * 1,
-                      child: Text(S.of(context).onlyOwnedGames)),
+                      child: Text(
+                        S.of(context).onlyOwnedGames,
+                        style: TextStyle(
+                            color: Theme.of(context).colorScheme.primary),
+                      )),
                   selected: onlyOwnedGames,
                   onSelected: (bool value) {
                     setState(() {
@@ -257,7 +262,21 @@ class _GameHelperState extends State<GameHelper> {
                                           0.68,
                                       child: ExpansionTile(
                                           shape: const Border(),
-                                          title: Text(S.of(context).gamesLists),
+                                          textColor: Theme.of(context)
+                                              .colorScheme
+                                              .primary,
+                                          iconColor: Theme.of(context)
+                                              .colorScheme
+                                              .primary,
+                                          collapsedIconColor: Theme.of(context)
+                                              .colorScheme
+                                              .primary,
+                                          collapsedTextColor: Theme.of(context)
+                                              .colorScheme
+                                              .primary,
+                                          title: Text(
+                                            S.of(context).gamesLists,
+                                          ),
                                           children: [
                                             Row(
                                                 mainAxisAlignment:
@@ -487,11 +506,8 @@ class _GameHelperState extends State<GameHelper> {
                                                     child: Text(
                                                         S.of(context).create)),
                                                 SizedBox(
-                                                    width:
-                                                        MediaQuery.of(context)
-                                                                .size
-                                                                .width *
-                                                            0.4,
+                                                    width: MediaQuery.of(context).size.width *
+                                                        0.4,
                                                     child: TextField(
                                                         controller:
                                                             newCustimListNameController,
@@ -499,19 +515,23 @@ class _GameHelperState extends State<GameHelper> {
                                                             border: InputBorder
                                                                 .none,
                                                             contentPadding:
-                                                                const EdgeInsets
-                                                                    .fromLTRB(
-                                                                    10,
-                                                                    0,
-                                                                    0,
-                                                                    0),
+                                                                const EdgeInsets.fromLTRB(
+                                                                    10, 0, 0, 0),
                                                             helperText:
                                                                 createListHelperText,
+                                                            helperStyle: TextStyle(
+                                                                color: Theme.of(context)
+                                                                    .colorScheme
+                                                                    .primary),
                                                             errorText:
                                                                 createListErrorText,
                                                             labelText: S
                                                                 .of(context)
-                                                                .listName)))
+                                                                .listName,
+                                                            labelStyle: TextStyle(
+                                                                color: Theme.of(context)
+                                                                    .colorScheme
+                                                                    .primary))))
                                               ],
                                             ),
                                           ])),
@@ -531,6 +551,10 @@ class _GameHelperState extends State<GameHelper> {
                                         Expanded(
                                             child: Text(
                                           (game.keys.first).name,
+                                          style: TextStyle(
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .primary),
                                           overflow: TextOverflow.ellipsis,
                                         )),
                                         CustomCounter(game, gamesFromFilter)
@@ -655,13 +679,16 @@ class _CustomCounterState extends State<CustomCounter> {
         },
         elevation: 2.0,
         shape: const CircleBorder(),
-        child: const Icon(
+        child: Icon(
           Icons.remove,
-          color: Colors.black,
+          color: Theme.of(context).colorScheme.primary,
           size: 12.0,
         ),
       ),
-      Text(widget.game.values.first.toString()),
+      Text(
+        widget.game.values.first.toString(),
+        style: TextStyle(color: Theme.of(context).colorScheme.primary),
+      ),
       RawMaterialButton(
         materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
         constraints: const BoxConstraints(minWidth: 32.0, minHeight: 32.0),
@@ -673,9 +700,9 @@ class _CustomCounterState extends State<CustomCounter> {
         },
         elevation: 2.0,
         shape: const CircleBorder(),
-        child: const Icon(
+        child: Icon(
           Icons.add,
-          color: Colors.black,
+          color: Theme.of(context).colorScheme.primary,
           size: 12.0,
         ),
       ),

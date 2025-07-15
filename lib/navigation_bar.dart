@@ -40,27 +40,36 @@ class _NavigationScreenState extends State<NavigationScreen> {
         selectedIndex: currentPageIndex,
         destinations: <Widget>[
           NavigationDestination(
-            selectedIcon: Icon(Icons.archive, key: tutorialHandler.logKey),
-            icon: const Icon(Icons.archive_outlined),
+            selectedIcon: Icon(Icons.archive,
+                key: tutorialHandler.logKey,
+                color: Theme.of(context).colorScheme.primary),
+            icon: Icon(Icons.archive_outlined,
+                color: Theme.of(context).colorScheme.primary),
             label: S.of(context).logPlayShort,
           ),
           NavigationDestination(
-            selectedIcon:
-                Icon(Icons.leaderboard, key: tutorialHandler.statsKey),
-            icon: const Icon(Icons.leaderboard_outlined),
+            selectedIcon: Icon(Icons.leaderboard,
+                key: tutorialHandler.statsKey,
+                color: Theme.of(context).colorScheme.primary),
+            icon: Icon(Icons.leaderboard_outlined,
+                color: Theme.of(context).colorScheme.primary),
             label: S.of(context).statistics,
           ),
           NavigationDestination(
-            selectedIcon:
-                Icon(Icons.smart_toy, key: tutorialHandler.gameChoseKey),
-            icon:
-                Icon(Icons.casino_outlined, key: tutorialHandler.gameChoseKey),
+            selectedIcon: Icon(Icons.smart_toy,
+                key: tutorialHandler.gameChoseKey,
+                color: Theme.of(context).colorScheme.primary),
+            icon: Icon(Icons.casino_outlined,
+                key: tutorialHandler.gameChoseKey,
+                color: Theme.of(context).colorScheme.primary),
             label: S.of(context).chooseAGame,
           ),
           NavigationDestination(
             selectedIcon: Icon(Icons.insert_emoticon,
-                key: tutorialHandler.firstPlayerKey),
-            icon: const Icon(Icons.sentiment_satisfied_alt),
+                key: tutorialHandler.firstPlayerKey,
+                color: Theme.of(context).colorScheme.primary),
+            icon: Icon(Icons.sentiment_satisfied_alt,
+                color: Theme.of(context).colorScheme.primary),
             label: S.of(context).firstPlayer,
           ),
         ],

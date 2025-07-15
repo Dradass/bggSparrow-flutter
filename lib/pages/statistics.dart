@@ -429,8 +429,12 @@ class _StatisticsState extends State<Statistics> {
                                                 }).toList(),
                                               ),
                                               ChoiceChip(
-                                                label:
-                                                    Text(S.of(context).winRate),
+                                                label: Text(
+                                                    S.of(context).winRate,
+                                                    style: TextStyle(
+                                                        color: Theme.of(context)
+                                                            .colorScheme
+                                                            .primary)),
                                                 selected: winRate,
                                                 onSelected: (bool value) {
                                                   setState(() {
@@ -446,9 +450,14 @@ class _StatisticsState extends State<Statistics> {
                                                 ),
                                               ),
                                               ChoiceChip(
-                                                label: Text(S
-                                                    .of(context)
-                                                    .onlyChosenPlayers),
+                                                label: Text(
+                                                    S
+                                                        .of(context)
+                                                        .onlyChosenPlayers,
+                                                    style: TextStyle(
+                                                        color: Theme.of(context)
+                                                            .colorScheme
+                                                            .primary)),
                                                 selected: onlyChosenPlayers,
                                                 onSelected: (bool value) {
                                                   setState(() {
@@ -464,9 +473,14 @@ class _StatisticsState extends State<Statistics> {
                                                 ),
                                               ),
                                               ChoiceChip(
-                                                label: Text(S
-                                                    .of(context)
-                                                    .winnerAmongChosenPlayers),
+                                                label: Text(
+                                                    S
+                                                        .of(context)
+                                                        .winnerAmongChosenPlayers,
+                                                    style: TextStyle(
+                                                        color: Theme.of(context)
+                                                            .colorScheme
+                                                            .primary)),
                                                 selected:
                                                     winnerAmongChosenPlayers,
                                                 onSelected: (bool value) {
@@ -521,14 +535,19 @@ class _StatisticsState extends State<Statistics> {
                                                                 color: Theme.of(
                                                                         context)
                                                                     .colorScheme
-                                                                    .onPrimary,
+                                                                    .primary,
                                                                 decoration:
                                                                     TextDecoration
                                                                         .lineThrough,
                                                                 decorationStyle:
                                                                     TextDecorationStyle
                                                                         .solid)
-                                                            : const TextStyle()),
+                                                            : TextStyle(
+                                                                color: Theme.of(
+                                                                        context)
+                                                                    .colorScheme
+                                                                    .primary,
+                                                              )),
                                                   )
                                                 ]),
                                             value: player['isChecked'],

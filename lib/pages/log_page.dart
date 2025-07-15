@@ -72,14 +72,6 @@ class _LogPageState extends State<LogPage> {
     }
   }
 
-  // void _changeColor(Color color) async {
-  //   // Обновляем глобальный цвет
-  //   main_app.secondaryColorNotifier.value = color;
-
-  //   // Сохраняем цвет в SharedPreferences
-  //   final prefs = await SharedPreferences.getInstance();
-  //   await prefs.setInt('secondaryColor', color.value);
-  // }
   Widget _buildColorButton({
     required BuildContext context,
     required Color color,
@@ -130,19 +122,21 @@ class _LogPageState extends State<LogPage> {
                   displayThumbColor: true,
                 ),
                 const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: () {
-                    onColorChanged(tempColor);
-                    Navigator.of(context).pop();
-                  },
-                  child: Text("Apply"),
-                ),
+                SizedBox(
+                    width: double.infinity,
+                    height: 48 * 2,
+                    child: ElevatedButton(
+                        onPressed: () {
+                          onColorChanged(tempColor);
+                          Navigator.of(context).pop();
+                        },
+                        child: Text(S.of(context).apply))),
               ],
             ),
           ),
           actions: <Widget>[
             TextButton(
-              child: Text("Reset all colors"),
+              child: Text(S.of(context).resetAllColors),
               onPressed: () {
                 Provider.of<ThemeManager>(context, listen: false).resetColors();
                 Navigator.of(context).pop();
@@ -283,11 +277,13 @@ class _LogPageState extends State<LogPage> {
                 FlexButtonSettings(
                     PlayDatePicker(),
                     IconButton(
-                        onPressed: () {
-                          _scaffoldKey.currentState?.openDrawer();
-                          defaultPlayersListWrapper.updateCustomLists(context);
-                        },
-                        icon: const Icon(Icons.settings)),
+                      onPressed: () {
+                        _scaffoldKey.currentState?.openDrawer();
+                        defaultPlayersListWrapper.updateCustomLists(context);
+                      },
+                      icon: const Icon(Icons.settings),
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
                     3),
                 FlexButton(LocationPicker(), 3),
                 FlexButton(Comments(), 5),
@@ -309,11 +305,16 @@ class _LogPageState extends State<LogPage> {
             padding: EdgeInsets.zero,
             children: [
               const ListTile(title: Text('')),
-              ListTile(title: Text(S.of(context).settings)),
+              ListTile(
+                  title: Text(S.of(context).settings,
+                      style: TextStyle(
+                          color: Theme.of(context).colorScheme.primary))),
               const Divider(),
               ListTile(
                 leading: const Icon(Icons.logout),
-                title: Text(S.of(context).logOut),
+                title: Text(S.of(context).logOut,
+                    style: TextStyle(
+                        color: Theme.of(context).colorScheme.primary)),
                 onTap: () {
                   _scaffoldKey.currentState?.closeDrawer();
                   TaskChecker().needCancel = true;
@@ -322,7 +323,9 @@ class _LogPageState extends State<LogPage> {
               ),
               ListTile(
                 leading: const Icon(Icons.sync),
-                title: Text(S.of(context).loadAllData),
+                title: Text(S.of(context).loadAllData,
+                    style: TextStyle(
+                        color: Theme.of(context).colorScheme.primary)),
                 onTap: () {
                   GameThingSQL.initTables();
                   if (!backgroundLoading) {
@@ -332,22 +335,27 @@ class _LogPageState extends State<LogPage> {
               ),
               ListTile(
                 leading: const Icon(Icons.clear),
-                title: Text(S.of(context).wipeAllLocalData),
+                title: Text(S.of(context).wipeAllLocalData,
+                    style: TextStyle(
+                        color: Theme.of(context).colorScheme.primary)),
                 onTap: () {
                   TaskChecker().needCancel = true;
                   GameThingSQL.deleteDB();
                 },
               ),
+              Divider(),
               ListTile(
                 leading: _buildColorButton(
                   context: context,
                   color: themeManager.surfaceColor,
-                  tooltip: "Pick surface color",
+                  tooltip: S.of(context).selectSurfaceColor,
                 ),
-                title: Text("Pick surface color"),
+                title: Text(S.of(context).selectSurfaceColor,
+                    style: TextStyle(
+                        color: Theme.of(context).colorScheme.primary)),
                 onTap: () {
                   _showColorPickerDialog(
-                    title: "Pick surface color",
+                    title: S.of(context).selectSurfaceColor,
                     currentColor: themeManager.surfaceColor,
                     onColorChanged: (color) =>
                         themeManager.surfaceColor = color,
@@ -358,12 +366,14 @@ class _LogPageState extends State<LogPage> {
                 leading: _buildColorButton(
                   context: context,
                   color: themeManager.secondaryColor,
-                  tooltip: "Pick secondary color",
+                  tooltip: S.of(context).selectSecondaryColor,
                 ),
-                title: Text("Pick secondary color"),
+                title: Text(S.of(context).selectSecondaryColor,
+                    style: TextStyle(
+                        color: Theme.of(context).colorScheme.primary)),
                 onTap: () {
                   _showColorPickerDialog(
-                    title: "Pick secondary color",
+                    title: S.of(context).selectSecondaryColor,
                     currentColor: themeManager.secondaryColor,
                     onColorChanged: (color) =>
                         themeManager.secondaryColor = color,
@@ -374,12 +384,14 @@ class _LogPageState extends State<LogPage> {
                 leading: _buildColorButton(
                   context: context,
                   color: themeManager.textColor,
-                  tooltip: "Pick text color",
+                  tooltip: S.of(context).selectTextColor,
                 ),
-                title: Text("Pick text color"),
+                title: Text(S.of(context).selectTextColor,
+                    style: TextStyle(
+                        color: Theme.of(context).colorScheme.primary)),
                 onTap: () {
                   _showColorPickerDialog(
-                    title: "Pick text color",
+                    title: S.of(context).selectTextColor,
                     currentColor: themeManager.textColor,
                     onColorChanged: (color) => themeManager.textColor = color,
                   );
@@ -392,7 +404,9 @@ class _LogPageState extends State<LogPage> {
                 title: Row(
                   children: [
                     Text(
-                        "${S.of(context).defaultSearchMode}: ${isOnlineSearchModeDefault ? S.of(context).online : S.of(context).offline}")
+                        "${S.of(context).defaultSearchMode}: ${isOnlineSearchModeDefault ? S.of(context).online : S.of(context).offline}",
+                        style: TextStyle(
+                            color: Theme.of(context).colorScheme.primary))
                   ],
                 ),
                 onTap: () {
@@ -410,7 +424,9 @@ class _LogPageState extends State<LogPage> {
                 title: Row(
                   children: [
                     Text(
-                        "${S.of(context).firstPlayerMode}: ${simpleIndicatorMode ? S.of(context).circle : S.of(context).finger}")
+                        "${S.of(context).firstPlayerMode}: ${simpleIndicatorMode ? S.of(context).circle : S.of(context).finger}",
+                        style: TextStyle(
+                            color: Theme.of(context).colorScheme.primary))
                   ],
                 ),
                 onTap: () {
@@ -425,7 +441,9 @@ class _LogPageState extends State<LogPage> {
               ListTile(
                 title: Row(
                   children: [
-                    Text("${S.of(context).currentLanguage}: "),
+                    Text("${S.of(context).currentLanguage}: ",
+                        style: TextStyle(
+                            color: Theme.of(context).colorScheme.primary)),
                     DropdownButton<Locale>(
                       value: currentLocale,
                       onChanged: (Locale? newLocale) {
@@ -463,7 +481,9 @@ class _LogPageState extends State<LogPage> {
               ListTile(
                 title: Row(
                   children: [
-                    Text("${S.of(context).defaultLocation}: "),
+                    Text("${S.of(context).defaultLocation}: ",
+                        style: TextStyle(
+                            color: Theme.of(context).colorScheme.primary)),
                     DropdownButton<Location>(
                       value: chosenLocation ??
                           (locations.isNotEmpty &&
@@ -502,7 +522,9 @@ class _LogPageState extends State<LogPage> {
               ListTile(
                 title: Row(
                   children: [
-                    Text("${S.of(context).defaultPlayersList}: "),
+                    Text("${S.of(context).defaultPlayersList}: ",
+                        style: TextStyle(
+                            color: Theme.of(context).colorScheme.primary)),
                     ChooseListDropdown(
                         playersListWrapper: defaultPlayersListWrapper,
                         parentStateUpdate: () => {
