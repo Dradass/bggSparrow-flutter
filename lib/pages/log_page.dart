@@ -105,44 +105,49 @@ class _LogPageState extends State<LogPage> {
     required Color currentColor,
     required ValueChanged<Color> onColorChanged,
   }) {
-    Color tempColor = currentColor;
+    final Color initialColor = currentColor;
 
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          content: SingleChildScrollView(
-            child: Column(
-              children: [
-                ColorPicker(
-                  pickerColor: currentColor,
-                  onColorChanged: (color) => tempColor = color,
-                  pickerAreaHeightPercent: 1,
-                  enableAlpha: false,
-                  displayThumbColor: true,
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              content: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    ColorPicker(
+                      pickerColor: currentColor,
+                      onColorChanged: (color) {
+                        onColorChanged(color);
+                        setState(() => currentColor = color);
+                      },
+                      pickerAreaHeightPercent: 1,
+                      enableAlpha: false,
+                      displayThumbColor: true,
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 16),
-                SizedBox(
-                    width: double.infinity,
-                    height: 48 * 2,
-                    child: ElevatedButton(
-                        onPressed: () {
-                          onColorChanged(tempColor);
-                          Navigator.of(context).pop();
-                        },
-                        child: Text(S.of(context).apply))),
+              ),
+              actions: <Widget>[
+                TextButton(
+                  child: Text(S.of(context).cancel),
+                  onPressed: () {
+                    onColorChanged(initialColor);
+                    Navigator.of(context).pop();
+                  },
+                ),
+                TextButton(
+                  child: Text(S.of(context).resetAllColors),
+                  onPressed: () {
+                    Provider.of<ThemeManager>(context, listen: false)
+                        .resetColors();
+                    Navigator.of(context).pop();
+                  },
+                ),
               ],
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: Text(S.of(context).resetAllColors),
-              onPressed: () {
-                Provider.of<ThemeManager>(context, listen: false).resetColors();
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
+            );
+          },
         );
       },
     );
