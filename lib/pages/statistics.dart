@@ -121,12 +121,16 @@ class _StatisticsState extends State<Statistics> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          TabBar(tabs: [
-            Tab(text: S.of(context).plays),
-            Tab(text: S.of(context).table),
-            Tab(text: S.of(context).histogram),
-            Tab(text: S.of(context).pieChart),
-          ]),
+          TabBar(
+              labelColor:
+                  Theme.of(context).colorScheme.secondary, // Активная вкладка
+              unselectedLabelColor: Theme.of(context).colorScheme.primary,
+              tabs: [
+                Tab(text: S.of(context).plays),
+                Tab(text: S.of(context).table),
+                Tab(text: S.of(context).histogram),
+                Tab(text: S.of(context).pieChart),
+              ]),
           LayoutBuilder(builder: ((context, constraints) {
             return SizedBox(
               height: MediaQuery.of(context).size.height * 0.50,
@@ -256,11 +260,42 @@ class _StatisticsState extends State<Statistics> {
                     ))),
                 SafeArea(
                   child: SfCartesianChart(
-                    title: ChartTitle(text: S.of(context).gamesStats),
-                    primaryXAxis: const CategoryAxis(
+                    title: ChartTitle(
+                        text: S.of(context).gamesStats,
+                        textStyle: TextStyle(
+                            color: Theme.of(context).colorScheme.primary)),
+                    primaryXAxis: CategoryAxis(
+                      labelStyle: TextStyle(
+                          color: Theme.of(context).colorScheme.primary),
                       labelRotation: 270,
                       interval: 1,
                       majorGridLines: MajorGridLines(width: 0),
+                      axisLine: AxisLine(
+                        color: Theme.of(context)
+                            .colorScheme
+                            .primary, // Желаемый цвет
+                        width: 2, // Толщина линии
+                      ),
+                      majorTickLines: MajorTickLines(
+                        color: Theme.of(context)
+                            .colorScheme
+                            .primary, // Цвет засечек
+                      ),
+                    ),
+                    primaryYAxis: NumericAxis(
+                      axisLine: AxisLine(
+                        color: Theme.of(context)
+                            .colorScheme
+                            .primary, // Желаемый цвет
+                        width: 2, // Толщина линии
+                      ),
+                      majorTickLines: MajorTickLines(
+                        color: Theme.of(context)
+                            .colorScheme
+                            .primary, // Цвет засечек
+                      ),
+                      labelStyle: TextStyle(
+                          color: Theme.of(context).colorScheme.primary),
                     ),
                     tooltipBehavior: TooltipBehavior(enable: true),
                     series: <CartesianSeries<_GamePlaysCount, String>>[
@@ -277,10 +312,16 @@ class _StatisticsState extends State<Statistics> {
                 ),
                 SafeArea(
                   child: SfCircularChart(
-                    title: ChartTitle(text: S.of(context).gamesStats),
+                    title: ChartTitle(
+                        text: S.of(context).gamesStats,
+                        textStyle: TextStyle(
+                            color: Theme.of(context).colorScheme.primary)),
                     margin: const EdgeInsets.all(0),
-                    legend: const Legend(
-                        isVisible: true, position: LegendPosition.bottom),
+                    legend: Legend(
+                        isVisible: true,
+                        position: LegendPosition.bottom,
+                        textStyle: TextStyle(
+                            color: Theme.of(context).colorScheme.primary)),
                     tooltipBehavior: TooltipBehavior(enable: true),
                     series: <PieSeries<_GamePlaysCount, String>>[
                       PieSeries(

@@ -311,7 +311,8 @@ class _LogPageState extends State<LogPage> {
                           color: Theme.of(context).colorScheme.primary))),
               const Divider(),
               ListTile(
-                leading: const Icon(Icons.logout),
+                leading: Icon(Icons.logout,
+                    color: Theme.of(context).colorScheme.primary),
                 title: Text(S.of(context).logOut,
                     style: TextStyle(
                         color: Theme.of(context).colorScheme.primary)),
@@ -322,7 +323,8 @@ class _LogPageState extends State<LogPage> {
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.sync),
+                leading: Icon(Icons.sync,
+                    color: Theme.of(context).colorScheme.primary),
                 title: Text(S.of(context).loadAllData,
                     style: TextStyle(
                         color: Theme.of(context).colorScheme.primary)),
@@ -334,7 +336,8 @@ class _LogPageState extends State<LogPage> {
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.clear),
+                leading: Icon(Icons.clear,
+                    color: Theme.of(context).colorScheme.primary),
                 title: Text(S.of(context).wipeAllLocalData,
                     style: TextStyle(
                         color: Theme.of(context).colorScheme.primary)),
@@ -399,8 +402,10 @@ class _LogPageState extends State<LogPage> {
               ),
               ListTile(
                 leading: isOnlineSearchModeDefault
-                    ? Icon(Icons.wifi)
-                    : Icon(Icons.wifi_off),
+                    ? Icon(Icons.wifi,
+                        color: Theme.of(context).colorScheme.primary)
+                    : Icon(Icons.wifi_off,
+                        color: Theme.of(context).colorScheme.primary),
                 title: Row(
                   children: [
                     Text(
@@ -420,7 +425,8 @@ class _LogPageState extends State<LogPage> {
               ),
               ListTile(
                 leading: Icon(
-                    simpleIndicatorMode ? Icons.circle : Icons.fingerprint),
+                    simpleIndicatorMode ? Icons.circle : Icons.fingerprint,
+                    color: Theme.of(context).colorScheme.primary),
                 title: Row(
                   children: [
                     Text(
