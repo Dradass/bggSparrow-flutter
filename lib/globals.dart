@@ -1,3 +1,6 @@
+const userNameParamName = "username";
+const passwordParamName = "password";
+
 int selectedGameId = 0;
 dynamic selectedGame;
 bool needUpdatePlaysFromBgg = false;

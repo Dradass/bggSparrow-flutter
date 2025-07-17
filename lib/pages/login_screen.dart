@@ -5,9 +5,8 @@ import '../bggApi/bgg_api.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../widgets/common.dart';
 import '../s.dart';
+import '../globals.dart';
 
-const userNameParamName = "username";
-const passwordParamName = "password";
 String? errorLoginText;
 String? errorPasswordText;
 

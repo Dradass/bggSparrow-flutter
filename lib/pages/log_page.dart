@@ -15,6 +15,7 @@ import '../globals.dart';
 import '../s.dart';
 import 'package:provider/provider.dart';
 import '../theme_manager.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 
@@ -324,6 +325,11 @@ class _LogPageState extends State<LogPage> {
                 onTap: () {
                   _scaffoldKey.currentState?.closeDrawer();
                   TaskChecker().needCancel = true;
+
+                  const storage = FlutterSecureStorage();
+                  storage.write(key: userNameParamName, value: null);
+                  storage.write(key: passwordParamName, value: null);
+
                   Navigator.pushNamed(context, '/login');
                 },
               ),
@@ -428,27 +434,27 @@ class _LogPageState extends State<LogPage> {
                       .then((onValue) => {setState(() {})});
                 },
               ),
-              ListTile(
-                leading: Icon(
-                    simpleIndicatorMode ? Icons.circle : Icons.fingerprint,
-                    color: Theme.of(context).colorScheme.primary),
-                title: Row(
-                  children: [
-                    Text(
-                        "${S.of(context).firstPlayerMode}: ${simpleIndicatorMode ? S.of(context).circle : S.of(context).finger}",
-                        style: TextStyle(
-                            color: Theme.of(context).colorScheme.primary))
-                  ],
-                ),
-                onTap: () {
-                  simpleIndicatorMode = !simpleIndicatorMode;
-                  SystemParameterSQL.updateSystemParameter(SystemParameter(
-                          id: 3,
-                          name: "simpleIndicatorMode",
-                          value: simpleIndicatorMode ? "1" : "0"))
-                      .then((onValue) => {setState(() {})});
-                },
-              ),
+              // ListTile(
+              //   leading: Icon(
+              //       simpleIndicatorMode ? Icons.circle : Icons.fingerprint,
+              //       color: Theme.of(context).colorScheme.primary),
+              //   title: Row(
+              //     children: [
+              //       Text(
+              //           "${S.of(context).firstPlayerMode}: ${simpleIndicatorMode ? S.of(context).circle : S.of(context).finger}",
+              //           style: TextStyle(
+              //               color: Theme.of(context).colorScheme.primary))
+              //     ],
+              //   ),
+              //   onTap: () {
+              //     simpleIndicatorMode = !simpleIndicatorMode;
+              //     SystemParameterSQL.updateSystemParameter(SystemParameter(
+              //             id: 3,
+              //             name: "simpleIndicatorMode",
+              //             value: simpleIndicatorMode ? "1" : "0"))
+              //         .then((onValue) => {setState(() {})});
+              //   },
+              // ),
               ListTile(
                 title: Row(
                   children: [
