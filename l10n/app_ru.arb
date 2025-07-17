@@ -57,6 +57,7 @@
   "logPlay": "Сохранить результаты",
   "logPlayShort": "Результаты",
   "login": "Логин",
+  "loginWithYourBGGAccount": "Войдите с помощью BGG аккаунта",
   "tologIn": "Войти",
   "logOut": "Выйти",
   "loginOrPasswordIsIncorrect": "Неправильный логин или пароль",

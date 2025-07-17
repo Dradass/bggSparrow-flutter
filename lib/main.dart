@@ -116,6 +116,7 @@ class _MyAppState extends State<MyApp> {
                   ),
                   inputDecorationTheme: InputDecorationTheme(
                       helperStyle: TextStyle(color: themeManager.textColor),
+                      hintStyle: TextStyle(color: themeManager.textColor),
                       labelStyle: TextStyle(color: themeManager.textColor)),
                 ),
                 supportedLocales: S.supportedLanguages

@@ -57,6 +57,7 @@
   "logPlay": "Save results",
   "logPlayShort": "Save results",
   "login": "Login",
+  "loginWithYourBGGAccount": "Login with your BGG account",
   "tologIn": "Log in",
   "logOut": "Log out",
   "loginOrPasswordIsIncorrect": "Login or password is incorrect",

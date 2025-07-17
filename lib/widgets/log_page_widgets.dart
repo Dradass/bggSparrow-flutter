@@ -650,6 +650,9 @@ class _GamePickerState extends State<GamePicker> {
               searchController: widget.searchController,
               builder: (context2, searchController) {
                 return SearchBar(
+                  shadowColor:
+                      const MaterialStatePropertyAll(Colors.transparent),
+                  elevation: const MaterialStatePropertyAll(0.0),
                   shape: WidgetStateProperty.all(const RoundedRectangleBorder(
                       borderRadius: BorderRadius.zero,
                       side: BorderSide(color: Colors.black12))),

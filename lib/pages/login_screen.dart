@@ -72,6 +72,8 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+        Text(S.of(context).loginWithYourBGGAccount,
+            style: Theme.of(context).textTheme.headlineMedium),
         const Divider(),
         TextField(
           controller: loginTextController,
