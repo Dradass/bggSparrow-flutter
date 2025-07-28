@@ -120,8 +120,8 @@ class TutorialHandler {
 
     if (recognizeGameButtonContext != null) {
       final buttonBox =
-          recognizeGameButtonContext!.findRenderObject() as RenderBox?;
-      if (buttonBox != null && buttonBox.hasSize) {
+          recognizeGameButtonContext!.findRenderObject() as RenderBox;
+      if (buttonBox.hasSize) {
         targets.add(TargetFocus(
           identify: "recognizeGame",
           targetPosition: TargetPosition(
