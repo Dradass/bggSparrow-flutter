@@ -343,6 +343,6 @@ class _ListNameFieldState extends State<ListNameField> {
             contentPadding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
             helperText: widget.playersListWrapper.listManageHintText,
             errorText: widget.playersListWrapper.listManageErrorText,
-            labelText: 'List name'));
+            labelText: S.of(context).listName));
   }
 }

@@ -9,6 +9,7 @@ import '../db/game_things_sql.dart';
 import '../login_handler.dart';
 import '../s.dart';
 import 'theme_manager.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 late List<CameraDescription> cameras;
 bool backgroundLoading = false;
@@ -18,6 +19,12 @@ const primaryTextColor = Color.fromARGB(255, 85, 92, 89);
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await ThemeManager.initialize();
+
+  final prefs = await SharedPreferences.getInstance();
+  String? defaultLanguage = prefs.getString('default_language');
+  if (defaultLanguage != null) {
+    S.setLocale(Locale(defaultLanguage));
+  }
 
   GameThingSQL.initTables();
   cameras = await availableCameras();

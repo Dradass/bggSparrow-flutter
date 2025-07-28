@@ -18,6 +18,7 @@ import '../theme_manager.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../db/location_sql.dart';
 
@@ -463,9 +464,13 @@ class _LogPageState extends State<LogPage> {
                             color: Theme.of(context).colorScheme.primary)),
                     DropdownButton<Locale>(
                       value: currentLocale,
-                      onChanged: (Locale? newLocale) {
+                      onChanged: (Locale? newLocale) async {
                         if (newLocale != null) {
                           S.setLocale(newLocale);
+
+                          final prefs = await SharedPreferences.getInstance();
+                          await prefs.setString(
+                              'default_language', newLocale.languageCode);
                         }
                       },
                       items: S.supportedLanguages
