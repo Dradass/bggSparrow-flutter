@@ -14,6 +14,7 @@ import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:open_file/open_file.dart';
 import 'dart:developer';
+import '../widgets/players_list.dart';
 
 // Free licence for small companies <5 developers and 1 millions $
 import 'package:syncfusion_flutter_charts/charts.dart';
@@ -39,10 +40,10 @@ class _StatisticsState extends State<Statistics> {
   bool onlyChosenPlayers = false;
   bool winnerAmongChosenPlayers = false;
   RangeValues maxRangeValues = const RangeValues(0, 10);
-  List<Map> players = [];
   Map<int, String> chosenGames = {};
   final SearchController searchController = SearchController();
   var chosenGameId = 0;
+  PlayersListWrapper playersListWrapper = PlayersListWrapper();
 
   DataCell _buildDataCell(
       int rowIndex, int colIndex, Widget child, double? width) {
@@ -106,6 +107,7 @@ class _StatisticsState extends State<Statistics> {
 
   @override
   Widget build(BuildContext context) {
+    playersListWrapper.updateCustomLists(context);
     GameThingSQL.getAllGames().then((allGames) {
       chosenGames[0] = S.of(context).allGames;
       if (allGames == null) return;
@@ -352,7 +354,7 @@ class _StatisticsState extends State<Statistics> {
           )),
           Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
             SizedBox(
-                width: MediaQuery.of(context).size.width * 0.75,
+                width: MediaQuery.of(context).size.width * 0.6,
                 child: Slider(
                   value: firstGamesCount,
                   min: 0,
@@ -384,8 +386,12 @@ class _StatisticsState extends State<Statistics> {
                           TutorialHandler.statsFiltersKeyContext = context2;
                           return ElevatedButton.icon(
                             onPressed: () async {
-                              if (players.isEmpty) {
-                                players = await getAllPlayers();
+                              // if (players.isEmpty) {
+                              //   players = await getAllPlayers();
+                              // }
+                              if (playersListWrapper.players.isEmpty) {
+                                playersListWrapper.players =
+                                    await getAllPlayers();
                               }
                               showDialog(
                                   context: context,
@@ -394,29 +400,29 @@ class _StatisticsState extends State<Statistics> {
                                         builder: (context, setState) {
                                       return AlertDialog(
                                           content: Column(children: [
-                                        Text(
-                                          S.of(context).game,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
+                                        // Text(
+                                        //   S.of(context).gamesLimit,
+                                        //   overflow: TextOverflow.ellipsis,
+                                        // ),
                                         Column(
                                           mainAxisAlignment:
                                               MainAxisAlignment.spaceBetween,
                                           children: [
-                                            SizedBox(
-                                                child: Slider(
-                                              value: firstGamesCount,
-                                              min: 0,
-                                              max: 25,
-                                              divisions: 26,
-                                              label: firstGamesCount
-                                                  .round()
-                                                  .toString(),
-                                              onChanged: (double value) {
-                                                setState(() {
-                                                  firstGamesCount = value;
-                                                });
-                                              },
-                                            )),
+                                            // SizedBox(
+                                            //     child: Slider(
+                                            //   value: firstGamesCount,
+                                            //   min: 0,
+                                            //   max: 25,
+                                            //   divisions: 26,
+                                            //   label: firstGamesCount
+                                            //       .round()
+                                            //       .toString(),
+                                            //   onChanged: (double value) {
+                                            //     setState(() {
+                                            //       firstGamesCount = value;
+                                            //     });
+                                            //   },
+                                            // )),
                                             Text(
                                               S.of(context).playersCount,
                                               overflow: TextOverflow.ellipsis,
@@ -539,12 +545,23 @@ class _StatisticsState extends State<Statistics> {
                                                 ),
                                               ),
                                             ]),
-                                        Text(S.of(context).players),
+                                        Row(
+                                          children: [
+                                            Text("${S.of(context).players}:"),
+                                            ChooseListDropdown(
+                                                playersListWrapper:
+                                                    playersListWrapper,
+                                                parentStateUpdate: () =>
+                                                    setState(() {})),
+                                          ],
+                                        ),
+
                                         Expanded(
                                             child: SingleChildScrollView(
                                                 child: Column(
-                                                    children:
-                                                        players.map((player) {
+                                                    children: playersListWrapper
+                                                        .players
+                                                        .map((player) {
                                           return CheckboxListTile(
                                             contentPadding: EdgeInsets.zero,
                                             title: Row(
@@ -627,11 +644,11 @@ class _StatisticsState extends State<Statistics> {
                             allPlays =
                                 await PlaysSQL.getAllPlays(startDate, endDate);
 
-                            var chosenPlayers = players
+                            var chosenPlayers = playersListWrapper.players
                                 .where((element) => element['isChecked']);
 
-                            var excludedPlayers =
-                                players.where((element) => element['excluded']);
+                            var excludedPlayers = playersListWrapper.players
+                                .where((element) => element['excluded']);
 
                             // Get plays with chosen players
                             if (chosenPlayers.isEmpty) {
