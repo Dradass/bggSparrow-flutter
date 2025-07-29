@@ -215,9 +215,15 @@ class _FirstPlayerChoserState extends State<FirstPlayerChoser>
         checkTouchPositions(touchPositions.length);
       },
       onPointerCancel: (opc) {
+        if (touchPositions.length == 0) {
+          needToStopCount = false;
+        }
         clearPointerPosition(opc.pointer);
       },
       onPointerUp: (opc) {
+        if (touchPositions.length == 0) {
+          needToStopCount = false;
+        }
         clearPointerPosition(opc.pointer);
       },
       child: Stack(children: children),
@@ -290,7 +296,8 @@ class _FirstPlayerChoserState extends State<FirstPlayerChoser>
           counter = "";
           fingerPrintsOpacity = 0.0;
         });
-        countInProgress = true;
+        await Future.delayed(const Duration(seconds: 1));
+        countInProgress = false;
       }
     } else {
       return;

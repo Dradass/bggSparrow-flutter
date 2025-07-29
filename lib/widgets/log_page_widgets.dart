@@ -653,9 +653,8 @@ class _GamePickerState extends State<GamePicker> {
               searchController: widget.searchController,
               builder: (context2, searchController) {
                 return SearchBar(
-                  shadowColor:
-                      const MaterialStatePropertyAll(Colors.transparent),
-                  elevation: const MaterialStatePropertyAll(0.0),
+                  shadowColor: const WidgetStatePropertyAll(Colors.transparent),
+                  elevation: const WidgetStatePropertyAll(0.0),
                   shape: WidgetStateProperty.all(const RoundedRectangleBorder(
                       borderRadius: BorderRadius.zero,
                       side: BorderSide(color: Colors.black12))),
@@ -743,11 +742,10 @@ class _GamePickerState extends State<GamePicker> {
                                   }
                                 }
                                 setState(() {
-                                  searchController.closeView(gameItem.name);
-                                  FocusScope.of(context).unfocus();
-
                                   selectedGameId = gameItem.id;
                                   selectedGame = gameItem;
+                                  searchController.closeView(gameItem.name);
+                                  FocusScope.of(context).unfocus();
                                 });
                               }),
                           const Divider(
