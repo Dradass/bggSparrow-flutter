@@ -494,7 +494,7 @@ class GamePicker extends StatefulWidget {
 
   int recognizedGameId = 0;
   GameThing? recognizedGame;
-  late CameraController _controller;
+  late CameraController _cameraController;
 
   @override
   State<GamePicker> createState() => _GamePickerState();
@@ -511,7 +511,7 @@ class _GamePickerState extends State<GamePicker> {
   void dispose() {
     super.dispose();
     widget.searchController.dispose();
-    widget._controller.dispose();
+    widget._cameraController.dispose();
   }
 
   @override
@@ -544,11 +544,13 @@ class _GamePickerState extends State<GamePicker> {
         }
       case AppLifecycleState.inactive:
         () {
-          widget._controller.dispose();
+          widget._cameraController.dispose();
         };
       case AppLifecycleState.hidden:
         () => {};
       case AppLifecycleState.paused:
+        widget._cameraController.stopImageStream();
+        widget._cameraController.dispose();
         _isCameraInitialized = false;
     }
   }
@@ -556,9 +558,10 @@ class _GamePickerState extends State<GamePicker> {
   Future<void> _initializeCamera() async {
     try {
       final cameras = await availableCameras();
-      widget._controller = CameraController(cameras[0], ResolutionPreset.max,
+      widget._cameraController = CameraController(
+          cameras[0], ResolutionPreset.max,
           enableAudio: false);
-      await widget._controller.initialize();
+      await widget._cameraController.initialize();
       if (mounted) {
         setState(() {});
       }
@@ -574,7 +577,7 @@ class _GamePickerState extends State<GamePicker> {
     var result = 0;
 
     try {
-      var capturedImage = await widget._controller.takePicture();
+      var capturedImage = await widget._cameraController.takePicture();
       var bytes = await capturedImage.readAsBytes();
 
       image_dart.Image? img = image_dart.decodeImage(bytes);
@@ -777,7 +780,7 @@ class _GamePickerState extends State<GamePicker> {
                                 width: MediaQuery.of(context).size.width * 0.8,
                                 height:
                                     MediaQuery.of(context).size.height * 0.5,
-                                child: CameraPreview(widget._controller),
+                                child: CameraPreview(widget._cameraController),
                               ),
                               SizedBox(
                                   width: MediaQuery.of(context).size.width,
