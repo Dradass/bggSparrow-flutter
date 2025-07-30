@@ -1,10 +1,27 @@
 class Player {
   int id;
+  final String? username;
   final int? userid;
   final String name;
-  final String? username;
 
-  Player({required this.id, required this.name, this.userid, this.username});
+  final String? startposition;
+  final String? color;
+  final String? score;
+  final String? isNew;
+  final String? rating;
+  final String? win;
+
+  Player(
+      {required this.id,
+      this.username,
+      required this.userid,
+      required this.name,
+      this.startposition,
+      this.color,
+      this.score,
+      this.isNew,
+      this.rating,
+      this.win});
 
   factory Player.fromJson(Map<String, dynamic> json) {
     return Player(

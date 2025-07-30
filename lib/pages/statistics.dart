@@ -9,12 +9,14 @@ import '../bggApi/bgg_api.dart';
 import '../db/game_things_sql.dart';
 import '../globals.dart';
 import '../s.dart';
+import '../widgets/common.dart';
 
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:open_file/open_file.dart';
 import 'dart:developer';
 import '../widgets/players_list.dart';
+import '../pages/edit_play.dart';
 
 // Free licence for small companies <5 developers and 1 millions $
 import 'package:syncfusion_flutter_charts/charts.dart';
@@ -60,7 +62,7 @@ class _StatisticsState extends State<Statistics> {
               ),
               overlay.localToGlobal(Offset.zero) & overlay.size,
             );
-            _showContextMenu(context, position);
+            _showContextMenu(context, position, plays[rowIndex].id);
           },
           child: SizedBox(
             //color: rowIndex.isEven ? Colors.grey[300] : Colors.white,
@@ -76,7 +78,8 @@ class _StatisticsState extends State<Statistics> {
     );
   }
 
-  void _showContextMenu(BuildContext context, RelativeRect position) {
+  void _showContextMenu(
+      BuildContext context, RelativeRect position, int playId) {
     showMenu<String>(
       context: context,
       position: position,
@@ -85,17 +88,33 @@ class _StatisticsState extends State<Statistics> {
           value: 'edit',
           child: Text('Edit'),
         ),
-        const PopupMenuItem<String>(
-          value: 'delete',
-          child: Text('Delete'),
-        ),
+        // const PopupMenuItem<String>(
+        //   value: 'delete',
+        //   child: Text('Delete'),
+        // ),
       ],
     ).then((value) {
       if (value == 'delete') {
         // _deleteRow(rowId);
       }
       if (value == 'edit') {
-        // _editRow(rowId);
+        // TODO playId is hardcoded
+        PlaysSQL.selectPlayByID(playId).then((bggPlay) {
+          if (bggPlay == null) {
+            showSnackBar(context, "Game not found");
+          } else {
+            showDialog(
+                context: context,
+                builder: (buildContext) {
+                  return StatefulBuilder(builder: (context, setState) {
+                    return AlertDialog(
+                        //insetPadding: EdgeInsets.zero,
+                        title: Text("Edit play"),
+                        content: EditPage(bggPlay: bggPlay));
+                  });
+                });
+          }
+        });
       }
     });
   }
@@ -1020,7 +1039,7 @@ Column getPlayersColumn(BggPlay bggPlay) {
   } else {
     List<Widget> columnChildren = [];
     for (var playerInfo in players.split(';')) {
-      var playerName = playerInfo.split('|').last;
+      var playerName = playerInfo.split('|')[2];
       if (bggPlay.winners != null && bggPlay.winners!.contains(playerName)) {
         columnChildren.add(Row(
           mainAxisAlignment: MainAxisAlignment.center,

@@ -19,6 +19,10 @@ import '../login_handler.dart';
 import '../globals.dart';
 import 'dart:developer';
 import '../s.dart';
+import '../models/bgg_play_model.dart';
+
+import 'dart:io';
+import 'package:html/parser.dart' as parser;
 
 const maxPagesCount = 1000;
 
@@ -203,15 +207,25 @@ Future<bool> getPlaysFromPage(
 
     final playersRoot = play.findElements('players').firstOrNull;
     if (playersRoot != null) {
+      print(playersRoot);
       final players = playersRoot.findElements('player');
       currentPlayers.clear();
+      // Structure of player:
+      // (0) username="" | (1) userid="0" | (2) name="Саша" | (3) startposition=""
+      //| (4) color="" | (5) score="42" | (6) new="0" | (7) rating="0" | (8) win="1"
       for (var player in players) {
         if (player.getAttribute('name') == null) continue;
         var newPlayer = Player(
           id: maxPlayerId,
-          name: player.getAttribute('name').toString(),
-          userid: int.parse(player.getAttribute('userid').toString()),
           username: player.getAttribute('username').toString(),
+          userid: int.parse(player.getAttribute('userid').toString()),
+          name: player.getAttribute('name').toString(),
+          startposition: player.getAttribute('startposition').toString(),
+          color: player.getAttribute('color').toString(),
+          score: player.getAttribute('score').toString(),
+          isNew: player.getAttribute('new').toString(),
+          rating: player.getAttribute('rating').toString(),
+          win: player.getAttribute('win').toString(),
         );
         var win = player.getAttribute('win').toString();
         currentPlayers.add(newPlayer);
@@ -243,7 +257,8 @@ Future<bool> getPlaysFromPage(
         location: location,
         winners: winnersNames.join(';'),
         players: currentPlayers
-            .map((e) => '${e.userid.toString()}|${e.name}')
+            .map((e) =>
+                '${e.username.toString()}|${e.userid.toString()}|${e.name}|${e.startposition.toString()}|${e.color.toString()}|${e.score.toString()}|${e.isNew.toString()}|${e.rating.toString()}|${e.win.toString()}')
             .join(';'));
     if (await PlaysSQL.selectPlayByID(bggPlay.id) == null) {
       bggPlays.add(bggPlay);
@@ -502,6 +517,152 @@ Future<List<GameThing>?> searchGamesFromLocalDB(String searchString) async {
     }
   }
   return games;
+}
+
+Map<String, Object?> createFormData(
+    BggPlay play, List<Map<dynamic, dynamic>> players) {
+  final formData = {
+    'version': '2',
+    'objecttype': 'thing',
+    'objectid': play.gameId.toString(), // ID игры (Abyss)
+    'playid': play.id.toString(), // ID редактируемой партии
+    'action': 'save', // Обязательное действие
+    'playdate': play.date.toString(), // Дата в формате YYYY-MM-DD
+    'location': play.location.toString(), // Место проведения
+    'quantity': '1', // Количество игр
+    'length': play.duration.toString(), // Длительность в минутах
+    'comments': play.comments.toString(), // Комментарий
+  };
+  if (play.players == null) {
+    return formData;
+  }
+
+  var playerIndex = 0;
+  for (var player in players.where((e) => e['isChecked'] == true)) {
+    // Structure of player:
+    // (0) username="" | (1) userid="0" | (2) name="Саша" | (3) startposition=""
+    //| (4) color="" | (5) score="42" | (6) new="0" | (7) rating="0" | (8) win="1"
+    if (player['username'] != "") {
+      // Bgg player
+      formData['players[${playerIndex}][username]'] =
+          player['username'].toString();
+      formData['players[${playerIndex}][win]'] =
+          player['win'] == true ? "1" : "0";
+      formData['players[${playerIndex}][score]'] = "0";
+      formData['players[${playerIndex}][new]'] = "0";
+    } else {
+      // Offline player
+      formData['players[${playerIndex}][name]'] = player['name'].toString();
+      ;
+      formData['players[${playerIndex}][win]'] =
+          player['win'] == true ? "1" : "0";
+      formData['players[${playerIndex}][score]'] = "0";
+      formData['players[${playerIndex}][new]'] = "0";
+    }
+    playerIndex++;
+  }
+  return formData;
+}
+
+Future<void> editBGGPlay(String playId, Map<String, Object?> formData) async {
+  final username = LoginHandler().login;
+  final password = LoginHandler().getDecryptedPassword();
+  //final playId = '101909222'; // ID редактируемой партии
+  final client = http.Client();
+
+  try {
+    // 1. Авторизация в системе
+    print('Шаг 1: Авторизация...');
+    final loginResponse = await client.post(
+      Uri.parse('https://boardgamegeek.com/login/api/v1'),
+      headers: {
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode({
+        'credentials': {'username': username, 'password': password}
+      }),
+    );
+
+    String sessionCookie = '';
+    for (final cookie in loginResponse.headers['set-cookie']!.split(';')) {
+      if (cookie.startsWith('bggusername')) {
+        sessionCookie += '${cookie.isNotEmpty ? ' ' : ''}$cookie;';
+        continue;
+      }
+      var idx = cookie.indexOf('bggpassword=');
+      if (idx != -1) {
+        sessionCookie +=
+            '${cookie.isNotEmpty ? ' ' : ''}bggpassword=${cookie.substring(idx + 12)};';
+        continue;
+      }
+      idx = cookie.indexOf('SessionID=');
+      if (idx != -1) {
+        sessionCookie +=
+            '${cookie.isNotEmpty ? ' ' : ''}SessionID=${cookie.substring(idx + 10)};';
+        continue;
+      }
+    }
+
+    // 5. Отправка формы (имитация нажатия "Save All")
+    print('Шаг 3: Отправка изменений...');
+    final updateUrl = Uri.parse('https://boardgamegeek.com/geekplay.php');
+    final updateResponse = await client.post(
+      updateUrl,
+      headers: {
+        'cookie': sessionCookie,
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Origin': 'https://boardgamegeek.com',
+        'Referer': 'https://boardgamegeek.com/play/edit/$playId',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) ...',
+      },
+      body: formData,
+    );
+
+    // Сохраняем ответ для анализа
+    //await File('update_result.html').writeAsString(updateResponse.body);
+
+    // 6. Проверка результата
+    if (updateResponse.statusCode == 302) {
+      print('✓ Успех! Сервер выполнил перенаправление');
+    } else if (updateResponse.body.contains('Play recorded successfully')) {
+      print('✓ Изменения сохранены!');
+    } else {
+      throw Exception('Ошибка сохранения. Проверьте update_result.html');
+    }
+  } catch (e) {
+    print('!!! Ошибка: $e');
+  } finally {
+    client.close();
+  }
+}
+
+Future<String> getCsrfToken(http.Client client) async {
+  final url = Uri.parse('https://boardgamegeek.com/plays');
+  final response = await client.get(url);
+  final document = parser.parse(response.body);
+
+  final tokenElement = document.querySelector('input[name="token"]');
+  return tokenElement?.attributes['value'] ?? '';
+}
+
+Future<String> authenticate() async {
+  final url = Uri.parse('https://boardgamegeek.com/login');
+  final response = await http.post(
+    url,
+    body: {
+      'username': LoginHandler().login,
+      'password': LoginHandler().getDecryptedPassword(),
+      'redirect': '1',
+      'token': '', // Получается из формы (см. шаг 2)
+    },
+  );
+
+  // Проверяем успешный вход (куки сохранятся в client)
+  if (response.statusCode == 200) {
+    return response.headers['set-cookie']!; // Сохраняем куки для сессии
+  } else {
+    throw Exception('Ошибка аутентификации');
+  }
 }
 
 Future<List<GameThing>?> searchGamesFromBGG(String searchString) async {

@@ -1,3 +1,4 @@
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 
 import '../db/players_list_sql.dart';
@@ -8,6 +9,8 @@ import 'dart:developer';
 import '../s.dart';
 
 class PlayersListWrapper {
+  String? sourceWinners;
+  String? sourcePlayers;
   String? listManageErrorText;
   String? listManageHintText;
   bool isSystemDropDownItem = true;
@@ -31,6 +34,26 @@ class PlayersListWrapper {
   Future<void> updatePlayersFromCustomList() async {
     if (chosenPlayersListId == 0) {
       players = await PlayersSQL.getAllPlayers();
+
+      for (var player in players) {
+        if (sourceWinners == null) {
+          break;
+        }
+        if (sourcePlayers == null) {
+          break;
+        }
+        if (sourceWinners!.split(';').contains(player['name'])) {
+          player['win'] = true;
+        }
+        // TODO Если пользователь - BGG - сравниваем по ИД, если нет - по имени
+        if (sourcePlayers!
+            .split(';')
+            .map((e) => e.split('|')[2])
+            .contains(player['name'])) {
+          player['isChecked'] = true;
+        }
+      }
+
       return;
     }
     var customList =

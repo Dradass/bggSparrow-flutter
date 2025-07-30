@@ -21,6 +21,7 @@ import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../db/location_sql.dart';
+import '../pages/edit_play.dart';
 
 int swipeDelta = 30;
 
@@ -281,6 +282,11 @@ class _LogPageState extends State<LogPage> {
                                   })
                           ],
                         ))),
+                ElevatedButton(
+                    onPressed: () {
+                      //updatePlayDuration();
+                    },
+                    child: Text("Test")),
                 FlexButtonSettings(
                     PlayDatePicker(),
                     IconButton(
