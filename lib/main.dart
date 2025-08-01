@@ -84,11 +84,12 @@ class _MyAppState extends State<MyApp> {
                     bodyColor: themeManager.textColor,
                     displayColor: themeManager.textColor,
                   ),
-                  primaryTextTheme: TextTheme().apply(bodyColor: Colors.blue),
+                  primaryTextTheme:
+                      const TextTheme().apply(bodyColor: Colors.blue),
                   colorScheme: ColorScheme(
                       brightness: Brightness.light,
                       primary: themeManager.textColor,
-                      onPrimary: Color.fromARGB(255, 183, 187, 187),
+                      onPrimary: const Color.fromARGB(255, 183, 187, 187),
                       secondary: themeManager.secondaryColor,
                       onSecondary: primaryTextColor,
                       error: Colors.red,
@@ -96,7 +97,7 @@ class _MyAppState extends State<MyApp> {
                       surface: themeManager.surfaceColor,
                       onSurface: primaryTextColor),
                   secondaryHeaderColor: const Color.fromARGB(255, 43, 132, 190),
-                  chipTheme: ChipThemeData(
+                  chipTheme: const ChipThemeData(
                     shape: RoundedRectangleBorder(
                       side: BorderSide(color: Colors.black12),
                       borderRadius: BorderRadius.zero,
@@ -106,8 +107,8 @@ class _MyAppState extends State<MyApp> {
                     style: ElevatedButton.styleFrom(
                       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                       padding: EdgeInsets.zero,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: const BorderRadius.all(Radius.zero),
+                      shape: const RoundedRectangleBorder(
+                        borderRadius: BorderRadius.all(Radius.zero),
                         side: BorderSide(color: Colors.black12),
                       ),
                     ),

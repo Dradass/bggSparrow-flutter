@@ -19,9 +19,7 @@ import '../login_handler.dart';
 import '../globals.dart';
 import 'dart:developer';
 import '../s.dart';
-import '../models/bgg_play_model.dart';
 
-import 'dart:io';
 import 'package:html/parser.dart' as parser;
 
 const maxPagesCount = 1000;
@@ -207,7 +205,6 @@ Future<bool> getPlaysFromPage(
 
     final playersRoot = play.findElements('players').firstOrNull;
     if (playersRoot != null) {
-      print(playersRoot);
       final players = playersRoot.findElements('player');
       currentPlayers.clear();
       // Structure of player:
@@ -549,20 +546,19 @@ Map<String, Object?> createFormData(
     //| (4) color="" | (5) score="42" | (6) new="0" | (7) rating="0" | (8) win="1"
     if (player['username'] != "") {
       // Bgg player
-      formData['players[${playerIndex}][username]'] =
+      formData['players[$playerIndex][username]'] =
           player['username'].toString();
-      formData['players[${playerIndex}][win]'] =
+      formData['players[$playerIndex][win]'] =
           player['win'] == true ? "1" : "0";
-      formData['players[${playerIndex}][score]'] = "0";
-      formData['players[${playerIndex}][new]'] = "0";
+      formData['players[$playerIndex][score]'] = "0";
+      formData['players[$playerIndex][new]'] = "0";
     } else {
       // Offline player
-      formData['players[${playerIndex}][name]'] = player['name'].toString();
-      ;
-      formData['players[${playerIndex}][win]'] =
+      formData['players[$playerIndex][name]'] = player['name'].toString();
+      formData['players[$playerIndex][win]'] =
           player['win'] == true ? "1" : "0";
-      formData['players[${playerIndex}][score]'] = "0";
-      formData['players[${playerIndex}][new]'] = "0";
+      formData['players[$playerIndex][score]'] = "0";
+      formData['players[$playerIndex][new]'] = "0";
     }
     playerIndex++;
   }

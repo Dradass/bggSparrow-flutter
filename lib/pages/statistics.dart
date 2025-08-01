@@ -285,7 +285,7 @@ class _StatisticsState extends State<Statistics> {
                           color: Theme.of(context).colorScheme.primary),
                       labelRotation: 270,
                       interval: 1,
-                      majorGridLines: MajorGridLines(width: 0),
+                      majorGridLines: const MajorGridLines(width: 0),
                       axisLine: AxisLine(
                         color: Theme.of(context)
                             .colorScheme

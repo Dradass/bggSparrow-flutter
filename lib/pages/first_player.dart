@@ -213,13 +213,13 @@ class _FirstPlayerChoserState extends State<FirstPlayerChoser>
         checkTouchPositions(touchPositions.length);
       },
       onPointerCancel: (opc) {
-        if (touchPositions.length == 0) {
+        if (touchPositions.isEmpty) {
           needToStopCount = false;
         }
         clearPointerPosition(opc.pointer);
       },
       onPointerUp: (opc) {
-        if (touchPositions.length == 0) {
+        if (touchPositions.isEmpty) {
           needToStopCount = false;
         }
         clearPointerPosition(opc.pointer);
