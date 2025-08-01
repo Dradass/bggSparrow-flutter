@@ -112,9 +112,8 @@ class _GameHelperState extends State<GameHelper> {
   Widget build(BuildContext context) {
     updateCustomLists(context);
 
-    return Scaffold(
-        body: SafeArea(
-            child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+    return SafeArea(
+        child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
       Column(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
         Flexible(
             flex: 1,
@@ -633,7 +632,7 @@ class _GameHelperState extends State<GameHelper> {
               textAlign: TextAlign.center,
             ))),
       ])
-    ])));
+    ]));
   }
 }
 

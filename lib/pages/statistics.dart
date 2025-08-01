@@ -131,9 +131,8 @@ class _StatisticsState extends State<Statistics> {
       }
     });
 
-    return Scaffold(
-        body: SafeArea(
-            child: DefaultTabController(
+    return SafeArea(
+        child: DefaultTabController(
       length: 4,
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -947,7 +946,7 @@ class _StatisticsState extends State<Statistics> {
               )),
         ],
       ),
-    )));
+    ));
   }
 
   Future<List<BggPlay>> getNewPlays() async {
