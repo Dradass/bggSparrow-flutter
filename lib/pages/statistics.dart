@@ -84,9 +84,9 @@ class _StatisticsState extends State<Statistics> {
       context: context,
       position: position,
       items: [
-        const PopupMenuItem<String>(
+        PopupMenuItem<String>(
           value: 'edit',
-          child: Text('Edit'),
+          child: Text(S.of(context).edit),
         ),
         // const PopupMenuItem<String>(
         //   value: 'delete',
@@ -94,22 +94,18 @@ class _StatisticsState extends State<Statistics> {
         // ),
       ],
     ).then((value) {
-      if (value == 'delete') {
-        // _deleteRow(rowId);
-      }
+      if (value == 'delete') {}
       if (value == 'edit') {
-        // TODO playId is hardcoded
         PlaysSQL.selectPlayByID(playId).then((bggPlay) {
           if (bggPlay == null) {
-            showSnackBar(context, "Game not found");
+            showSnackBar(context, S.of(context).gamePlayWasNotFound);
           } else {
             showDialog(
                 context: context,
                 builder: (buildContext) {
                   return StatefulBuilder(builder: (context, setState) {
                     return AlertDialog(
-                        //insetPadding: EdgeInsets.zero,
-                        title: Text("Edit play"),
+                        title: Text(S.of(context).editPlayData),
                         content: EditPage(bggPlay: bggPlay));
                   });
                 });

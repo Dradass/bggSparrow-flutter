@@ -1,12 +1,10 @@
-import 'dart:ffi';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/bgg_play_model.dart';
-import '../models/game_thing.dart';
 import '../widgets/log_page_widgets.dart';
 import '../widgets/players_list.dart';
 import '../widgets/common.dart';
 import '../bggApi/bgg_api.dart';
+import '../s.dart';
 
 class EditPage extends StatefulWidget {
   EditPage({required this.bggPlay, super.key});
@@ -47,35 +45,47 @@ class _EditPageState extends State<EditPage> {
         FocusScope.of(context).unfocus();
       },
       behavior: HitTestBehavior.opaque,
-      child: Scaffold(
-        body: SafeArea(
-          child: Column(
-            children: [
-              FlexButton(playDatePickerSimple, 3),
-              FlexButton(locationPickerSimple, 3),
-              FlexButton(commentsSimple, 5),
-              FlexButton(durationSliderSimple, 1),
-              FlexButton(playersPickerSimple, 3),
-              FlexButton(
-                  ElevatedButton(
-                    onPressed: () {
-                      var formData = createFormData(
-                          widget.bggPlay, playersListWrapper.players);
-                      editBGGPlay(widget.bggPlay.id.toString(), formData);
-                    },
-                    child: Text("Save"),
-                  ),
-                  3),
-              FlexButton(
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.of(context).pushReplacementNamed('/navigation');
-                    },
-                    child: Text("Cancel"),
-                  ),
-                  3)
-            ],
-          ),
+      child: SafeArea(
+        child: Column(
+          children: [
+            FlexButton(playDatePickerSimple, 3),
+            FlexButton(locationPickerSimple, 3),
+            FlexButton(commentsSimple, 5),
+            FlexButton(durationSliderSimple, 2),
+            FlexButton(playersPickerSimple, 3),
+            FlexButton(
+                ElevatedButton(
+                  onPressed: () async {
+                    var formData = createFormData(
+                        widget.bggPlay,
+                        playDatePickerSimple.date,
+                        locationPickerSimple.location,
+                        commentsSimple.comments,
+                        durationSliderSimple.durationCurrentValue
+                            .toInt()
+                            .toString(),
+                        playersListWrapper.players);
+                    var errorMessage = await editBGGPlay(
+                        widget.bggPlay.id.toString(), formData);
+                    if (errorMessage != "") {
+                      showSnackBar(context, errorMessage);
+                    } else {
+                      showSnackBar(context, S.of(context).playResultsWasSaved);
+                    }
+                    Navigator.of(context).pop();
+                  },
+                  child: Text(S.of(context).saveChanges),
+                ),
+                3),
+            FlexButton(
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: Text(S.of(context).cancel),
+                ),
+                3)
+          ],
         ),
       ),
     );

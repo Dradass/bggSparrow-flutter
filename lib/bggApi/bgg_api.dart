@@ -520,18 +520,23 @@ Future<List<GameThing>?> searchGamesFromLocalDB(String searchString) async {
 }
 
 Map<String, Object?> createFormData(
-    BggPlay play, List<Map<dynamic, dynamic>> players) {
+    BggPlay play,
+    String playdate,
+    String location,
+    String comments,
+    String duration,
+    List<Map<dynamic, dynamic>> players) {
   final formData = {
     'version': '2',
     'objecttype': 'thing',
     'objectid': play.gameId.toString(), // ID игры (Abyss)
     'playid': play.id.toString(), // ID редактируемой партии
     'action': 'save', // Обязательное действие
-    'playdate': play.date.toString(), // Дата в формате YYYY-MM-DD
-    'location': play.location.toString(), // Место проведения
+    'playdate': playdate, // Дата в формате YYYY-MM-DD
+    'location': location, // Место проведения
     'quantity': '1', // Количество игр
-    'length': play.duration.toString(), // Длительность в минутах
-    'comments': play.comments.toString(), // Комментарий
+    'length': duration, // Длительность в минутах
+    'comments': comments, // Комментарий
   };
   if (play.players == null) {
     return formData;
@@ -564,14 +569,13 @@ Map<String, Object?> createFormData(
   return formData;
 }
 
-Future<void> editBGGPlay(String playId, Map<String, Object?> formData) async {
+Future<String> editBGGPlay(String playId, Map<String, Object?> formData) async {
   final username = LoginHandler().login;
   final password = LoginHandler().getDecryptedPassword();
-  //final playId = '101909222'; // ID редактируемой партии
   final client = http.Client();
+  String errorMessage = '';
 
   try {
-    // 1. Авторизация в системе
     print('Шаг 1: Авторизация...');
     final loginResponse = await client.post(
       Uri.parse('https://boardgamegeek.com/login/api/v1'),
@@ -603,7 +607,6 @@ Future<void> editBGGPlay(String playId, Map<String, Object?> formData) async {
       }
     }
 
-    // 5. Отправка формы (имитация нажатия "Save All")
     print('Шаг 3: Отправка изменений...');
     final updateUrl = Uri.parse('https://boardgamegeek.com/geekplay.php');
     final updateResponse = await client.post(
@@ -618,22 +621,20 @@ Future<void> editBGGPlay(String playId, Map<String, Object?> formData) async {
       body: formData,
     );
 
-    // Сохраняем ответ для анализа
-    //await File('update_result.html').writeAsString(updateResponse.body);
-
     // 6. Проверка результата
     if (updateResponse.statusCode == 302) {
       print('✓ Успех! Сервер выполнил перенаправление');
     } else if (updateResponse.body.contains('Play recorded successfully')) {
       print('✓ Изменения сохранены!');
     } else {
-      throw Exception('Ошибка сохранения. Проверьте update_result.html');
+      errorMessage = "Error game play updating, try late";
     }
   } catch (e) {
-    print('!!! Ошибка: $e');
+    errorMessage = e.toString();
   } finally {
     client.close();
   }
+  return errorMessage;
 }
 
 Future<String> getCsrfToken(http.Client client) async {
@@ -653,13 +654,12 @@ Future<String> authenticate() async {
       'username': LoginHandler().login,
       'password': LoginHandler().getDecryptedPassword(),
       'redirect': '1',
-      'token': '', // Получается из формы (см. шаг 2)
     },
   );
 
   // Проверяем успешный вход (куки сохранятся в client)
   if (response.statusCode == 200) {
-    return response.headers['set-cookie']!; // Сохраняем куки для сессии
+    return response.headers['set-cookie']!;
   } else {
     throw Exception('Ошибка аутентификации');
   }
