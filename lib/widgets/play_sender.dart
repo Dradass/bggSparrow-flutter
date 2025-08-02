@@ -17,6 +17,18 @@ import '../widgets/players_list.dart';
 
 import '../widgets/log_page_widgets.dart';
 
+const fieldOrder = [
+  'username',
+  'userid',
+  'name',
+  'startposition',
+  'color',
+  'score',
+  'new',
+  'rating',
+  'win'
+];
+
 class PlaySender extends StatefulWidget {
   static PlaySender? _singleton;
 
@@ -50,7 +62,7 @@ class PlaySender extends StatefulWidget {
   @override
   State<PlaySender> createState() => _PlaySenderState();
 
-  Future<int> sendLogRequestByPlay(BggPlay bggPlay) async {
+  Future<String> sendLogRequestByPlay(BggPlay bggPlay) async {
     logData['players'] = bggPlay.players ?? "";
     logData['objectid'] = bggPlay.gameId;
     logData['length'] = bggPlay.duration ?? 0;
@@ -79,15 +91,25 @@ class _PlaySenderState extends State<PlaySender> {
                   return;
                 }
                 List<Map> bggPlayers = [];
+                String winners = "";
                 for (var player in widget.playersListWrapper.players
                     .where((element) => element['isChecked'] == true)) {
                   bggPlayers.add({
                     'username': player['username'],
                     'userid': player['userid'],
                     'name': player['name'],
+                    'startposition': "",
+                    'color': "",
+                    'score': "",
+                    'new': "",
+                    'rating': "",
                     'win': player['win'] ? 1 : 0
                   });
+                  if (player['win']) {
+                    winners += "${player['name']};";
+                  }
                 }
+                winners = winners.substring(0, winners.length - 1);
                 final gameId = selectedGameId;
                 final dateShort =
                     DateFormat('yyyy-MM-dd').format(PlayDatePicker().playDate);
@@ -128,8 +150,15 @@ class _PlaySenderState extends State<PlaySender> {
                       comments: Comments().commentsController.text,
                       location:
                           chosenLocation != null ? chosenLocation.name : "",
-                      players: json.encode(bggPlayers),
-                      winners: "",
+                      players: bggPlayers
+                          .map((player) {
+                            return fieldOrder
+                                .map((field) => player[field]?.toString() ?? "")
+                                .join('|');
+                          })
+                          .toList()
+                          .join(";"),
+                      winners: winners,
                       duration: duration,
                       quantity: 1);
                   PlaysSQL.addPlay(play);
@@ -141,8 +170,44 @@ class _PlaySenderState extends State<PlaySender> {
                   return;
                 }
                 // Log online if internet connection
-                await sendLogRequest(stringData);
-                needUpdatePlaysFromBgg = true;
+                var isOffline = 0;
+                var sendLogResult = await sendLogRequest(stringData);
+                int? playId = (int.tryParse(sendLogResult));
+                if (playId == null) {
+                  showSnackBar(context, "NetWork error game saved locally");
+                  isOffline = 1;
+                  playId = await PlaysSQL.getMinFreeOfflinePlayId();
+
+                  if (playId == null) {
+                    showSnackBar(context, "Error saving game, try later");
+                    return;
+                  }
+                }
+
+                final gameThing = await GameThingSQL.selectGameByID(gameId);
+
+                var play = BggPlay(
+                    id: playId,
+                    offline: isOffline,
+                    gameId: gameId,
+                    gameName: gameThing?.name ?? "",
+                    date: dateShort,
+                    comments: Comments().commentsController.text,
+                    location: chosenLocation != null ? chosenLocation.name : "",
+                    players: bggPlayers
+                        .map((player) {
+                          return fieldOrder
+                              .map((field) => player[field]?.toString() ?? "")
+                              .join('|');
+                        })
+                        .toList()
+                        .join(";"),
+                    winners: winners,
+                    duration: duration,
+                    quantity: 1);
+
+                PlaysSQL.addPlay(play);
+                //needUpdatePlaysFromBgg = true;
                 Timer(const Duration(seconds: messageDuration + 1), () {
                   setState(() {
                     isRequestSending = false;
@@ -160,52 +225,4 @@ class _PlaySenderState extends State<PlaySender> {
         label: Text(S.of(context).logPlay),
         icon: const Icon(Icons.send_and_archive));
   }
-}
-
-Future<int> sendLogRequest(String logData) async {
-  dynamic bodyLogin = json.encode({
-    'credentials': {
-      'username': LoginHandler().login,
-      'password': LoginHandler().getDecryptedPassword()
-    }
-  });
-
-  http
-      .post(Uri.parse("https://boardgamegeek.com/login/api/v1"),
-          headers: {
-            'Content-Type': 'application/json; charset=UTF-8',
-          },
-          body: bodyLogin)
-      .then((response) {
-    String sessionCookie = '';
-    for (final cookie in response.headers['set-cookie']!.split(';')) {
-      if (cookie.startsWith('bggusername')) {
-        sessionCookie += '${cookie.isNotEmpty ? ' ' : ''}$cookie;';
-        continue;
-      }
-      var idx = cookie.indexOf('bggpassword=');
-      if (idx != -1) {
-        sessionCookie +=
-            '${cookie.isNotEmpty ? ' ' : ''}bggpassword=${cookie.substring(idx + 12)};';
-        continue;
-      }
-      idx = cookie.indexOf('SessionID=');
-      if (idx != -1) {
-        sessionCookie +=
-            '${cookie.isNotEmpty ? ' ' : ''}SessionID=${cookie.substring(idx + 10)};';
-        continue;
-      }
-    }
-
-    http
-        .post(Uri.parse("https://boardgamegeek.com/geekplay.php"),
-            headers: {
-              'Content-Type': 'application/json; charset=UTF-8',
-              'cookie': sessionCookie,
-            },
-            body: logData)
-        .then((response2) {});
-  });
-
-  return 1;
 }

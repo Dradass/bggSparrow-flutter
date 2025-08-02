@@ -3,7 +3,7 @@ const passwordParamName = "password";
 
 int selectedGameId = 0;
 dynamic selectedGame;
-bool needUpdatePlaysFromBgg = false;
+//bool needUpdatePlaysFromBgg = false;
 bool simpleIndicatorMode = false;
 int defaultPlayersListId = 0;
 int currentPageIndex = 0;

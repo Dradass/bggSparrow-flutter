@@ -287,9 +287,7 @@ class _StatisticsState extends State<Statistics> {
                       interval: 1,
                       majorGridLines: const MajorGridLines(width: 0),
                       axisLine: AxisLine(
-                        color: Theme.of(context)
-                            .colorScheme
-                            .primary, // Желаемый цвет
+                        color: Theme.of(context).colorScheme.primary,
                         width: 2, // Толщина линии
                       ),
                       majorTickLines: MajorTickLines(
@@ -300,9 +298,7 @@ class _StatisticsState extends State<Statistics> {
                     ),
                     primaryYAxis: NumericAxis(
                       axisLine: AxisLine(
-                        color: Theme.of(context)
-                            .colorScheme
-                            .primary, // Желаемый цвет
+                        color: Theme.of(context).colorScheme.primary,
                         width: 2, // Толщина линии
                       ),
                       majorTickLines: MajorTickLines(
@@ -414,29 +410,10 @@ class _StatisticsState extends State<Statistics> {
                                         builder: (context, setState) {
                                       return AlertDialog(
                                           content: Column(children: [
-                                        // Text(
-                                        //   S.of(context).gamesLimit,
-                                        //   overflow: TextOverflow.ellipsis,
-                                        // ),
                                         Column(
                                           mainAxisAlignment:
                                               MainAxisAlignment.spaceBetween,
                                           children: [
-                                            // SizedBox(
-                                            //     child: Slider(
-                                            //   value: firstGamesCount,
-                                            //   min: 0,
-                                            //   max: 25,
-                                            //   divisions: 26,
-                                            //   label: firstGamesCount
-                                            //       .round()
-                                            //       .toString(),
-                                            //   onChanged: (double value) {
-                                            //     setState(() {
-                                            //       firstGamesCount = value;
-                                            //     });
-                                            //   },
-                                            // )),
                                             Text(
                                               S.of(context).playersCount,
                                               overflow: TextOverflow.ellipsis,
@@ -569,7 +546,6 @@ class _StatisticsState extends State<Statistics> {
                                                     setState(() {})),
                                           ],
                                         ),
-
                                         Expanded(
                                             child: SingleChildScrollView(
                                                 child: Column(
@@ -645,13 +621,13 @@ class _StatisticsState extends State<Statistics> {
                         child: ElevatedButton.icon(
                           onPressed: () async {
                             // Get last plays
-                            if (needUpdatePlaysFromBgg) {
-                              int maxPlayerId = await PlayersSQL.getMaxID();
-                              int maxLocationId = await LocationSQL.getMaxID();
-                              await getPlaysFromPage(
-                                  1, maxPlayerId, maxLocationId);
-                              needUpdatePlaysFromBgg = false;
-                            }
+                            // if (needUpdatePlaysFromBgg) {
+                            //   int maxPlayerId = await PlayersSQL.getMaxID();
+                            //   int maxLocationId = await LocationSQL.getMaxID();
+                            //   await getPlaysFromPage(
+                            //       1, maxPlayerId, maxLocationId);
+                            //   needUpdatePlaysFromBgg = false;
+                            // }
 
                             List<BggPlay> allPlays = [];
                             plays.clear();

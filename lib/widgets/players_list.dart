@@ -272,7 +272,7 @@ class _CreateButtonState extends State<CreateButton> {
               getSelectedPlayers(widget.playersListWrapper.players);
           if (selectedPlayers.isEmpty) {
             widget.playersListWrapper.listManageErrorText =
-                S.of(context).pickTheGamesToCreateList;
+                S.of(context).pickThePlayersToCreateList;
             widget.parentStateUpdate();
             return;
           }

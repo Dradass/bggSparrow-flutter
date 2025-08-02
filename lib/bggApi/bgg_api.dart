@@ -398,6 +398,46 @@ Future<void> sendOfflinePlaysToBGG() async {
   }
 }
 
+List<Map<String, dynamic>> parseBggPlayers(String input) {
+  List<String> playerStrings = input.split(';');
+
+  const fields = [
+    'username',
+    'userid',
+    'name',
+    'startposition',
+    'color',
+    'score',
+    'new',
+    'rating',
+    'win'
+  ];
+
+  List<Map<String, dynamic>> players = [];
+
+  for (String playerStr in playerStrings) {
+    List<String> values = playerStr.split('|');
+
+    Map<String, dynamic> player = {};
+
+    for (int i = 0; i < fields.length; i++) {
+      String field = fields[i];
+
+      String value = (i < values.length) ? values[i] : "";
+
+      if (field == 'win') {
+        player[field] = (value == "1") ? true : false;
+      } else {
+        player[field] = value;
+      }
+    }
+
+    players.add(player);
+  }
+
+  return players;
+}
+
 Future<void> initializeBggData(
     LoadingStatus loadingStatus, dynamic context, refreshProgress) async {
   loadingStatus.status = S.of(context).updatingGameCollection;
@@ -414,7 +454,7 @@ Future<void> initializeBggData(
   TaskChecker().needCancel = false;
 }
 
-Future<int> sendLogPlayToBGG(BggPlay bggPlay) async {
+Future<String> sendLogPlayToBGG(BggPlay bggPlay) async {
   var logData = {
     "playdate": "2024-03-15",
     "comments": "#bggSparrow",
@@ -432,7 +472,8 @@ Future<int> sendLogPlayToBGG(BggPlay bggPlay) async {
     "ajax": 1
   };
 
-  final players = bggPlay.players == null ? [] : json.decode(bggPlay.players!);
+  final players =
+      bggPlay.players == null ? [] : parseBggPlayers(bggPlay.players!);
 
   logData['players'] = players;
   logData['objectid'] = bggPlay.gameId;
@@ -446,8 +487,7 @@ Future<int> sendLogPlayToBGG(BggPlay bggPlay) async {
   return await sendLogRequest(stringData);
 }
 
-Future<int> sendLogRequest(String logData) async {
-  log("Send log request");
+Future<String> sendLogRequest(String logData) async {
   dynamic bodyLogin = json.encode({
     'credentials': {
       'username': LoginHandler().login,
@@ -455,44 +495,51 @@ Future<int> sendLogRequest(String logData) async {
     }
   });
 
-  http
-      .post(Uri.parse("https://boardgamegeek.com/login/api/v1"),
+  var loginResponse =
+      await http.post(Uri.parse("https://boardgamegeek.com/login/api/v1"),
           headers: {
             'Content-Type': 'application/json; charset=UTF-8',
           },
-          body: bodyLogin)
-      .then((response) {
-    String sessionCookie = '';
-    for (final cookie in response.headers['set-cookie']!.split(';')) {
-      if (cookie.startsWith('bggusername')) {
-        sessionCookie += '${cookie.isNotEmpty ? ' ' : ''}$cookie;';
-        continue;
-      }
-      var idx = cookie.indexOf('bggpassword=');
-      if (idx != -1) {
-        sessionCookie +=
-            '${cookie.isNotEmpty ? ' ' : ''}bggpassword=${cookie.substring(idx + 12)};';
-        continue;
-      }
-      idx = cookie.indexOf('SessionID=');
-      if (idx != -1) {
-        sessionCookie +=
-            '${cookie.isNotEmpty ? ' ' : ''}SessionID=${cookie.substring(idx + 10)};';
-        continue;
-      }
+          body: bodyLogin);
+  String sessionCookie = '';
+  for (final cookie in loginResponse.headers['set-cookie']!.split(';')) {
+    if (cookie.startsWith('bggusername')) {
+      sessionCookie += '${cookie.isNotEmpty ? ' ' : ''}$cookie;';
+      continue;
     }
+    var idx = cookie.indexOf('bggpassword=');
+    if (idx != -1) {
+      sessionCookie +=
+          '${cookie.isNotEmpty ? ' ' : ''}bggpassword=${cookie.substring(idx + 12)};';
+      continue;
+    }
+    idx = cookie.indexOf('SessionID=');
+    if (idx != -1) {
+      sessionCookie +=
+          '${cookie.isNotEmpty ? ' ' : ''}SessionID=${cookie.substring(idx + 10)};';
+      continue;
+    }
+  }
 
-    http
-        .post(Uri.parse("https://boardgamegeek.com/geekplay.php"),
-            headers: {
-              'Content-Type': 'application/json; charset=UTF-8',
-              'cookie': sessionCookie,
-            },
-            body: logData)
-        .then((response2) {});
-  });
+  var resp2 =
+      await http.post(Uri.parse("https://boardgamegeek.com/geekplay.php"),
+          headers: {
+            'Content-Type': 'application/json; charset=UTF-8',
+            'cookie': sessionCookie,
+          },
+          body: logData);
+  print(resp2.body);
+  if (resp2.statusCode == 200) {
+    try {
+      Map<String, dynamic> jsonData = jsonDecode(resp2.body);
 
-  return 1;
+      String playid = jsonData['playid'] as String;
+      return playid;
+    } catch (e) {
+      return e.toString();
+    }
+  }
+  return "Error";
 }
 
 Future<List<GameThing>?> searchGamesFromLocalDB(String searchString) async {
