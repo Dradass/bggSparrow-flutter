@@ -185,15 +185,18 @@ class _FirstPlayerChoserState extends State<FirstPlayerChoser>
 
   @override
   Widget build(BuildContext context) {
-    var child = SizedBox(
-        width: MediaQuery.of(context).size.width,
-        height: MediaQuery.of(context).size.height,
-        child: FittedBox(
-            child: Text(
-          selectionColor: Colors.tealAccent,
-          counter ?? S.of(context).touchTheScreen,
-          textAlign: TextAlign.center,
-        )));
+    // Scaffold to get screen touch events
+    var child = Scaffold(
+      body: SizedBox(
+          width: MediaQuery.of(context).size.width,
+          height: MediaQuery.of(context).size.height,
+          child: FittedBox(
+              child: Text(
+            selectionColor: Colors.tealAccent,
+            counter ?? S.of(context).touchTheScreen,
+            textAlign: TextAlign.center,
+          ))),
+    );
 
     if ((kReleaseMode && !forceInReleaseMode) || !enabled) {
       return child;
