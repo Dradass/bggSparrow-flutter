@@ -237,6 +237,7 @@ class _FirstPlayerChoserState extends State<FirstPlayerChoser>
         setState(() {
           counter = "3";
           countInProgress = true;
+          needToStopCount = false;
         });
       } else {
         setState(() {
