@@ -555,9 +555,7 @@ Future<List<GameThing>?> searchGamesFromLocalDB(String searchString) async {
   }
 
   for (var game in allGames) {
-    if (game.name
-        .toLowerCase()
-        .contains(RegExp('^${searchString.toLowerCase()}'))) {
+    if (game.name.toLowerCase().contains(searchString.toLowerCase())) {
       games.add(game);
     }
   }
