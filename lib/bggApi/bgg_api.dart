@@ -288,6 +288,7 @@ Future<void> fillLocalPlayers(
     if (foundResult != null) {
       log("Exist player name ${newPlayer.name}");
     } else {
+      log("creating not bgg player ${newPlayer.name}");
       maxPlayerId++;
       newPlayer.id = maxPlayerId;
       PlayersSQL.addPlayer(newPlayer);
@@ -595,6 +596,7 @@ Map<String, Object?> createFormData(
       // Bgg player
       formData['players[$playerIndex][username]'] =
           player['username'].toString();
+      formData['players[$playerIndex][name]'] = player['name'].toString();
       formData['players[$playerIndex][win]'] =
           player['win'] == true ? "1" : "0";
       formData['players[$playerIndex][score]'] = "0";
@@ -670,7 +672,7 @@ Future<String> editBGGPlay(String playId, Map<String, Object?> formData) async {
     } else if (updateResponse.body.contains('Play recorded successfully')) {
       print('✓ Изменения сохранены!');
     } else {
-      errorMessage = "Error game play updating, try late";
+      errorMessage = "Cannot update game play, try later";
     }
   } catch (e) {
     errorMessage = e.toString();
