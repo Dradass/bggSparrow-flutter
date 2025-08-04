@@ -12,6 +12,7 @@ import 'theme_manager.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 late List<CameraDescription> cameras;
+
 bool backgroundLoading = false;
 bool needLogin = true;
 const primaryTextColor = Color.fromARGB(255, 85, 92, 89);

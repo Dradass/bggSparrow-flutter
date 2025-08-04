@@ -117,37 +117,59 @@ Future<String> getGameThumbFromBGG(int gameId) async {
   }
 }
 
+Future<bool> checkAllGamesCountInfoLoaded() async {
+  var isLoaded = false;
+  final gettingAllGames = await GameThingSQL.getAllGames();
+  if (gettingAllGames != null) {
+    int gamesWithPlayerInfo = gettingAllGames
+        .where((e) => e.minPlayers != 0 && e.maxPlayers != 0)
+        .length;
+    if (gamesWithPlayerInfo >= gettingAllGames.length) {
+      isLoaded = true;
+    } else {
+      isLoaded = false;
+    }
+  }
+  return isLoaded;
+}
+
 Future<void> getGamesPlayersCount(refreshProgress, dynamic context) async {
   final gettingAllGames = await GameThingSQL.getAllGames();
   if (gettingAllGames != null) {
     int gamesWithPlayerInfo = gettingAllGames
         .where((e) => e.minPlayers != 0 && e.maxPlayers != 0)
         .length;
-    for (var game in gettingAllGames) {
-      if (TaskChecker().needCancel) {
-        return;
-      }
-      if (game.minPlayers != 0 && game.maxPlayers != 0) continue;
+    if (gamesWithPlayerInfo < gettingAllGames.length) {
+      isLoadedGamesPlayersCountInfoNotifier.value = false;
+      for (var game in gettingAllGames) {
+        if (TaskChecker().needCancel) {
+          return;
+        }
+        if (game.minPlayers != 0 && game.maxPlayers != 0) continue;
 
-      var client = RetryClient(http.Client(), retries: 5);
-      var gameThingResponse = await client.get(
-          Uri.parse('https://boardgamegeek.com//xmlapi2/things?id=${game.id}'));
-      client.close();
+        var client = RetryClient(http.Client(), retries: 5);
+        var gameThingResponse = await client.get(Uri.parse(
+            'https://boardgamegeek.com//xmlapi2/things?id=${game.id}'));
+        client.close();
 
-      if (gameThingResponse.statusCode == 200) {
-        final gameThingServer = GameThing.fromXml(gameThingResponse.body);
-        game.minPlayers = gameThingServer.minPlayers;
-        game.maxPlayers = gameThingServer.maxPlayers;
-        log("Update players count of game ${game.name} id = ${game.id}");
-        refreshProgress(true,
-            "${S.of(context).updatingGamePlayersInfo} $gamesWithPlayerInfo / ${gettingAllGames.length - 1}");
-        gamesWithPlayerInfo += 1;
-        await GameThingSQL.updateGame(game);
-        // Anti DDOS
-        await Future.delayed(const Duration(milliseconds: 2000));
-      } else {
-        log("Error while getting info about game ${game.name} id = ${game.id}");
+        if (gameThingResponse.statusCode == 200) {
+          final gameThingServer = GameThing.fromXml(gameThingResponse.body);
+          game.minPlayers = gameThingServer.minPlayers;
+          game.maxPlayers = gameThingServer.maxPlayers;
+          log("Update players count of game ${game.name} id = ${game.id}");
+          refreshProgress(true,
+              "${S.of(context).updatingGamePlayersInfo} $gamesWithPlayerInfo / ${gettingAllGames.length - 1}");
+          gamesWithPlayerInfo += 1;
+          await GameThingSQL.updateGame(game);
+          // Anti DDOS
+          await Future.delayed(const Duration(milliseconds: 2000));
+        } else {
+          log("Error while getting info about game ${game.name} id = ${game.id}");
+        }
       }
+    }
+    if (gamesWithPlayerInfo >= gettingAllGames.length) {
+      isLoadedGamesPlayersCountInfoNotifier.value = true;
     }
   }
 }
@@ -442,6 +464,8 @@ List<Map<String, dynamic>> parseBggPlayers(String input) {
 Future<void> initializeBggData(
     LoadingStatus loadingStatus, dynamic context, refreshProgress) async {
   loadingStatus.status = S.of(context).updatingGameCollection;
+  isLoadedGamesPlayersCountInfoNotifier.value =
+      await checkAllGamesCountInfoLoaded();
 
   await importGameCollectionFromBGG(refreshProgress);
 

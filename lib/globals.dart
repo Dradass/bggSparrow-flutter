@@ -1,3 +1,9 @@
+import 'package:flutter/material.dart';
+
+// If false - show warning about not corrent game choice
+ValueNotifier<bool> isLoadedGamesPlayersCountInfoNotifier =
+    ValueNotifier(false);
+
 const userNameParamName = "username";
 const passwordParamName = "password";
 
@@ -5,6 +11,7 @@ int selectedGameId = 0;
 dynamic selectedGame;
 //bool needUpdatePlaysFromBgg = false;
 bool simpleIndicatorMode = false;
+
 int defaultPlayersListId = 0;
 int currentPageIndex = 0;
 

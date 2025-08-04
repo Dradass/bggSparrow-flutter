@@ -48,6 +48,7 @@
   "gamesLists": "Games lists",
   "gameNotFoundMatchingYourConditions": "Game not found matching your conditions",
   "gamePlayWasNotFound": "Game play was not found",
+  "gamePlayersInfoNotLoaded": "Player count information not loaded. \n Please wait for loading to complete to use player count filter",
   "gamesStats": "Games statistics",
   "histogram": "Histogram",
   "lastYear": "Last year",

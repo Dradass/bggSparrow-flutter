@@ -4,6 +4,7 @@ import 'package:flutter_application_1/models/game_list_model.dart';
 import '../db/game_things_sql.dart';
 import '../db/game_list_sql.dart';
 import 'dart:developer';
+import '../globals.dart';
 import '../s.dart';
 
 class GameHelper extends StatefulWidget {
@@ -14,7 +15,7 @@ class GameHelper extends StatefulWidget {
 }
 
 class _GameHelperState extends State<GameHelper> {
-  double chosenPlayersCount = 1;
+  double chosenPlayersCount = 0;
   String? chosenGame;
   RangeValues maxRangeValues = const RangeValues(0, 0);
   bool onlyOwnedGames = true;
@@ -144,6 +145,33 @@ class _GameHelperState extends State<GameHelper> {
                     Text(S.of(context).maxPlayersCount),
                   ],
                 ))),
+        SizedBox(
+            width: MediaQuery.of(context).size.width,
+            height: MediaQuery.of(context).size.height * 0.2,
+            child: FittedBox(
+                child: ValueListenableBuilder<bool>(
+              valueListenable: isLoadedGamesPlayersCountInfoNotifier,
+              builder: (context, value, _) {
+                return value
+                    ? Container()
+                    : Container(
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 4),
+                        child: Text(
+                          maxLines: 2,
+                          value
+                              ? ""
+                              : "*${S.of(context).gamePlayersInfoNotLoaded}",
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.secondary,
+                            backgroundColor: Colors.transparent,
+                          ),
+                        ));
+              },
+            ))),
         Flexible(
             flex: 1,
             child: SizedBox(
@@ -153,9 +181,9 @@ class _GameHelperState extends State<GameHelper> {
                   children: [
                     Slider(
                       value: chosenPlayersCount,
-                      min: 1,
+                      min: 0,
                       max: 12,
-                      divisions: 11,
+                      divisions: 12,
                       label: chosenPlayersCount.round().toString(),
                       onChanged: (double value) {
                         setState(() {
@@ -638,7 +666,8 @@ class _GameHelperState extends State<GameHelper> {
 
 bool isGameMatchChosenPlayersCount(
     GameThing game, double chosenPlayersCount, RangeValues maxRangeValues) {
-  if (game.minPlayers == 0 && game.maxPlayers == 0) {
+  if ((game.minPlayers == 0 && game.maxPlayers == 0) ||
+      chosenPlayersCount == 0) {
     return true;
   }
 
