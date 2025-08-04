@@ -564,13 +564,42 @@ Future<List<GameThing>?> searchGamesFromLocalDB(String searchString) async {
   return games;
 }
 
+Map<String, String> createBggPlayersInfo(List<Map<dynamic, dynamic>> players) {
+  Map<String, String> playersInfo = {};
+  var playerIndex = 0;
+  for (var player in players.where((e) => e['isChecked'] == true)) {
+    // Structure of player:
+    // (0) username="" | (1) userid="0" | (2) name="Саша" | (3) startposition=""
+    //| (4) color="" | (5) score="42" | (6) new="0" | (7) rating="0" | (8) win="1"
+    if (player['username'] != "") {
+      // Bgg player
+      playersInfo['players[$playerIndex][username]'] =
+          player['username'].toString();
+      playersInfo['players[$playerIndex][name]'] = player['name'].toString();
+      playersInfo['players[$playerIndex][win]'] =
+          player['win'] == true ? "1" : "0";
+      playersInfo['players[$playerIndex][score]'] = "0";
+      playersInfo['players[$playerIndex][new]'] = "0";
+    } else {
+      // Offline player
+      playersInfo['players[$playerIndex][name]'] = player['name'].toString();
+      playersInfo['players[$playerIndex][win]'] =
+          player['win'] == true ? "1" : "0";
+      playersInfo['players[$playerIndex][score]'] = "0";
+      playersInfo['players[$playerIndex][new]'] = "0";
+    }
+    playerIndex++;
+  }
+  return playersInfo;
+}
+
 Map<String, Object?> createFormData(
     BggPlay play,
     String playdate,
     String location,
     String comments,
     String duration,
-    List<Map<dynamic, dynamic>> players) {
+    Map<String, String> players) {
   final formData = {
     'version': '2',
     'objecttype': 'thing',
@@ -587,30 +616,8 @@ Map<String, Object?> createFormData(
     return formData;
   }
 
-  var playerIndex = 0;
-  for (var player in players.where((e) => e['isChecked'] == true)) {
-    // Structure of player:
-    // (0) username="" | (1) userid="0" | (2) name="Саша" | (3) startposition=""
-    //| (4) color="" | (5) score="42" | (6) new="0" | (7) rating="0" | (8) win="1"
-    if (player['username'] != "") {
-      // Bgg player
-      formData['players[$playerIndex][username]'] =
-          player['username'].toString();
-      formData['players[$playerIndex][name]'] = player['name'].toString();
-      formData['players[$playerIndex][win]'] =
-          player['win'] == true ? "1" : "0";
-      formData['players[$playerIndex][score]'] = "0";
-      formData['players[$playerIndex][new]'] = "0";
-    } else {
-      // Offline player
-      formData['players[$playerIndex][name]'] = player['name'].toString();
-      formData['players[$playerIndex][win]'] =
-          player['win'] == true ? "1" : "0";
-      formData['players[$playerIndex][score]'] = "0";
-      formData['players[$playerIndex][new]'] = "0";
-    }
-    playerIndex++;
-  }
+  formData.addAll(players);
+
   return formData;
 }
 
