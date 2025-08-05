@@ -359,12 +359,13 @@ Future<bool> checkLoginByRequest(String username, String password) async {
     'credentials': {'username': username, 'password': password}
   });
 
-  var response =
-      await http.post(Uri.parse("https://boardgamegeek.com/login/api/v1"),
+  var response = await http
+      .post(Uri.parse("https://boardgamegeek.com/login/api/v1"),
           headers: {
             'Content-Type': 'application/json; charset=UTF-8',
           },
-          body: bodyLogin);
+          body: bodyLogin)
+      .timeout(requestTimeout);
   if (response.hasError) {
     return false;
   } else {
