@@ -1086,8 +1086,9 @@ class _GamePickerState extends State<GamePicker> {
                   textStyle: WidgetStateProperty.all<TextStyle>(
                       TextStyle(color: Theme.of(context).colorScheme.primary)),
                   leading: Builder(builder: (context3) {
-                    TutorialHandler.selectGameButtonContext = context3;
+                    //TutorialHandler.selectGameButtonContext = context3;
                     return IconButton(
+                        key: selectGameButtonKey,
                         color: Theme.of(context).colorScheme.primary,
                         onPressed: () {},
                         icon: const Icon(Icons.search));
@@ -1185,9 +1186,8 @@ class _GamePickerState extends State<GamePicker> {
             padding: const EdgeInsets.only(right: 0),
             width: MediaQuery.of(context).size.width * 0.15,
             child: Builder(builder: (context3) {
-              TutorialHandler.recognizeGameButtonContext = context3;
-
               return ElevatedButton.icon(
+                  key: recognizeGameButtonKey,
                   //recognizeGameButtonContext
                   //key: TutorialHandler.logRecognizeGameKey,
                   onPressed: () {

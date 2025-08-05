@@ -9,8 +9,9 @@ class TutorialHandler {
   dynamic parentContext;
   dynamic setPageMethod;
 
-  static BuildContext? selectGameButtonContext;
-  static BuildContext? recognizeGameButtonContext;
+  // static BuildContext? selectGameButtonContext;
+  // static BuildContext? recognizeGameButtonContext;
+
   static BuildContext? statsFiltersKeyContext;
   static BuildContext? statsFirstPlaysKeyContext;
   static BuildContext? statsExportTableKeyContext;
@@ -82,77 +83,79 @@ class TutorialHandler {
       )
     ];
 
-    if (selectGameButtonContext != null) {
-      final buttonBox =
-          selectGameButtonContext!.findRenderObject() as RenderBox?;
-      if (buttonBox != null && buttonBox.hasSize) {
-        targets.add(TargetFocus(
-          identify: "selectGame",
-          targetPosition: TargetPosition(
-            buttonBox.size,
-            buttonBox.localToGlobal(Offset.zero),
-          ),
-          radius: 12,
-          contents: [
-            TargetContent(
-              align: ContentAlign.top,
-              builder: (context, controller) {
-                return Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      S.of(context).selectGameFromList,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                        fontSize: 20,
-                      ),
-                    ),
-                  ],
-                );
-              },
-            ),
-          ],
-        ));
-      }
-    }
+    // if (selectGameButtonContext != null) {
+    //   final buttonBox =
+    //       selectGameButtonContext!.findRenderObject() as RenderBox?;
+    //   if (buttonBox != null && buttonBox.hasSize) {
+    targets.add(TargetFocus(
+      identify: "selectGame",
+      keyTarget: selectGameButtonKey,
+      // targetPosition: TargetPosition(
+      //   buttonBox.size,
+      //   buttonBox.localToGlobal(Offset.zero),
+      // ),
+      // radius: 12,
+      contents: [
+        TargetContent(
+          align: ContentAlign.top,
+          builder: (context, controller) {
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  S.of(context).selectGameFromList,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                    fontSize: 20,
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+      ],
+    ));
+    // }
+    //}
 
-    if (recognizeGameButtonContext != null) {
-      final buttonBox =
-          recognizeGameButtonContext!.findRenderObject() as RenderBox;
-      if (buttonBox.hasSize) {
-        targets.add(TargetFocus(
-          identify: "recognizeGame",
-          targetPosition: TargetPosition(
-            buttonBox.size,
-            buttonBox.localToGlobal(Offset.zero),
-          ),
-          radius: 12,
-          contents: [
-            TargetContent(
-              align: ContentAlign.top,
-              builder: (context, controller) {
-                return Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      S.of(context).orRecognizeGame,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                        fontSize: 20,
-                      ),
-                    ),
-                  ],
-                );
-              },
-            ),
-          ],
-        ));
-      }
-    }
+    // if (recognizeGameButtonKey != null) {
+    //   final buttonBox =
+    //       recognizeGameButtonKey!.findRenderObject() as RenderBox;
+    //   if (buttonBox.hasSize) {
+    targets.add(TargetFocus(
+      keyTarget: recognizeGameButtonKey,
+      identify: "recognizeGame",
+      // targetPosition: TargetPosition(
+      //   buttonBox.size,
+      //   buttonBox.localToGlobal(Offset.zero),
+      // ),
+      // radius: 12,
+      contents: [
+        TargetContent(
+          align: ContentAlign.top,
+          builder: (context, controller) {
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  S.of(context).orRecognizeGame,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                    fontSize: 20,
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+      ],
+    ));
+    //}
+    //}
     return targets;
   }
 

@@ -7,6 +7,9 @@ ValueNotifier<bool> isLoadedGamesPlayersCountInfoNotifier =
 const userNameParamName = "username";
 const passwordParamName = "password";
 
+final GlobalKey selectGameButtonKey = GlobalKey();
+final GlobalKey recognizeGameButtonKey = GlobalKey();
+
 Duration requestTimeout = const Duration(seconds: 10);
 int selectedGameId = 0;
 dynamic selectedGame;
