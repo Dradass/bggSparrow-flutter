@@ -298,6 +298,7 @@ class _FirstPlayerChoserState extends State<FirstPlayerChoser>
           counter = "";
           fingerPrintsOpacity = 0.0;
         });
+        needToStopCount = true;
         await Future.delayed(const Duration(seconds: 1));
         countInProgress = false;
       }

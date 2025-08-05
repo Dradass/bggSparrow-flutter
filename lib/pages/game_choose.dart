@@ -116,35 +116,12 @@ class _GameHelperState extends State<GameHelper> {
     return SafeArea(
         child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
       Column(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
-        Flexible(
-            flex: 1,
-            child: SizedBox(
-                width: MediaQuery.of(context).size.width,
-                height: MediaQuery.of(context).size.height,
-                child: const Text(" "))),
-        Flexible(
-            flex: 1,
-            child: SizedBox(
-                width: MediaQuery.of(context).size.width,
-                height: MediaQuery.of(context).size.height,
-                child: Column(
-                  children: [
-                    RangeSlider(
-                      values: maxRangeValues,
-                      max: 10,
-                      divisions: 10,
-                      labels: RangeLabels(
-                          maxRangeValues.start.round().toString(),
-                          maxRangeValues.end.round().toString()),
-                      onChanged: (RangeValues values) {
-                        setState(() {
-                          maxRangeValues = values;
-                        });
-                      },
-                    ),
-                    Text(S.of(context).maxPlayersCount),
-                  ],
-                ))),
+        // Flexible(
+        //     flex: 1,
+        //     child: SizedBox(
+        //         width: MediaQuery.of(context).size.width,
+        //         height: MediaQuery.of(context).size.height,
+        //         child: const Text(" "))),
         SizedBox(
             width: MediaQuery.of(context).size.width,
             height: MediaQuery.of(context).size.height * 0.2,
@@ -172,6 +149,29 @@ class _GameHelperState extends State<GameHelper> {
                         ));
               },
             ))),
+        Flexible(
+            flex: 1,
+            child: SizedBox(
+                width: MediaQuery.of(context).size.width,
+                height: MediaQuery.of(context).size.height,
+                child: Column(
+                  children: [
+                    RangeSlider(
+                      values: maxRangeValues,
+                      max: 10,
+                      divisions: 10,
+                      labels: RangeLabels(
+                          maxRangeValues.start.round().toString(),
+                          maxRangeValues.end.round().toString()),
+                      onChanged: (RangeValues values) {
+                        setState(() {
+                          maxRangeValues = values;
+                        });
+                      },
+                    ),
+                    Text(S.of(context).maxPlayersCount),
+                  ],
+                ))),
         Flexible(
             flex: 1,
             child: SizedBox(
@@ -604,6 +604,7 @@ class _GameHelperState extends State<GameHelper> {
                 height: MediaQuery.of(context).size.height,
                 child: ElevatedButton(
                   onPressed: () async {
+                    await updateGamesFromCustomList(chosenGameListId);
                     List<GameThing>? chosenGames = [];
                     if (gamesFromFilter
                         .any((element) => element.values.first > 0)) {
