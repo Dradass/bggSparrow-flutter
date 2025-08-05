@@ -633,6 +633,9 @@ class _PlayersPickerState extends State<PlayersPicker> {
                                   onSelected: (bool? value) {
                                     setState(() {
                                       player['win'] = value;
+                                      if (player['win'] == true) {
+                                        player['isChecked'] = true;
+                                      }
                                     });
                                   },
                                   shape: const RoundedRectangleBorder(
@@ -653,6 +656,9 @@ class _PlayersPickerState extends State<PlayersPicker> {
                             setState(() {
                               player['isChecked'] = value;
                             });
+                            if (player['isChecked'] == false) {
+                              player['win'] = false;
+                            }
                           },
                         );
                       }).toList())));
