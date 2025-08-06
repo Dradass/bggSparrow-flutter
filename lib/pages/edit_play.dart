@@ -4,6 +4,7 @@ import '../widgets/log_page_widgets.dart';
 import '../widgets/players_list.dart';
 import '../widgets/common.dart';
 import '../bggApi/bgg_api.dart';
+import '../models/bgg_play_player.dart';
 import 'package:flutter_application_1/db/plays_sql.dart';
 import '../s.dart';
 
@@ -57,8 +58,8 @@ class _EditPageState extends State<EditPage> {
             FlexButton(
                 ElevatedButton(
                   onPressed: () async {
-                    var playersInfo =
-                        createBggPlayersInfo(playersListWrapper.players);
+                    var playersInfo = createBggPlayersInfo(
+                        widget.bggPlay, playersListWrapper.players);
                     var formData = createFormData(
                         widget.bggPlay,
                         playDatePickerSimple.date,
@@ -75,11 +76,18 @@ class _EditPageState extends State<EditPage> {
                     } else {
                       showSnackBar(context, S.of(context).playResultsWasSaved);
                       // Update the play in the database
+                      var sourcePlayerInfo = widget.bggPlay.players;
+                      var bggPlayPlayersList = sourcePlayerInfo
+                          ?.split(';')
+                          .map((e) => BggPlayPlayer.fromString(e))
+                          .toList();
 
                       var play = BggPlay(
                           id: widget.bggPlay.id,
                           offline: 0,
                           gameId: widget.bggPlay.gameId,
+                          incomplete: widget.bggPlay.incomplete,
+                          nowinstats: widget.bggPlay.nowinstats,
                           gameName: widget.bggPlay.gameName,
                           date: playDatePickerSimple.date,
                           comments: Comments().commentsController.text,
@@ -87,7 +95,7 @@ class _EditPageState extends State<EditPage> {
                           players: playersListWrapper.players
                               .where((e) => e['isChecked'] == true)
                               .map((e) =>
-                                  '${e['username']}|${e['userid']}|${e['name']}|${e['startposition']}|${e['color']}|${e['score']}|${e['rating']}|${e['new']}|${e['win' == true ? 1 : 0]}')
+                                  '${e['username']}|${e['userid']}|${e['name']}|${BggPlayPlayer.getPlayerByName(bggPlayPlayersList!, e['username'], e['name']).startposition}|${BggPlayPlayer.getPlayerByName(bggPlayPlayersList!, e['username'], e['name']).color}|${BggPlayPlayer.getPlayerByName(bggPlayPlayersList!, e['username'], e['name']).score}|${BggPlayPlayer.getPlayerByName(bggPlayPlayersList!, e['username'], e['name']).rating}|${BggPlayPlayer.getPlayerByName(bggPlayPlayersList!, e['username'], e['name']).isNew}|${e['win'] == true ? 1 : 0}')
                               .join(';'),
                           winners: playersListWrapper.players
                               .where((item) => item['win'] == true)

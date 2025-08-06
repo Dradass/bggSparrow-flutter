@@ -118,6 +118,9 @@ class _PlaySenderState extends State<PlaySender> {
                 widget.logData['players'] = bggPlayers;
                 widget.logData['objectid'] = gameId;
                 widget.logData['length'] = duration;
+                widget.logData['incomplete'] = "0";
+                widget.logData['nowinstats'] = "0";
+
                 widget.logData['playdate'] = dateShort;
                 widget.logData['date'] = "${dateShort}T05:00:00.000Z";
                 widget.logData['comments'] = Comments().commentsController.text;
@@ -160,6 +163,8 @@ class _PlaySenderState extends State<PlaySender> {
                           .join(";"),
                       winners: winners,
                       duration: duration,
+                      incomplete: 0,
+                      nowinstats: 0,
                       quantity: 1);
                   PlaysSQL.addPlay(play);
                   Timer(const Duration(seconds: messageDuration + 1), () {
@@ -204,6 +209,8 @@ class _PlaySenderState extends State<PlaySender> {
                         .join(";"),
                     winners: winners,
                     duration: duration,
+                    incomplete: 0,
+                    nowinstats: 0,
                     quantity: 1);
 
                 PlaysSQL.addPlay(play);

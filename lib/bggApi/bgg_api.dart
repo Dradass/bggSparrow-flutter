@@ -9,6 +9,7 @@ import 'package:http/http.dart' as http;
 import 'package:xml/xml.dart' as xml;
 import '../models/bgg_player_model.dart';
 import '../models/bgg_play_model.dart';
+import '../models/bgg_play_player.dart';
 import '../models/bgg_location.dart';
 import 'dart:convert';
 import 'package:requests/requests.dart';
@@ -208,6 +209,7 @@ Future<bool> getPlaysFromPage(
     final location = play.getAttribute('location').toString();
     final duration = int.parse(play.getAttribute('length').toString());
     final quantity = int.parse(play.getAttribute('quantity').toString());
+    final incomplete = int.parse(play.getAttribute('incomplete').toString());
     final comments = play.findElements('comments').firstOrNull != null
         ? play.findElements('comments').first.innerText
         : "";
@@ -273,6 +275,7 @@ Future<bool> getPlaysFromPage(
         comments: comments,
         duration: duration,
         quantity: quantity,
+        incomplete: incomplete,
         location: location,
         winners: winnersNames.join(';'),
         players: currentPlayers
@@ -587,7 +590,11 @@ Future<List<GameThing>?> searchGamesFromLocalDB(String searchString) async {
   return games;
 }
 
-Map<String, String> createBggPlayersInfo(List<Map<dynamic, dynamic>> players) {
+Map<String, String> createBggPlayersInfo(
+    BggPlay bggPlay, List<Map<dynamic, dynamic>> players) {
+  var sourcePlayerInfo = bggPlay.players;
+  var bggPlayPlayersList =
+      sourcePlayerInfo?.split(';').map((e) => BggPlayPlayer.fromString(e));
   Map<String, String> playersInfo = {};
   var playerIndex = 0;
   for (var player in players.where((e) => e['isChecked'] == true)) {
@@ -601,15 +608,61 @@ Map<String, String> createBggPlayersInfo(List<Map<dynamic, dynamic>> players) {
       playersInfo['players[$playerIndex][name]'] = player['name'].toString();
       playersInfo['players[$playerIndex][win]'] =
           player['win'] == true ? "1" : "0";
-      playersInfo['players[$playerIndex][score]'] = "0";
-      playersInfo['players[$playerIndex][new]'] = "0";
+      playersInfo['players[$playerIndex][score]'] = bggPlayPlayersList!
+          .where((e) => e.username == player['username'])
+          .first
+          .score
+          .toString();
+      playersInfo['players[$playerIndex][new]'] = bggPlayPlayersList
+          .where((e) => e.username == player['username'])
+          .first
+          .isNew
+          .toString();
+      playersInfo['players[$playerIndex][color]'] = bggPlayPlayersList
+          .where((e) => e.username == player['username'])
+          .first
+          .color
+          .toString();
+      playersInfo['players[$playerIndex][rating]'] = bggPlayPlayersList
+          .where((e) => e.username == player['username'])
+          .first
+          .rating
+          .toString();
+      playersInfo['players[$playerIndex][startposition]'] = bggPlayPlayersList
+          .where((e) => e.username == player['username'])
+          .first
+          .startposition
+          .toString();
     } else {
       // Offline player
       playersInfo['players[$playerIndex][name]'] = player['name'].toString();
       playersInfo['players[$playerIndex][win]'] =
           player['win'] == true ? "1" : "0";
-      playersInfo['players[$playerIndex][score]'] = "0";
-      playersInfo['players[$playerIndex][new]'] = "0";
+      playersInfo['players[$playerIndex][score]'] = bggPlayPlayersList!
+          .where((e) => e.name == player['name'] && player['username'] == "")
+          .first
+          .score
+          .toString();
+      playersInfo['players[$playerIndex][new]'] = bggPlayPlayersList
+          .where((e) => e.name == player['name'] && player['username'] == "")
+          .first
+          .isNew
+          .toString();
+      playersInfo['players[$playerIndex][color]'] = bggPlayPlayersList
+          .where((e) => e.name == player['name'] && player['username'] == "")
+          .first
+          .color
+          .toString();
+      playersInfo['players[$playerIndex][rating]'] = bggPlayPlayersList
+          .where((e) => e.name == player['name'] && player['username'] == "")
+          .first
+          .rating
+          .toString();
+      playersInfo['players[$playerIndex][startposition]'] = bggPlayPlayersList
+          .where((e) => e.name == player['name'] && player['username'] == "")
+          .first
+          .startposition
+          .toString();
     }
     playerIndex++;
   }
@@ -632,6 +685,8 @@ Map<String, Object?> createFormData(
     'playdate': playdate, // Дата в формате YYYY-MM-DD
     'location': location, // Место проведения
     'quantity': '1', // Количество игр
+    'incomplete': play.incomplete.toString(), // ID редактируемой партии
+    'nowinstats': play.nowinstats.toString(),
     'length': duration, // Длительность в минутах
     'comments': comments, // Комментарий
   };
