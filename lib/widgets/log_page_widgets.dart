@@ -1077,6 +1077,7 @@ class _GamePickerState extends State<GamePicker> {
               searchController: widget.searchController,
               builder: (context2, searchController) {
                 return SearchBar(
+                  hintText: widget.searchController.text,
                   shadowColor: const WidgetStatePropertyAll(Colors.transparent),
                   elevation: const WidgetStatePropertyAll(0.0),
                   shape: WidgetStateProperty.all(const RoundedRectangleBorder(
@@ -1086,7 +1087,6 @@ class _GamePickerState extends State<GamePicker> {
                   textStyle: WidgetStateProperty.all<TextStyle>(
                       TextStyle(color: Theme.of(context).colorScheme.primary)),
                   leading: Builder(builder: (context3) {
-                    //TutorialHandler.selectGameButtonContext = context3;
                     return IconButton(
                         key: selectGameButtonKey,
                         color: Theme.of(context).colorScheme.primary,
@@ -1188,8 +1188,6 @@ class _GamePickerState extends State<GamePicker> {
             child: Builder(builder: (context3) {
               return ElevatedButton.icon(
                   key: recognizeGameButtonKey,
-                  //recognizeGameButtonContext
-                  //key: TutorialHandler.logRecognizeGameKey,
                   onPressed: () {
                     showDialog(
                         context: context,

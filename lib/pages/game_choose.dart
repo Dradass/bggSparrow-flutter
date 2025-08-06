@@ -576,14 +576,30 @@ class _GameHelperState extends State<GameHelper> {
                                           MainAxisAlignment.spaceBetween,
                                       children: [
                                         Expanded(
-                                            child: Text(
-                                          (game.keys.first).name,
-                                          style: TextStyle(
-                                              color: Theme.of(context)
-                                                  .colorScheme
-                                                  .primary),
-                                          overflow: TextOverflow.ellipsis,
-                                        )),
+                                          child: Tooltip(
+                                            message: (game.keys.first).name,
+                                            child: InkWell(
+                                              onTap: () {
+                                                setState(() {
+                                                  gamesFromFilter[
+                                                              gamesFromFilter
+                                                                  .indexOf(
+                                                                      game)]
+                                                          [game.keys.first] =
+                                                      game.values.first + 1;
+                                                });
+                                              },
+                                              child: Text(
+                                                (game.keys.first).name,
+                                                style: TextStyle(
+                                                    color: Theme.of(context)
+                                                        .colorScheme
+                                                        .primary),
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
                                         CustomCounter(game, gamesFromFilter)
                                       ]),
                                 );
