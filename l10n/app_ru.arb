@@ -118,6 +118,7 @@
   "totalGames": "Всего игр",
   "totalPlays": "Всего партий",
   "waitingForYourFriends": "Ждем друзей",
+  "warningNotAllImagesLoaded": "Не все изображения игр загружены. Распознавание может быть некорректным",
   "winnerAmongChosenPlayers": "Победитель среди выбранных",
   "winQuestion": "Победа?",
   "winRate": "Процент побед",

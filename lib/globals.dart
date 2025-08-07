@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 ValueNotifier<bool> isLoadedGamesPlayersCountInfoNotifier =
     ValueNotifier(false);
 
+ValueNotifier<bool> isLoadedAllGamesImagesNotifier = ValueNotifier(false);
+
 const userNameParamName = "username";
 const passwordParamName = "password";
 

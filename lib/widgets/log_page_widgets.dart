@@ -1196,8 +1196,36 @@ class _GamePickerState extends State<GamePicker> {
                             title:
                                 Text(S.of(context).placeTheTopOfTheBoxInFrame),
                             content: Column(children: [
+                              ValueListenableBuilder<bool>(
+                                valueListenable: isLoadedAllGamesImagesNotifier,
+                                builder: (context, value, _) {
+                                  return value
+                                      ? Container()
+                                      : Container(
+                                          decoration: BoxDecoration(
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .primary,
+                                          ),
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 8, vertical: 4),
+                                          child: Text(
+                                            maxLines: 3,
+                                            value
+                                                ? ""
+                                                : "*${S.of(context).warningNotAllImagesLoaded}",
+                                            style: TextStyle(
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .secondary,
+                                              backgroundColor:
+                                                  Colors.transparent,
+                                            ),
+                                          ));
+                                },
+                              ),
                               SizedBox(
-                                width: MediaQuery.of(context).size.width * 0.8,
+                                width: MediaQuery.of(context).size.width * 0.7,
                                 height:
                                     MediaQuery.of(context).size.height * 0.5,
                                 child: CameraPreview(widget._cameraController),

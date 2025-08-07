@@ -154,64 +154,59 @@ class _LogPageState extends State<LogPage> {
     );
   }
 
-  void initDataFromServer() {
-    checkInternetConnection().then((isConnected) => {
-          if (!isConnected)
-            log('No internet connection')
-          else
-            {
-              sendOfflinePlaysToBGG(),
-              GameThingSQL.initTables().then(
-                (value) {
-                  setState(() {
-                    isProgressBarVisible = true;
-                    backgroundLoading = true;
-                  });
+  Future<void> initDataFromServer() async {
+    try {
+      final isConnected = await checkInternetConnection();
+      if (!isConnected) {
+        log('No internet connection');
+        return;
+      }
 
-                  // Check "first time" system param
-                  getOrCreateSystemParameter(1, "firstLaunch", "1")
-                      .then((paramValue) {
-                    if (paramValue == "1") {
-                      getAllPlaysFromServer();
-                      SystemParameterSQL.addOrEditParameter(
-                          1, "firstLaunch", "0");
-                    }
-                  });
+      await sendOfflinePlaysToBGG();
 
-                  // Check "search mode" system param
-                  getOrCreateSystemParameter(2, "isSearchModeOnline", "1")
-                      .then((paramValue) {
-                    isOnlineSearchModeDefault = paramValue == "1";
-                  });
+      setState(() {
+        isProgressBarVisible = true;
+        backgroundLoading = true;
+      });
 
-                  // Check "first player mode" system param
-                  getOrCreateSystemParameter(3, "simpleIndicatorMode", "1")
-                      .then((paramValue) {
-                    simpleIndicatorMode = paramValue == "1";
-                  });
+      final firstLaunch =
+          await getOrCreateSystemParameter(1, "firstLaunch", "1");
+      if (firstLaunch == "1") {
+        await getAllPlaysFromServer();
+        locations = await getLocalLocationsObj();
+        await SystemParameterSQL.addOrEditParameter(1, "firstLaunch", "0");
+      }
 
-                  // Check "Default players list" system param
-                  getOrCreateSystemParameter(4, "chosenPlayersListId", "0")
-                      .then((paramValue) {
-                    defaultPlayersListId = int.parse(paramValue ?? "0");
-                    defaultPlayersListWrapper.chosenPlayersListId =
-                        defaultPlayersListId;
-                    playersListWrapper.chosenPlayersListId =
-                        defaultPlayersListId;
-                    playersListWrapper.updatePlayersFromCustomList();
-                  });
-                  var initializeProgress = initializeBggData(
-                      loadingStatus, context, refreshProgress);
-                  initializeProgress.then((value) {
-                    setState(() {
-                      isProgressBarVisible = false;
-                      backgroundLoading = false;
-                    });
-                  });
-                },
-              )
-            }
+      final searchMode =
+          await getOrCreateSystemParameter(2, "isSearchModeOnline", "1");
+      setState(() => isOnlineSearchModeDefault = searchMode == "1");
+
+      final indicatorMode =
+          await getOrCreateSystemParameter(3, "simpleIndicatorMode", "1");
+      setState(() => simpleIndicatorMode = indicatorMode == "1");
+
+      final playersListId =
+          await getOrCreateSystemParameter(4, "chosenPlayersListId", "0");
+      final id = int.tryParse(playersListId ?? "0") ?? 0;
+      setState(() {
+        defaultPlayersListId = id;
+        defaultPlayersListWrapper.chosenPlayersListId = id;
+        playersListWrapper.chosenPlayersListId = id;
+        playersListWrapper.updatePlayersFromCustomList();
+      });
+
+      await initializeBggData(loadingStatus, context, refreshProgress);
+      locations = await getLocalLocationsObj();
+    } catch (e) {
+      log('Initialization error: $e');
+    } finally {
+      if (mounted) {
+        setState(() {
+          isProgressBarVisible = false;
+          backgroundLoading = false;
         });
+      }
+    }
   }
 
   void refreshProgress(bool needShowProgressBar, String statusState) {

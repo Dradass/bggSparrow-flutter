@@ -86,19 +86,28 @@ Future<void> getGamesThumbnail(refreshProgress, dynamic context) async {
     int gamesWithThumbCount = gettingAllGames
         .where((e) => e.thumbBinary != null && e.thumbBinary!.isNotEmpty)
         .length;
-    for (var game in gettingAllGames) {
-      log("Task canceled = ${TaskChecker().needCancel}");
-      if (TaskChecker().needCancel) {
-        return;
+
+    if (gamesWithThumbCount < gettingAllGames.length) {
+      isLoadedAllGamesImagesNotifier.value = false;
+
+      for (var game in gettingAllGames) {
+        log("Task canceled = ${TaskChecker().needCancel}");
+        if (TaskChecker().needCancel) {
+          return;
+        }
+        if (game.thumbBinary == null) {
+          game.createBinaryThumb();
+          refreshProgress(true,
+              "${S.of(context).updatingThumbnails} $gamesWithThumbCount / ${gettingAllGames.length - 1}");
+          gamesWithThumbCount += 1;
+          // Anti DDOS
+          await Future.delayed(const Duration(milliseconds: 2000));
+        }
       }
-      if (game.thumbBinary == null) {
-        game.createBinaryThumb();
-        refreshProgress(true,
-            "${S.of(context).updatingThumbnails} $gamesWithThumbCount / ${gettingAllGames.length - 1}");
-        gamesWithThumbCount += 1;
-        // Anti DDOS
-        await Future.delayed(const Duration(milliseconds: 2000));
-      }
+    }
+    if (gamesWithThumbCount == gettingAllGames.length) {
+      isLoadedAllGamesImagesNotifier.value = true;
+      return;
     }
   }
 }
@@ -132,6 +141,23 @@ Future<bool> checkAllGamesCountInfoLoaded() async {
     }
   }
   return isLoaded;
+}
+
+Future<bool> checkAllGamesImagesLoaded() async {
+  final gettingAllGames = await GameThingSQL.getAllGames();
+  if (gettingAllGames == null) {
+    return true;
+  }
+
+  int gamesWithThumbCount = gettingAllGames
+      .where((e) => e.thumbBinary != null && e.thumbBinary!.isNotEmpty)
+      .length;
+
+  if (gamesWithThumbCount == gettingAllGames.length) {
+    return true;
+  }
+
+  return false;
 }
 
 Future<void> getGamesPlayersCount(refreshProgress, dynamic context) async {
@@ -470,6 +496,7 @@ Future<void> initializeBggData(
   loadingStatus.status = S.of(context).updatingGameCollection;
   isLoadedGamesPlayersCountInfoNotifier.value =
       await checkAllGamesCountInfoLoaded();
+  isLoadedAllGamesImagesNotifier.value = await checkAllGamesImagesLoaded();
 
   await importGameCollectionFromBGG(refreshProgress);
 
