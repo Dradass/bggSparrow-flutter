@@ -354,59 +354,6 @@ class _LogPageState extends State<LogPage> {
               ),
               Divider(),
               ListTile(
-                leading: _buildColorButton(
-                  context: context,
-                  color: themeManager.surfaceColor,
-                  tooltip: S.of(context).selectSurfaceColor,
-                ),
-                title: Text(S.of(context).selectSurfaceColor,
-                    style: TextStyle(
-                        color: Theme.of(context).colorScheme.primary)),
-                onTap: () {
-                  _showColorPickerDialog(
-                    title: S.of(context).selectSurfaceColor,
-                    currentColor: themeManager.surfaceColor,
-                    onColorChanged: (color) =>
-                        themeManager.surfaceColor = color,
-                  );
-                },
-              ),
-              ListTile(
-                leading: _buildColorButton(
-                  context: context,
-                  color: themeManager.secondaryColor,
-                  tooltip: S.of(context).selectSecondaryColor,
-                ),
-                title: Text(S.of(context).selectSecondaryColor,
-                    style: TextStyle(
-                        color: Theme.of(context).colorScheme.primary)),
-                onTap: () {
-                  _showColorPickerDialog(
-                    title: S.of(context).selectSecondaryColor,
-                    currentColor: themeManager.secondaryColor,
-                    onColorChanged: (color) =>
-                        themeManager.secondaryColor = color,
-                  );
-                },
-              ),
-              ListTile(
-                leading: _buildColorButton(
-                  context: context,
-                  color: themeManager.textColor,
-                  tooltip: S.of(context).selectTextColor,
-                ),
-                title: Text(S.of(context).selectTextColor,
-                    style: TextStyle(
-                        color: Theme.of(context).colorScheme.primary)),
-                onTap: () {
-                  _showColorPickerDialog(
-                    title: S.of(context).selectTextColor,
-                    currentColor: themeManager.textColor,
-                    onColorChanged: (color) => themeManager.textColor = color,
-                  );
-                },
-              ),
-              ListTile(
                 leading: isOnlineSearchModeDefault
                     ? Icon(Icons.wifi,
                         color: Theme.of(context).colorScheme.primary)
@@ -554,6 +501,60 @@ class _LogPageState extends State<LogPage> {
                   ],
                 ),
                 onTap: null,
+              ),
+              Divider(),
+              ListTile(
+                leading: _buildColorButton(
+                  context: context,
+                  color: themeManager.surfaceColor,
+                  tooltip: S.of(context).selectSurfaceColor,
+                ),
+                title: Text(S.of(context).selectSurfaceColor,
+                    style: TextStyle(
+                        color: Theme.of(context).colorScheme.primary)),
+                onTap: () {
+                  _showColorPickerDialog(
+                    title: S.of(context).selectSurfaceColor,
+                    currentColor: themeManager.surfaceColor,
+                    onColorChanged: (color) =>
+                        themeManager.surfaceColor = color,
+                  );
+                },
+              ),
+              ListTile(
+                leading: _buildColorButton(
+                  context: context,
+                  color: themeManager.secondaryColor,
+                  tooltip: S.of(context).selectSecondaryColor,
+                ),
+                title: Text(S.of(context).selectSecondaryColor,
+                    style: TextStyle(
+                        color: Theme.of(context).colorScheme.primary)),
+                onTap: () {
+                  _showColorPickerDialog(
+                    title: S.of(context).selectSecondaryColor,
+                    currentColor: themeManager.secondaryColor,
+                    onColorChanged: (color) =>
+                        themeManager.secondaryColor = color,
+                  );
+                },
+              ),
+              ListTile(
+                leading: _buildColorButton(
+                  context: context,
+                  color: themeManager.textColor,
+                  tooltip: S.of(context).selectTextColor,
+                ),
+                title: Text(S.of(context).selectTextColor,
+                    style: TextStyle(
+                        color: Theme.of(context).colorScheme.primary)),
+                onTap: () {
+                  _showColorPickerDialog(
+                    title: S.of(context).selectTextColor,
+                    currentColor: themeManager.textColor,
+                    onColorChanged: (color) => themeManager.textColor = color,
+                  );
+                },
               ),
             ],
           ),

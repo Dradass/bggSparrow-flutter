@@ -618,49 +618,55 @@ class _PlayersPickerState extends State<PlayersPicker> {
                           child: Column(
                               children: widget.playersListWrapper.players
                                   .map((player) {
-                        return CheckboxListTile(
-                          contentPadding: EdgeInsets.zero,
-                          title: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              children: [
-                                ChoiceChip(
-                                  label: Text(
-                                    S.of(context).winQuestion,
-                                    style: TextStyle(
-                                        color: Theme.of(context).primaryColor),
-                                  ),
-                                  selected: player['win'],
-                                  onSelected: (bool? value) {
-                                    setState(() {
-                                      player['win'] = value;
-                                      if (player['win'] == true) {
-                                        player['isChecked'] = true;
-                                      }
-                                    });
-                                  },
-                                  shape: const RoundedRectangleBorder(
-                                    side: BorderSide(color: Colors.black12),
-                                    borderRadius: BorderRadius.zero,
-                                  ),
-                                ),
-                                const SizedBox(width: 10),
-                                Expanded(
-                                    child: Text(player['name'],
-                                        overflow: TextOverflow.ellipsis,
+                        return ListTileTheme(
+                            horizontalTitleGap: 0,
+                            child: CheckboxListTile(
+                              contentPadding: EdgeInsets.zero,
+                              title: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceEvenly,
+                                  children: [
+                                    ChoiceChip(
+                                      label: Text(
+                                        S.of(context).winQuestion,
                                         style: TextStyle(
-                                            color: Theme.of(context)
-                                                .primaryColor)))
-                              ]),
-                          value: player['isChecked'],
-                          onChanged: (bool? value) {
-                            setState(() {
-                              player['isChecked'] = value;
-                            });
-                            if (player['isChecked'] == false) {
-                              player['win'] = false;
-                            }
-                          },
-                        );
+                                            color:
+                                                Theme.of(context).primaryColor),
+                                      ),
+                                      selected: player['win'],
+                                      onSelected: (bool? value) {
+                                        setState(() {
+                                          player['win'] = value;
+                                          if (player['win'] == true) {
+                                            player['isChecked'] = true;
+                                          }
+                                        });
+                                      },
+                                      shape: const RoundedRectangleBorder(
+                                        side: BorderSide(color: Colors.black12),
+                                        borderRadius: BorderRadius.zero,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 10),
+                                    Expanded(
+                                        child: Tooltip(
+                                            message: player['name'],
+                                            child: Text(player['name'],
+                                                overflow: TextOverflow.ellipsis,
+                                                style: TextStyle(
+                                                    color: Theme.of(context)
+                                                        .primaryColor))))
+                                  ]),
+                              value: player['isChecked'],
+                              onChanged: (bool? value) {
+                                setState(() {
+                                  player['isChecked'] = value;
+                                });
+                                if (player['isChecked'] == false) {
+                                  player['win'] = false;
+                                }
+                              },
+                            ));
                       }).toList())));
                 });
               });
@@ -1225,7 +1231,7 @@ class _GamePickerState extends State<GamePicker> {
                                 },
                               ),
                               SizedBox(
-                                width: MediaQuery.of(context).size.width * 0.7,
+                                width: MediaQuery.of(context).size.width * 0.8,
                                 height:
                                     MediaQuery.of(context).size.height * 0.5,
                                 child: CameraPreview(widget._cameraController),
