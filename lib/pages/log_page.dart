@@ -271,7 +271,8 @@ class _LogPageState extends State<LogPage> {
                               ValueListenableBuilder<DownloadProgress>(
                                   valueListenable: progressNotifier,
                                   builder: (_, progress, __) {
-                                    return Text(progress.status);
+                                    return Text(progress.status,
+                                        key: progressBarKey);
                                   })
                           ],
                         ))),

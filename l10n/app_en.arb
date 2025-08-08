@@ -51,6 +51,7 @@
   "gamePlayersInfoNotLoaded": "Player count information not loaded. \n Please wait for loading to complete to use player count filter",
   "gamesStats": "Games statistics",
   "histogram": "Histogram",
+  "initialLoadingCanBeLong": "The initial download may take a long time due to the service's data download security policy.",
   "lastYear": "Last year",
   "listName": "List name",
   "listIsAlreadyExistsWithSameName": "List is already exists with same name",

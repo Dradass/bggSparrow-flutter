@@ -9,9 +9,6 @@ class TutorialHandler {
   dynamic parentContext;
   dynamic setPageMethod;
 
-  // static BuildContext? selectGameButtonContext;
-  // static BuildContext? recognizeGameButtonContext;
-
   static BuildContext? statsFiltersKeyContext;
   static BuildContext? statsFirstPlaysKeyContext;
   static BuildContext? statsExportTableKeyContext;
@@ -83,18 +80,35 @@ class TutorialHandler {
       )
     ];
 
-    // if (selectGameButtonContext != null) {
-    //   final buttonBox =
-    //       selectGameButtonContext!.findRenderObject() as RenderBox?;
-    //   if (buttonBox != null && buttonBox.hasSize) {
+    targets.add(TargetFocus(
+      identify: "progressBar",
+      keyTarget: progressBarKey,
+      contents: [
+        TargetContent(
+          align: ContentAlign.bottom,
+          builder: (context, controller) {
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  S.of(context).initialLoadingCanBeLong,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                    fontSize: 20,
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+      ],
+    ));
+
     targets.add(TargetFocus(
       identify: "selectGame",
       keyTarget: selectGameButtonKey,
-      // targetPosition: TargetPosition(
-      //   buttonBox.size,
-      //   buttonBox.localToGlobal(Offset.zero),
-      // ),
-      // radius: 12,
       contents: [
         TargetContent(
           align: ContentAlign.top,
@@ -117,21 +131,10 @@ class TutorialHandler {
         ),
       ],
     ));
-    // }
-    //}
 
-    // if (recognizeGameButtonKey != null) {
-    //   final buttonBox =
-    //       recognizeGameButtonKey!.findRenderObject() as RenderBox;
-    //   if (buttonBox.hasSize) {
     targets.add(TargetFocus(
       keyTarget: recognizeGameButtonKey,
       identify: "recognizeGame",
-      // targetPosition: TargetPosition(
-      //   buttonBox.size,
-      //   buttonBox.localToGlobal(Offset.zero),
-      // ),
-      // radius: 12,
       contents: [
         TargetContent(
           align: ContentAlign.top,
