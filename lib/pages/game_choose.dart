@@ -310,90 +310,84 @@ class _GameHelperState extends State<GameHelper> {
                                                     MainAxisAlignment
                                                         .spaceBetween,
                                                 children: [
-                                                  Row(children: [
-                                                    ElevatedButton(
-                                                        onPressed:
-                                                            isSystemDropDownItem
-                                                                ? null
-                                                                : () async {
+                                                  ElevatedButton(
+                                                      onPressed:
+                                                          isSystemDropDownItem
+                                                              ? null
+                                                              : () async {
+                                                                  setState(() {
+                                                                    createListErrorText =
+                                                                        null;
+                                                                    createListHelperText =
+                                                                        null;
+                                                                  });
+                                                                  var selectedGames =
+                                                                      getSelectedGames();
+                                                                  if (!await updateCustomList(
+                                                                      selectedGames,
+                                                                      chosenGameListId)) {
                                                                     setState(
                                                                         () {
-                                                                      createListErrorText =
-                                                                          null;
-                                                                      createListHelperText =
-                                                                          null;
-                                                                    });
-                                                                    var selectedGames =
-                                                                        getSelectedGames();
-                                                                    if (!await updateCustomList(
-                                                                        selectedGames,
-                                                                        chosenGameListId)) {
-                                                                      setState(
-                                                                          () {
-                                                                        createListErrorText = S
-                                                                            .of(context)
-                                                                            .cantUpdateThisListTryAgain;
-                                                                      });
-                                                                      return;
-                                                                    }
-                                                                    setState(
-                                                                        () {});
-                                                                    setState(
-                                                                        () {
-                                                                      createListHelperText = S
+                                                                      createListErrorText = S
                                                                           .of(context)
-                                                                          .listWasUpdated;
+                                                                          .cantUpdateThisListTryAgain;
                                                                     });
-                                                                  },
-                                                        style: ButtonStyle(
-                                                            backgroundColor: WidgetStateProperty
-                                                                .all(Theme.of(
-                                                                        context)
-                                                                    .colorScheme
-                                                                    .secondary)),
-                                                        child: Text(S
-                                                            .of(context)
-                                                            .update)),
-                                                    DropdownButton(
-                                                      padding:
-                                                          const EdgeInsets.all(
-                                                              10),
-                                                      value: gamesList
-                                                              .isNotEmpty
-                                                          ? gamesList[
-                                                              chosenGameListId]
-                                                          : null,
-                                                      onChanged: (String?
-                                                          value) async {
-                                                        chosenGameListId = gamesList
-                                                            .entries
-                                                            .firstWhere(
-                                                                (entry) =>
-                                                                    entry
-                                                                        .value ==
-                                                                    value)
-                                                            .key;
-                                                        isSystemDropDownItem =
-                                                            chosenGameListId ==
-                                                                    0
-                                                                ? true
-                                                                : false;
+                                                                    return;
+                                                                  }
+                                                                  setState(
+                                                                      () {});
+                                                                  setState(() {
+                                                                    createListHelperText = S
+                                                                        .of(context)
+                                                                        .listWasUpdated;
+                                                                  });
+                                                                },
+                                                      style: ButtonStyle(
+                                                          backgroundColor:
+                                                              WidgetStateProperty
+                                                                  .all(Theme.of(
+                                                                          context)
+                                                                      .colorScheme
+                                                                      .secondary)),
+                                                      child: Text(S
+                                                          .of(context)
+                                                          .update)),
+                                                  Expanded(
+                                                      child: DropdownButton(
+                                                    padding:
+                                                        const EdgeInsets.all(
+                                                            10),
+                                                    value: gamesList.isNotEmpty
+                                                        ? gamesList[
+                                                            chosenGameListId]
+                                                        : null,
+                                                    onChanged:
+                                                        (String? value) async {
+                                                      chosenGameListId = gamesList
+                                                          .entries
+                                                          .firstWhere((entry) =>
+                                                              entry.value ==
+                                                              value)
+                                                          .key;
+                                                      isSystemDropDownItem =
+                                                          chosenGameListId == 0
+                                                              ? true
+                                                              : false;
 
-                                                        await updateGamesFromCustomList(
-                                                            chosenGameListId);
-                                                        setState(() {});
-                                                      },
-                                                      items: gamesList.values.map<
-                                                              DropdownMenuItem<
-                                                                  String>>(
-                                                          (String value) {
-                                                        return DropdownMenuItem<
-                                                                String>(
-                                                            value: value,
-                                                            child: Text(value));
-                                                      }).toList(),
-                                                    )
-                                                  ]),
+                                                      await updateGamesFromCustomList(
+                                                          chosenGameListId);
+                                                      setState(() {});
+                                                    },
+                                                    items: gamesList.values.map<
+                                                            DropdownMenuItem<
+                                                                String>>(
+                                                        (String value) {
+                                                      return DropdownMenuItem<
+                                                              String>(
+                                                          value: value,
+                                                          child: Text(value));
+                                                    }).toList(),
+                                                  )),
                                                   ElevatedButton(
                                                       onPressed:
                                                           isSystemDropDownItem

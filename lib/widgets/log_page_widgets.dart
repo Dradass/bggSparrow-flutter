@@ -536,36 +536,47 @@ class _PlayersPickerState extends State<PlayersPicker> {
                                     color: Theme.of(context).primaryColor)),
                             children: [
                               Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
                                 children: [
-                                  ElevatedButton(
-                                    onPressed: () async => {
-                                      _errorText = await addNotBggPlayer(
-                                          playerNameController.text, context),
-                                      setState(() {})
-                                    },
-                                    style: ButtonStyle(
-                                      backgroundColor: WidgetStateProperty.all(
+                                  Expanded(
+                                    child: ElevatedButton(
+                                      onPressed: () async {
+                                        _errorText = await addNotBggPlayer(
+                                            playerNameController.text, context);
+                                        setState(() {});
+                                      },
+                                      style: ButtonStyle(
+                                        backgroundColor:
+                                            WidgetStateProperty.all(
                                           Theme.of(context)
                                               .colorScheme
-                                              .secondary),
+                                              .secondary,
+                                        ),
+                                      ),
+                                      child: Text(S.of(context).addPlayer,
+                                          textAlign: TextAlign.center),
                                     ),
-                                    child: Text(S.of(context).addPlayer),
                                   ),
-                                  ElevatedButton(
-                                    onPressed: () async => {
-                                      _errorText = await addBggPlayer(
-                                          playerNameController.text, context),
-                                      setState(() {})
-                                    },
-                                    style: ButtonStyle(
-                                      backgroundColor: WidgetStateProperty.all(
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: ElevatedButton(
+                                      onPressed: () async {
+                                        _errorText = await addBggPlayer(
+                                            playerNameController.text, context);
+                                        setState(() {});
+                                      },
+                                      style: ButtonStyle(
+                                        backgroundColor:
+                                            WidgetStateProperty.all(
                                           Theme.of(context)
                                               .colorScheme
-                                              .secondary),
+                                              .secondary,
+                                        ),
+                                      ),
+                                      child: Text(
+                                        S.of(context).addBggPlayer,
+                                        textAlign: TextAlign.center,
+                                      ),
                                     ),
-                                    child: Text(S.of(context).addBggPlayer),
                                   ),
                                 ],
                               ),
@@ -578,20 +589,32 @@ class _PlayersPickerState extends State<PlayersPicker> {
                                           .of(context)
                                           .enterFriendNameOrNickname)),
                               //Players list
-                              Row(children: [
-                                UpdateButton(
+                              Row(
+                                children: [
+                                  UpdateButton(
                                     playersListWrapper:
                                         widget.playersListWrapper,
-                                    parentStateUpdate: () => setState(() {})),
-                                ChooseListDropdown(
+                                    parentStateUpdate: () => setState(() {}),
+                                  ),
+                                  Expanded(
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 3.0),
+                                      child: ChooseListDropdown(
+                                        playersListWrapper:
+                                            widget.playersListWrapper,
+                                        parentStateUpdate: () =>
+                                            setState(() {}),
+                                      ),
+                                    ),
+                                  ),
+                                  DeleteButton(
                                     playersListWrapper:
                                         widget.playersListWrapper,
-                                    parentStateUpdate: () => setState(() {})),
-                                DeleteButton(
-                                    playersListWrapper:
-                                        widget.playersListWrapper,
-                                    parentStateUpdate: () => setState(() {}))
-                              ]),
+                                    parentStateUpdate: () => setState(() {}),
+                                  ),
+                                ],
+                              ),
                               Row(children: [
                                 CreateButton(
                                     playersListWrapper:
