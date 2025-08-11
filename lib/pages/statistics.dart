@@ -712,7 +712,17 @@ class _StatisticsState extends State<Statistics> {
                                     e.players!.split(';').length >=
                                         maxRangeValues.start)
                                 .toList();
-                            plays.sort((a, b) => b.id.compareTo(a.id));
+                            plays.sort((a, b) {
+                              // Сначала сравниваем даты (по возрастанию)
+                              final dateCompare = b.date.compareTo(a.date);
+
+                              // Если даты разные - возвращаем результат сравнения дат
+                              if (dateCompare != 0) {
+                                return dateCompare;
+                              }
+                              // Если даты одинаковые - сортируем по ID (по убыванию)
+                              return b.id.compareTo(a.id);
+                            });
                             // Get all plays and plays count for each game
                             gamePlays.clear();
                             List<_GamePlaysCount> allGames = [];

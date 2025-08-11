@@ -158,6 +158,11 @@ class _LogPageState extends State<LogPage> {
     try {
       final isConnected = await checkInternetConnection();
       if (!isConnected) {
+        isLoadedGamesPlayersCountInfoNotifier.value =
+            await checkAllGamesCountInfoLoaded();
+        isLoadedAllGamesImagesNotifier.value =
+            await checkAllGamesImagesLoaded();
+
         log('No internet connection');
         return;
       }
