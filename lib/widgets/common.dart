@@ -1,6 +1,24 @@
 import 'package:flutter/material.dart';
 import '../globals.dart';
 
+// Создать текст с автоподбором размера
+Widget buildScaledText(BuildContext context, String text, bool isSelected) {
+  return FittedBox(
+    fit: BoxFit.scaleDown,
+    child: Text(
+      text,
+      maxLines: 1,
+      style: Theme.of(context).textTheme.labelMedium?.copyWith(
+            color: isSelected
+                ? Theme.of(context).colorScheme.secondary
+                : Theme.of(context).colorScheme.primary,
+            fontSize: isSelected ? 14 : 14,
+            fontWeight: isSelected ? FontWeight.w500 : FontWeight.normal,
+          ),
+    ),
+  );
+}
+
 class FlexButton extends StatelessWidget {
   final Widget childWidget;
   final int flexValue;

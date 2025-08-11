@@ -3,6 +3,7 @@ import 'package:flutter_application_1/pages/log_page.dart';
 import 'package:flutter_application_1/pages/game_choose.dart';
 import 'package:flutter_application_1/pages/first_player.dart';
 import 'package:flutter_application_1/pages/statistics.dart';
+import '../widgets/common.dart';
 import '../s.dart';
 import 'globals.dart';
 import 'tutorial_handler.dart';
@@ -25,24 +26,6 @@ class _NavigationScreenState extends State<NavigationScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       tutorialHandler.checkFirstLaunch();
     });
-  }
-
-  // Кастомный виджет для текста с автоподбором размера
-  Widget _buildScaledText(BuildContext context, String text, bool isSelected) {
-    return FittedBox(
-      fit: BoxFit.scaleDown,
-      child: Text(
-        text,
-        maxLines: 1,
-        style: Theme.of(context).textTheme.labelMedium?.copyWith(
-              color: isSelected
-                  ? Theme.of(context).colorScheme.secondary
-                  : Theme.of(context).colorScheme.primary,
-              fontSize: isSelected ? 14 : 12,
-              fontWeight: isSelected ? FontWeight.w500 : FontWeight.normal,
-            ),
-      ),
-    );
   }
 
   // Переопределение метода для кастомного отображения
@@ -137,7 +120,7 @@ class _NavigationScreenState extends State<NavigationScreen> {
               size: 24,
             ),
             const SizedBox(height: 4),
-            _buildScaledText(context, label, isSelected),
+            buildScaledText(context, label, isSelected),
           ],
         ),
       ),

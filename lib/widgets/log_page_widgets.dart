@@ -15,6 +15,7 @@ import 'package:image/image.dart' as image_dart;
 import '../db/players_sql.dart';
 import '../models/bgg_player_model.dart';
 import '../widgets/players_list.dart';
+import '../widgets/common.dart';
 
 import 'package:flutter/services.dart';
 import 'package:flutter_pixelmatching/flutter_pixelmatching.dart';
@@ -552,8 +553,8 @@ class _PlayersPickerState extends State<PlayersPicker> {
                                               .secondary,
                                         ),
                                       ),
-                                      child: Text(S.of(context).addPlayer,
-                                          textAlign: TextAlign.center),
+                                      child: buildScaledText(context,
+                                          S.of(context).addPlayer, false),
                                     ),
                                   ),
                                   const SizedBox(width: 8),
@@ -572,10 +573,8 @@ class _PlayersPickerState extends State<PlayersPicker> {
                                               .secondary,
                                         ),
                                       ),
-                                      child: Text(
-                                        S.of(context).addBggPlayer,
-                                        textAlign: TextAlign.center,
-                                      ),
+                                      child: buildScaledText(context,
+                                          S.of(context).addBggPlayer, false),
                                     ),
                                   ),
                                 ],
@@ -1261,9 +1260,8 @@ class _GamePickerState extends State<GamePicker> {
                               ),
                               SizedBox(
                                   width: MediaQuery.of(context).size.width,
-                                  //height: MediaQuery.of(context).size.height * 0.3,
-                                  // child:
-                                  // Expanded(
+                                  height:
+                                      MediaQuery.of(context).size.height * 0.15,
                                   child: ElevatedButton(
                                       onPressed: () async {
                                         widget.recognizedGameId = 0;
@@ -1318,9 +1316,7 @@ class _GamePickerState extends State<GamePicker> {
                                                   Theme.of(context)
                                                       .colorScheme
                                                       .secondary)),
-                                      child: Text(S.of(context).recognize))
-                                  //)
-                                  )
+                                      child: Text(S.of(context).recognize)))
                             ]),
                           );
                         });
