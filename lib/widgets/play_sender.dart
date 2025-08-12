@@ -109,7 +109,9 @@ class _PlaySenderState extends State<PlaySender> {
                     winners += "${player['name']};";
                   }
                 }
-                winners = winners.substring(0, winners.length - 1);
+                if (winners.isNotEmpty) {
+                  winners = winners.substring(0, winners.length - 1);
+                }
                 final gameId = selectedGameId;
                 final dateShort =
                     DateFormat('yyyy-MM-dd').format(PlayDatePicker().playDate);
