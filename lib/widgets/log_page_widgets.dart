@@ -1361,101 +1361,114 @@ class _GamePickerState extends State<GamePicker> {
                           return AlertDialog(
                             title:
                                 Text(S.of(context).placeTheTopOfTheBoxInFrame),
-                            content: Column(children: [
-                              ValueListenableBuilder<bool>(
-                                valueListenable: isLoadedAllGamesImagesNotifier,
-                                builder: (context, value, _) {
-                                  return value
-                                      ? Container()
-                                      : Container(
-                                          decoration: BoxDecoration(
-                                            color: Theme.of(context)
-                                                .colorScheme
-                                                .primary,
-                                          ),
-                                          padding: const EdgeInsets.symmetric(
-                                              horizontal: 8, vertical: 4),
-                                          child: Text(
-                                            maxLines: 3,
-                                            value
-                                                ? ""
-                                                : "*${S.of(context).warningNotAllImagesLoaded}",
-                                            style: TextStyle(
-                                              color: Theme.of(context)
-                                                  .colorScheme
-                                                  .secondary,
-                                              backgroundColor:
-                                                  Colors.transparent,
-                                            ),
-                                          ));
-                                },
-                              ),
-                              SizedBox(
-                                width: MediaQuery.of(context).size.width * 0.8,
-                                height:
-                                    MediaQuery.of(context).size.height * 0.5,
-                                child: CameraPreview(widget._cameraController),
-                              ),
-                              SizedBox(
-                                  width: MediaQuery.of(context).size.width,
-                                  height:
-                                      MediaQuery.of(context).size.height * 0.15,
-                                  child: ElevatedButton(
-                                      onPressed: () async {
-                                        widget.recognizedGameId = 0;
-                                        Navigator.of(context,
-                                                rootNavigator: true)
-                                            .pop();
-                                        setState(() {
-                                          widget.searchController.text =
-                                              S.of(context).recognizing;
-                                        });
-                                        var gameId = await takePhoto();
-                                        var recognizedGameName =
-                                            S.of(context).cantFindSimilarGame;
-
-                                        if (gameId != null) {
-                                          widget.recognizedGame =
-                                              await GameThingSQL.selectGameByID(
-                                                  gameId);
-                                          if (widget.recognizedGame != null) {
-                                            widget.recognizedGameId =
-                                                widget.recognizedGame!.id;
-
-                                            recognizedGameName =
-                                                widget.recognizedGame!.name;
-                                          }
-                                        }
-
-                                        setState(() {
-                                          widget.searchController.text =
-                                              recognizedGameName;
-                                          if (widget.recognizedGame
-                                                  ?.thumbBinary !=
-                                              null) {
-                                            widget.imageWidget = Image.memory(
-                                                base64Decode(widget
-                                                    .recognizedGame!.thumbBinary
-                                                    .toString()));
-                                          }
-                                        });
-
-                                        selectedGameId =
-                                            widget.recognizedGameId;
-                                        selectedGame = widget.recognizedGame;
-                                      },
-                                      style: ButtonStyle(
-                                          iconColor: WidgetStateProperty.all(
-                                              Theme.of(context)
-                                                  .colorScheme
-                                                  .primary),
-                                          backgroundColor:
-                                              WidgetStateProperty.all(
-                                                  Theme.of(context)
+                            content: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  ValueListenableBuilder<bool>(
+                                    valueListenable:
+                                        isLoadedAllGamesImagesNotifier,
+                                    builder: (context, value, _) {
+                                      return value
+                                          ? Container()
+                                          : Container(
+                                              decoration: BoxDecoration(
+                                                color: Theme.of(context)
+                                                    .colorScheme
+                                                    .primary,
+                                              ),
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                      horizontal: 8,
+                                                      vertical: 4),
+                                              child: Text(
+                                                maxLines: 3,
+                                                value
+                                                    ? ""
+                                                    : "*${S.of(context).warningNotAllImagesLoaded}",
+                                                style: TextStyle(
+                                                  color: Theme.of(context)
                                                       .colorScheme
-                                                      .secondary)),
-                                      child: Text(S.of(context).recognize)))
-                            ]),
+                                                      .secondary,
+                                                  backgroundColor:
+                                                      Colors.transparent,
+                                                ),
+                                              ));
+                                    },
+                                  ),
+                                  SizedBox(
+                                    width:
+                                        MediaQuery.of(context).size.width * 0.8,
+                                    height: MediaQuery.of(context).size.height *
+                                        0.5,
+                                    child:
+                                        CameraPreview(widget._cameraController),
+                                  ),
+                                  SizedBox(
+                                      width: MediaQuery.of(context).size.width,
+                                      // height:
+                                      //     MediaQuery.of(context).size.height * 0.15,
+                                      child: ElevatedButton(
+                                          onPressed: () async {
+                                            widget.recognizedGameId = 0;
+                                            Navigator.of(context,
+                                                    rootNavigator: true)
+                                                .pop();
+                                            setState(() {
+                                              widget.searchController.text =
+                                                  S.of(context).recognizing;
+                                            });
+                                            var gameId = await takePhoto();
+                                            var recognizedGameName = S
+                                                .of(context)
+                                                .cantFindSimilarGame;
+
+                                            if (gameId != null) {
+                                              widget.recognizedGame =
+                                                  await GameThingSQL
+                                                      .selectGameByID(gameId);
+                                              if (widget.recognizedGame !=
+                                                  null) {
+                                                widget.recognizedGameId =
+                                                    widget.recognizedGame!.id;
+
+                                                recognizedGameName =
+                                                    widget.recognizedGame!.name;
+                                              }
+                                            }
+
+                                            setState(() {
+                                              widget.searchController.text =
+                                                  recognizedGameName;
+                                              if (widget.recognizedGame
+                                                      ?.thumbBinary !=
+                                                  null) {
+                                                widget.imageWidget =
+                                                    Image.memory(base64Decode(
+                                                        widget.recognizedGame!
+                                                            .thumbBinary
+                                                            .toString()));
+                                              }
+                                            });
+
+                                            selectedGameId =
+                                                widget.recognizedGameId;
+                                            selectedGame =
+                                                widget.recognizedGame;
+                                          },
+                                          style: ButtonStyle(
+                                              iconColor:
+                                                  WidgetStateProperty.all(
+                                                      Theme.of(context)
+                                                          .colorScheme
+                                                          .primary),
+                                              backgroundColor:
+                                                  WidgetStateProperty.all(
+                                                      Theme.of(context)
+                                                          .colorScheme
+                                                          .secondary)),
+                                          child: Text(S.of(context).recognize)))
+                                ]),
                           );
                         });
                   },
