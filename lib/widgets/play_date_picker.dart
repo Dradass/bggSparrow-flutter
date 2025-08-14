@@ -56,7 +56,7 @@ class _PlayDatePickerSimpleState extends State<PlayDatePickerSimple> {
               lastDate: DateTime(3000));
           if (pickedDate != null) {
             setState(() {
-              widget.date = pickedDate.toString();
+              widget.date = DateFormat('yyyy-MM-dd').format(pickedDate);
             });
           }
         },
