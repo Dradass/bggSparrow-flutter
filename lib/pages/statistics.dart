@@ -3,7 +3,6 @@ import 'package:flutter_application_1/db/players_sql.dart';
 import 'package:flutter_application_1/tutorial_handler.dart';
 import 'package:intl/intl.dart';
 import '../db/plays_sql.dart';
-import '../db/location_sql.dart';
 import '../models/bgg_play_model.dart';
 import '../bggApi/bgg_api.dart';
 import '../db/game_things_sql.dart';

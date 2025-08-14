@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/bgg_play_model.dart';
-import '../widgets/log_page_widgets.dart';
+import '../widgets/duration_slider.dart';
+import '../widgets/comments.dart';
+import '../widgets/location_picker.dart';
+import '../widgets/play_date_picker.dart';
 import '../widgets/players_list.dart';
+import '../widgets/players_picker.dart';
 import '../widgets/common.dart';
 import '../bggApi/bgg_api.dart';
 import '../models/bgg_play_player.dart';
