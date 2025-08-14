@@ -105,7 +105,8 @@ class _StatisticsState extends State<Statistics> {
                   return StatefulBuilder(builder: (context, setState) {
                     return AlertDialog(
                         title: Text(S.of(context).editPlayData),
-                        content: EditPage(bggPlay: bggPlay));
+                        content: EditPage(
+                            bggPlay: bggPlay, playsRefreshCallback: getPlays));
                   });
                 });
           }
@@ -287,7 +288,7 @@ class _StatisticsState extends State<Statistics> {
                       majorGridLines: const MajorGridLines(width: 0),
                       axisLine: AxisLine(
                         color: Theme.of(context).colorScheme.primary,
-                        width: 2, // Толщина линии
+                        width: 2,
                       ),
                       majorTickLines: MajorTickLines(
                         color: Theme.of(context)
@@ -298,7 +299,7 @@ class _StatisticsState extends State<Statistics> {
                     primaryYAxis: NumericAxis(
                       axisLine: AxisLine(
                         color: Theme.of(context).colorScheme.primary,
-                        width: 2, // Толщина линии
+                        width: 2,
                       ),
                       majorTickLines: MajorTickLines(
                         color: Theme.of(context)
@@ -628,183 +629,7 @@ class _StatisticsState extends State<Statistics> {
                             //   needUpdatePlaysFromBgg = false;
                             // }
 
-                            List<BggPlay> allPlays = [];
-                            plays.clear();
-                            allPlays =
-                                await PlaysSQL.getAllPlays(startDate, endDate);
-
-                            var chosenPlayers = playersListWrapper.players
-                                .where((element) => element['isChecked']);
-
-                            var excludedPlayers = playersListWrapper.players
-                                .where((element) => element['excluded']);
-
-                            // Get plays with chosen players
-                            if (chosenPlayers.isEmpty) {
-                              plays = allPlays;
-                            } else {
-                              for (var allPlay in allPlays) {
-                                if (allPlay.players == null) continue;
-
-                                // Exclude players
-                                var haveExcludedPlayer = false;
-                                for (var excludedPlayer in excludedPlayers) {
-                                  if (allPlay.players!
-                                      .split(";")
-                                      .join("|")
-                                      .contains(excludedPlayer['name'])) {
-                                    haveExcludedPlayer = true;
-                                    break;
-                                  }
-                                }
-                                if (haveExcludedPlayer) continue;
-
-                                var chosenMatches = 0;
-                                var winnerAmongThisPlay = false;
-                                for (var chosenPlayer in chosenPlayers) {
-                                  if (allPlay.players!
-                                      .split(";")
-                                      .join("|")
-                                      .contains(chosenPlayer['name'])) {
-                                    chosenMatches++;
-                                  }
-                                }
-
-                                // Check winner among chosen players
-                                for (var chosenPlayer in chosenPlayers) {
-                                  if (allPlay.winners!
-                                      .split(";")
-                                      .contains(chosenPlayer['name'])) {
-                                    winnerAmongThisPlay = true;
-                                    break;
-                                  }
-                                }
-
-                                if (onlyChosenPlayers) {
-                                  if (chosenMatches ==
-                                          allPlay.players!.split(";").length &&
-                                      chosenMatches == chosenPlayers.length) {
-                                    if (winnerAmongChosenPlayers &&
-                                        !winnerAmongThisPlay) continue;
-                                    plays.add(allPlay);
-                                  }
-                                } else {
-                                  if (chosenMatches >= chosenPlayers.length) {
-                                    if (winnerAmongChosenPlayers &&
-                                        !winnerAmongThisPlay) continue;
-                                    plays.add(allPlay);
-                                  }
-                                }
-                              }
-                            }
-
-                            if (chosenGameId != 0) {
-                              plays = plays
-                                  .where((e) => e.gameId == chosenGameId)
-                                  .toList();
-                            }
-
-                            plays = plays
-                                .where((e) =>
-                                    e.players!.split(';').length <=
-                                        maxRangeValues.end &&
-                                    e.players!.split(';').length >=
-                                        maxRangeValues.start)
-                                .toList();
-                            plays.sort((a, b) {
-                              // Сначала сравниваем даты (по возрастанию)
-                              final dateCompare = b.date.compareTo(a.date);
-
-                              // Если даты разные - возвращаем результат сравнения дат
-                              if (dateCompare != 0) {
-                                return dateCompare;
-                              }
-                              // Если даты одинаковые - сортируем по ID (по убыванию)
-                              return b.id.compareTo(a.id);
-                            });
-                            // Get all plays and plays count for each game
-                            gamePlays.clear();
-                            List<_GamePlaysCount> allGames = [];
-                            List<_GamePlaysCount> allWinners = [];
-                            var allPlayers = (await PlayersSQL.getAllPlayers());
-                            if (!winRate) {
-                              for (var play in plays) {
-                                if (allGames
-                                    .map((e) => e.gameName)
-                                    .contains(play.gameName)) {
-                                  var gamePlay = allGames
-                                      .where((element) =>
-                                          element.gameName == play.gameName)
-                                      .first;
-                                  gamePlay.count =
-                                      gamePlay.count! + play.quantity!;
-                                } else {
-                                  allGames.add(_GamePlaysCount(
-                                      play.gameName,
-                                      play.gameName,
-                                      play.quantity,
-                                      play.gameId));
-                                }
-                              }
-                              // Winrate
-                            } else {
-                              for (var play in plays) {
-                                if (play.winners != null &&
-                                    play.winners!.isNotEmpty) {
-                                  var winners = play.winners!.split(';');
-
-                                  for (var winner in winners) {
-                                    if (winner == '0') {
-                                      continue;
-                                    }
-                                    if (allWinners
-                                        .map((e) => e.gameName)
-                                        .contains(winner)) {
-                                      var existingWinner = allWinners
-                                          .where((element) =>
-                                              element.gameName == winner)
-                                          .first;
-                                      existingWinner.count =
-                                          existingWinner.count! + 1;
-                                    } else {
-                                      var winnerFromDb = allPlayers
-                                          .where((e) => e['name'] == (winner));
-                                      if (winnerFromDb.isEmpty) {
-                                        continue;
-                                      }
-
-                                      allWinners.add(_GamePlaysCount(winner,
-                                          winner, 1, winnerFromDb.first['id']));
-                                    }
-                                  }
-                                }
-                              }
-                            }
-
-                            if (winRate) {
-                              allGames = allWinners;
-                            }
-
-                            for (var e in allGames) {
-                              e.gameNameShort.length > 20
-                                  ? e.gameNameShort =
-                                      "${e.gameNameShort.substring(0, 18)}..."
-                                  : e.gameNameShort;
-                            }
-                            allGames
-                                .sort((a, b) => b.count!.compareTo(a.count!));
-                            if (firstGamesCount != 0) {
-                              gamePlays = allGames
-                                  .take(firstGamesCount.round())
-                                  .toList();
-                            } else {
-                              gamePlays = allGames;
-                            }
-
-                            setState(() {
-                              statsSummary =
-                                  "${S.of(context).totalPlays}: ${allGames.fold(0, (sum, item) => sum + item.count!)} ${S.of(context).totalGames}: ${allGames.length}";
-                            });
+                            await getPlays();
                           },
                           style: ButtonStyle(
                               backgroundColor: WidgetStateProperty.all(
@@ -932,6 +757,168 @@ class _StatisticsState extends State<Statistics> {
         ],
       ),
     ));
+  }
+
+  Future<void> getPlays() async {
+    // Get last plays
+    // if (needUpdatePlaysFromBgg) {
+    //   int maxPlayerId = await PlayersSQL.getMaxID();
+    //   int maxLocationId = await LocationSQL.getMaxID();
+    //   await getPlaysFromPage(
+    //       1, maxPlayerId, maxLocationId);
+    //   needUpdatePlaysFromBgg = false;
+    // }
+
+    List<BggPlay> allPlays = [];
+    plays.clear();
+    allPlays = await PlaysSQL.getAllPlays(startDate, endDate);
+
+    var chosenPlayers =
+        playersListWrapper.players.where((element) => element['isChecked']);
+
+    var excludedPlayers =
+        playersListWrapper.players.where((element) => element['excluded']);
+
+    // Get plays with chosen players
+    if (chosenPlayers.isEmpty) {
+      plays = allPlays;
+    } else {
+      for (var allPlay in allPlays) {
+        if (allPlay.players == null) continue;
+
+        // Exclude players
+        var haveExcludedPlayer = false;
+        for (var excludedPlayer in excludedPlayers) {
+          if (allPlay.players!
+              .split(";")
+              .join("|")
+              .contains(excludedPlayer['name'])) {
+            haveExcludedPlayer = true;
+            break;
+          }
+        }
+        if (haveExcludedPlayer) continue;
+
+        var chosenMatches = 0;
+        var winnerAmongThisPlay = false;
+        for (var chosenPlayer in chosenPlayers) {
+          if (allPlay.players!
+              .split(";")
+              .join("|")
+              .contains(chosenPlayer['name'])) {
+            chosenMatches++;
+          }
+        }
+
+        // Check winner among chosen players
+        for (var chosenPlayer in chosenPlayers) {
+          if (allPlay.winners!.split(";").contains(chosenPlayer['name'])) {
+            winnerAmongThisPlay = true;
+            break;
+          }
+        }
+
+        if (onlyChosenPlayers) {
+          if (chosenMatches == allPlay.players!.split(";").length &&
+              chosenMatches == chosenPlayers.length) {
+            if (winnerAmongChosenPlayers && !winnerAmongThisPlay) continue;
+            plays.add(allPlay);
+          }
+        } else {
+          if (chosenMatches >= chosenPlayers.length) {
+            if (winnerAmongChosenPlayers && !winnerAmongThisPlay) continue;
+            plays.add(allPlay);
+          }
+        }
+      }
+    }
+
+    if (chosenGameId != 0) {
+      plays = plays.where((e) => e.gameId == chosenGameId).toList();
+    }
+
+    plays = plays
+        .where((e) =>
+            e.players!.split(';').length <= maxRangeValues.end &&
+            e.players!.split(';').length >= maxRangeValues.start)
+        .toList();
+    plays.sort((a, b) {
+      // Сначала сравниваем даты (по возрастанию)
+      final dateCompare = b.date.compareTo(a.date);
+
+      // Если даты разные - возвращаем результат сравнения дат
+      if (dateCompare != 0) {
+        return dateCompare;
+      }
+      // Если даты одинаковые - сортируем по ID (по убыванию)
+      return b.id.compareTo(a.id);
+    });
+    // Get all plays and plays count for each game
+    gamePlays.clear();
+    List<_GamePlaysCount> allGames = [];
+    List<_GamePlaysCount> allWinners = [];
+    var allPlayers = (await PlayersSQL.getAllPlayers());
+    if (!winRate) {
+      for (var play in plays) {
+        if (allGames.map((e) => e.gameName).contains(play.gameName)) {
+          var gamePlay = allGames
+              .where((element) => element.gameName == play.gameName)
+              .first;
+          gamePlay.count = gamePlay.count! + play.quantity!;
+        } else {
+          allGames.add(_GamePlaysCount(
+              play.gameName, play.gameName, play.quantity, play.gameId));
+        }
+      }
+      // Winrate
+    } else {
+      for (var play in plays) {
+        if (play.winners != null && play.winners!.isNotEmpty) {
+          var winners = play.winners!.split(';');
+
+          for (var winner in winners) {
+            if (winner == '0') {
+              continue;
+            }
+            if (allWinners.map((e) => e.gameName).contains(winner)) {
+              var existingWinner = allWinners
+                  .where((element) => element.gameName == winner)
+                  .first;
+              existingWinner.count = existingWinner.count! + 1;
+            } else {
+              var winnerFromDb = allPlayers.where((e) => e['name'] == (winner));
+              if (winnerFromDb.isEmpty) {
+                continue;
+              }
+
+              allWinners.add(
+                  _GamePlaysCount(winner, winner, 1, winnerFromDb.first['id']));
+            }
+          }
+        }
+      }
+    }
+
+    if (winRate) {
+      allGames = allWinners;
+    }
+
+    for (var e in allGames) {
+      e.gameNameShort.length > 20
+          ? e.gameNameShort = "${e.gameNameShort.substring(0, 18)}..."
+          : e.gameNameShort;
+    }
+    allGames.sort((a, b) => b.count!.compareTo(a.count!));
+    if (firstGamesCount != 0) {
+      gamePlays = allGames.take(firstGamesCount.round()).toList();
+    } else {
+      gamePlays = allGames;
+    }
+
+    setState(() {
+      statsSummary =
+          "${S.of(context).totalPlays}: ${allGames.fold(0, (sum, item) => sum + item.count!)} ${S.of(context).totalGames}: ${allGames.length}";
+    });
   }
 
   Future<List<BggPlay>> getNewPlays() async {

@@ -13,8 +13,10 @@ import 'package:flutter_application_1/db/plays_sql.dart';
 import '../s.dart';
 
 class EditPage extends StatefulWidget {
-  EditPage({required this.bggPlay, super.key});
+  EditPage(
+      {required this.bggPlay, required this.playsRefreshCallback, super.key});
   BggPlay bggPlay;
+  dynamic playsRefreshCallback;
 
   @override
   State<EditPage> createState() => _EditPageState();
@@ -111,6 +113,7 @@ class _EditPageState extends State<EditPage> {
                       await PlaysSQL.updatePlay(play);
                     }
                     Navigator.of(context).pop();
+                    widget.playsRefreshCallback();
                   },
                   child: Text(S.of(context).saveChanges),
                 ),
