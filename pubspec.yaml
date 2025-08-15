@@ -65,6 +65,7 @@ dependency_overrides:
     path: camera_android
 
 dev_dependencies:
+  flutter_native_splash: ^2.3.3
   flutter_test:
     sdk: flutter
 
@@ -91,6 +92,7 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - assets/no_image.png
+    - assets/Splash.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
@@ -117,3 +119,13 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages
+
+flutter_native_splash:
+  color: "#ffffff"        # Фоновый цвет
+  image: assets/Splash.png  # Путь к изображению
+  android: true
+  ios: true
+  # Опционально: настройка под разные устройства
+  android_12:
+    color: "#ffffff"
+    image: assets/Splash.png
