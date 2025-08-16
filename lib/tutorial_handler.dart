@@ -170,7 +170,7 @@ class TutorialHandler {
     TutorialCoachMark(
       targets: _createStatisticsTargets(),
       colorShadow: Colors.green.withOpacity(0.8),
-      textSkip: "Skip",
+      textSkip: S.of(parentContext).skip,
       paddingFocus: 10,
       onClickTarget: (target) {
         if (target.identify == "stats_export_table") {

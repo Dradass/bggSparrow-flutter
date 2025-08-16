@@ -66,6 +66,7 @@ dependency_overrides:
 
 dev_dependencies:
   flutter_native_splash: ^2.3.3
+  flutter_launcher_icons: ^0.13.1
   flutter_test:
     sdk: flutter
 
@@ -93,6 +94,8 @@ flutter:
   assets:
     - assets/no_image.png
     - assets/Splash.png
+    - assets/icon.png
+    - assets/icon2.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
@@ -129,3 +132,11 @@ flutter_native_splash:
   android_12:
     color: "#ffffff"
     image: assets/Splash.png
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/icon2.png"
+  # Опционально: адаптивная иконка для Android 13+
+  adaptive_icon_background: "#FFFFFF"  # Цвет фона
+  adaptive_icon_foreground: "assets/icon2.png"  # Передний слой
