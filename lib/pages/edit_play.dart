@@ -41,7 +41,6 @@ class _EditPageState extends State<EditPage> {
         durationCurrentValue: (widget.bggPlay.duration ?? 60).toDouble());
     playersPickerSimple =
         PlayersPickerSimple(playersListWrapper: playersListWrapper);
-    playersListWrapper.sourceWinners = widget.bggPlay.winners;
     playersListWrapper.sourcePlayers = widget.bggPlay.players;
     playersListWrapper.updatePlayersFromCustomList();
   }
@@ -64,8 +63,8 @@ class _EditPageState extends State<EditPage> {
             FlexButton(
                 ElevatedButton(
                   onPressed: () async {
-                    var playersInfo = createBggPlayersInfo(
-                        widget.bggPlay, playersListWrapper.players);
+                    var playersInfo =
+                        createBggPlayersInfo(playersListWrapper.players);
                     var formData = createFormData(
                         widget.bggPlay,
                         playDatePickerSimple.date,
@@ -81,12 +80,8 @@ class _EditPageState extends State<EditPage> {
                       showSnackBar(context, errorMessage);
                     } else {
                       showSnackBar(context, S.of(context).playResultsWasSaved);
-                      // Update the play in the database
-                      var sourcePlayerInfo = widget.bggPlay.players;
-                      var bggPlayPlayersList = sourcePlayerInfo
-                          ?.split(';')
-                          .map((e) => BggPlayPlayer.fromString(e))
-                          .toList();
+                      var bggPlayPlayersList =
+                          playersListWrapper.getBggPlayers();
 
                       var play = BggPlay(
                           id: widget.bggPlay.id,
@@ -101,11 +96,7 @@ class _EditPageState extends State<EditPage> {
                           players: playersListWrapper.players
                               .where((e) => e['isChecked'] == true)
                               .map((e) =>
-                                  '${e['username']}|${e['userid']}|${e['name']}|${BggPlayPlayer.getPlayerByName(bggPlayPlayersList!, e['username'], e['name']).startposition}|${BggPlayPlayer.getPlayerByName(bggPlayPlayersList!, e['username'], e['name']).color}|${BggPlayPlayer.getPlayerByName(bggPlayPlayersList!, e['username'], e['name']).score}|${BggPlayPlayer.getPlayerByName(bggPlayPlayersList!, e['username'], e['name']).rating}|${BggPlayPlayer.getPlayerByName(bggPlayPlayersList!, e['username'], e['name']).isNew}|${e['win'] == true ? 1 : 0}')
-                              .join(';'),
-                          winners: playersListWrapper.players
-                              .where((item) => item['win'] == true)
-                              .map((item) => item['name'])
+                                  '${e['username']}|${e['userid']}|${e['name']}|${BggPlayPlayer.getPlayerByName(bggPlayPlayersList, e['username'], e['name']).startposition}|${BggPlayPlayer.getPlayerByName(bggPlayPlayersList, e['username'], e['name']).color}|${BggPlayPlayer.getPlayerByName(bggPlayPlayersList, e['username'], e['name']).score}|${BggPlayPlayer.getPlayerByName(bggPlayPlayersList, e['username'], e['name']).rating}|${BggPlayPlayer.getPlayerByName(bggPlayPlayersList, e['username'], e['name']).isNew}|${e['win'] == true ? 1 : 0}')
                               .join(';'),
                           duration:
                               durationSliderSimple.durationCurrentValue.toInt(),

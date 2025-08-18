@@ -457,6 +457,9 @@ class _PlayersPickerSimpleState extends State<PlayersPickerSimple> {
                                     setState(() {
                                       player['win'] = value;
                                     });
+                                    if (player['win'] == true) {
+                                      player['isChecked'] = true;
+                                    }
                                   },
                                   shape: const RoundedRectangleBorder(
                                     side: BorderSide(color: Colors.black12),
@@ -476,6 +479,9 @@ class _PlayersPickerSimpleState extends State<PlayersPickerSimple> {
                             setState(() {
                               player['isChecked'] = value;
                             });
+                            if (player['isChecked'] == false) {
+                              player['win'] = false;
+                            }
                           },
                         );
                       }).toList())));

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/db/players_sql.dart';
+import 'package:flutter_application_1/models/bgg_play_player.dart';
 import 'package:flutter_application_1/tutorial_handler.dart';
 import 'package:intl/intl.dart';
 import '../db/plays_sql.dart';
@@ -787,6 +788,7 @@ class _StatisticsState extends State<Statistics> {
         if (allPlay.players == null) continue;
 
         // Exclude players
+        // TODO use BGG user id
         var haveExcludedPlayer = false;
         for (var excludedPlayer in excludedPlayers) {
           if (allPlay.players!
@@ -798,7 +800,7 @@ class _StatisticsState extends State<Statistics> {
           }
         }
         if (haveExcludedPlayer) continue;
-
+// TODO use BGG user id
         var chosenMatches = 0;
         var winnerAmongThisPlay = false;
         for (var chosenPlayer in chosenPlayers) {
@@ -811,8 +813,13 @@ class _StatisticsState extends State<Statistics> {
         }
 
         // Check winner among chosen players
+        // TODO use BGG user id
         for (var chosenPlayer in chosenPlayers) {
-          if (allPlay.winners!.split(";").contains(chosenPlayer['name'])) {
+          if (allPlay.players!
+              .split(";")
+              .map((e) => e.split("|")[6])
+              .contains(chosenPlayer['name'])) {
+            //   if (allPlay.winners!.split(";").contains(chosenPlayer['name'])) {
             winnerAmongThisPlay = true;
             break;
           }
@@ -873,26 +880,34 @@ class _StatisticsState extends State<Statistics> {
       // Winrate
     } else {
       for (var play in plays) {
-        if (play.winners != null && play.winners!.isNotEmpty) {
-          var winners = play.winners!.split(';');
+        if (play.players != null && play.players!.isNotEmpty) {
+          var winnersInfo = play.players!.split(';');
+          var winnersPlayers =
+              winnersInfo.map((e) => BggPlayPlayer.fromString(e));
 
-          for (var winner in winners) {
-            if (winner == '0') {
+          for (var winnerPlayer in winnersPlayers) {
+            if (winnerPlayer.win == '0') {
               continue;
             }
-            if (allWinners.map((e) => e.gameName).contains(winner)) {
+
+            var winnerFullName = winnerPlayer.userid == '0'
+                ? winnerPlayer.name
+                : "${winnerPlayer.name} (${winnerPlayer.username})";
+            if (allWinners.map((e) => e.gameName).contains(winnerFullName)) {
               var existingWinner = allWinners
-                  .where((element) => element.gameName == winner)
+                  .where((element) => element.gameName == winnerFullName)
                   .first;
               existingWinner.count = existingWinner.count! + 1;
             } else {
-              var winnerFromDb = allPlayers.where((e) => e['name'] == (winner));
+              var winnerFromDb = allPlayers.where((e) => e['userid'] == '0'
+                  ? e['name'] == (winnerFullName)
+                  : e['userId'] == winnerPlayer.userid);
               if (winnerFromDb.isEmpty) {
                 continue;
               }
 
-              allWinners.add(
-                  _GamePlaysCount(winner, winner, 1, winnerFromDb.first['id']));
+              allWinners.add(_GamePlaysCount(winnerFullName, winnerPlayer.name,
+                  1, winnerFromDb.first['id']));
             }
           }
         }
@@ -947,11 +962,11 @@ class _StatisticsState extends State<Statistics> {
 
   void exportCSV() async {
     String csv =
-        "id,date,gameId,gameName,quantity,location,players,winners,comments,duration\n";
+        "id,date,gameId,gameName,quantity,location,players,comments,duration\n";
 
     for (var play in plays) {
       csv +=
-          "${play.id},${play.date},${play.gameId},${play.gameName},${play.quantity},${play.location},${play.players},${play.winners},${play.comments},${play.duration}\n"; // Добавьте данные
+          "${play.id},${play.date},${play.gameId},${play.gameName},${play.quantity},${play.location},${play.players},${play.comments},${play.duration}\n"; // Добавьте данные
     }
 
     Directory directory;
@@ -1006,16 +1021,17 @@ Column getPlayersColumn(BggPlay bggPlay) {
   } else {
     List<Widget> columnChildren = [];
     for (var playerInfo in players.split(';')) {
-      var playerName = playerInfo.split('|')[2];
-      if (bggPlay.winners != null && bggPlay.winners!.contains(playerName)) {
+      var player = BggPlayPlayer.fromString(playerInfo);
+      //var playerName = playerInfo.split('|')[2];
+      if (bggPlay.players != null && player.win == '1') {
         columnChildren.add(Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const Icon(Icons.emoji_events, color: Colors.amber),
             Text(
-              playerName.length > maxColumnPlayerNameLength
-                  ? "${playerName.substring(0, maxColumnPlayerNameLength)}..."
-                  : playerName,
+              player.name.length > maxColumnPlayerNameLength
+                  ? "${player.name.substring(0, maxColumnPlayerNameLength)}..."
+                  : player.name,
               textAlign: TextAlign.left,
               overflow: TextOverflow.ellipsis,
             )
@@ -1025,9 +1041,9 @@ Column getPlayersColumn(BggPlay bggPlay) {
         columnChildren
             .add(Row(mainAxisAlignment: MainAxisAlignment.center, children: [
           Text(
-              playerName.length > maxColumnPlayerNameLength
-                  ? "${playerName.substring(0, maxColumnPlayerNameLength)}..."
-                  : playerName,
+              player.name.length > maxColumnPlayerNameLength
+                  ? "${player.name.substring(0, maxColumnPlayerNameLength)}..."
+                  : player.name,
               textAlign: TextAlign.left,
               overflow: TextOverflow.ellipsis)
         ]));

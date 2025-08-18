@@ -163,7 +163,6 @@ class _PlaySenderState extends State<PlaySender> {
                           })
                           .toList()
                           .join(";"),
-                      winners: winners,
                       duration: duration,
                       incomplete: 0,
                       nowinstats: 0,
@@ -209,7 +208,6 @@ class _PlaySenderState extends State<PlaySender> {
                         })
                         .toList()
                         .join(";"),
-                    winners: winners,
                     duration: duration,
                     incomplete: 0,
                     nowinstats: 0,

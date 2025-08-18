@@ -7,7 +7,6 @@ class BggPlay {
   final String gameName;
   final String? comments;
   final String? players;
-  final String? winners;
   final int? duration;
   final int? offline;
   final int? incomplete;
@@ -22,7 +21,6 @@ class BggPlay {
       this.comments,
       this.location,
       this.players,
-      this.winners,
       this.duration,
       this.offline,
       this.incomplete,
@@ -36,7 +34,6 @@ class BggPlay {
         'quantity': quantity,
         'location': location,
         'players': players,
-        'winners': winners,
         'comments': comments,
         'duration': duration,
         'offline': offline,
@@ -54,7 +51,6 @@ class BggPlay {
         comments: json['comments'],
         location: json['location'],
         players: json['players'],
-        winners: json['winners'],
         duration: json['duration'],
         offline: json['offline'],
         incomplete: json['incomplete'],

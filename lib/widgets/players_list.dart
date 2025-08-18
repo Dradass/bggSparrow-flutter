@@ -1,5 +1,6 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/models/bgg_play_player.dart';
 
 import '../db/players_list_sql.dart';
 import '../models/player_list_model.dart';
@@ -67,13 +68,18 @@ class PlayersListWrapper {
           var player = await PlayersSQL.selectPlayerById(int.parse(playerId));
           if (player != null) {
             players.add({
+              'username': player.username,
+              'userid': player.userid,
               'name': player.name,
+              'startPosition': player.startposition ?? "0",
+              'color': player.color ?? "0",
+              'score': player.score ?? "0",
+              'new': player.isNew ?? "0",
+              'rating': player.rating ?? "0",
+              'win': false,
               'id': player.id,
               'isChecked': false,
-              'win': false,
               'excluded': false,
-              'username': player.username,
-              'userid': player.userid
             });
           } else {
             log('Cant find player with id $playerId');
@@ -82,6 +88,24 @@ class PlayersListWrapper {
         players.sort((a, b) => a['id'].compareTo(b['id']));
       }
     }
+  }
+
+  List<BggPlayPlayer> getBggPlayers() {
+    List<BggPlayPlayer> result = [];
+    for (var player in players) {
+      var bggPlayer = BggPlayPlayer(
+          username: player['username'],
+          userid: player['userid'].toString(),
+          name: player['name'],
+          startposition: player['startPosition'],
+          color: player['color'],
+          score: player['score'],
+          isNew: player['new'],
+          rating: player['rating'],
+          win: player['win'] ? "1" : "0");
+      result.add(bggPlayer);
+    }
+    return result;
   }
 }
 

@@ -30,6 +30,10 @@ class BggPlayPlayer {
 
   factory BggPlayPlayer.fromString(String sourceString) {
     var sourceList = sourceString.split('|');
+
+    if (sourceList.length < 9) {
+      sourceList = [...sourceList, ...List.filled(9 - sourceList.length, "0")];
+    }
     return BggPlayPlayer(
         username: sourceList[0],
         userid: sourceList[1],

@@ -87,15 +87,23 @@ class PlayersSQL {
     if (result.isEmpty) return players;
     for (var playerResult in result) {
       var player = Player.fromJson(playerResult);
+      // Structure of player:
+      // (0) username="" | (1) userid="0" | (2) name="Саша" | (3) startposition=""
+      //| (4) color="" | (5) score="42" | (6) new="0" | (7) rating="0" | (8) win="1"
       if (player.name.isEmpty) continue;
       players.add({
+        'username': player.username,
+        'userid': player.userid,
         'name': player.name,
+        'startPosition': player.startposition ?? "0",
+        'color': player.color ?? "0",
+        'score': player.score ?? "0",
+        'new': player.isNew ?? "0",
+        'rating': player.rating ?? "0",
+        'win': false,
         'id': player.id,
         'isChecked': false,
-        'win': false,
         'excluded': false,
-        'username': player.username,
-        'userid': player.userid
       });
     }
     players

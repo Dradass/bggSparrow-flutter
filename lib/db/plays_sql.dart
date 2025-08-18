@@ -15,7 +15,7 @@ class PlaysSQL {
   static void createTable() async {
     final db = await _getDB();
     await db.execute(
-        "CREATE TABLE Plays(id INTEGER PRIMARY KEY, date DATETIME NOT NULL, quantity INTEGER, location TEXT, gameId INTEGER NOT NULL, gameName TEXT NOT NULL, comments TEXT, players TEXT, winners TEXT, duration INTEGER, offline INTEGER, incomplete INTEGER, nowinstats INTEGER);");
+        "CREATE TABLE Plays(id INTEGER PRIMARY KEY, date DATETIME NOT NULL, quantity INTEGER, location TEXT, gameId INTEGER NOT NULL, gameName TEXT NOT NULL, comments TEXT, players TEXT, duration INTEGER, offline INTEGER, incomplete INTEGER, nowinstats INTEGER);");
   }
 
   static void dropTable() async {
@@ -125,7 +125,6 @@ class PlaysSQL {
           'comments': play.comments,
           'location': play.location,
           'players': play.players,
-          'winners': play.winners,
           'duration': play.duration,
         }));
       }

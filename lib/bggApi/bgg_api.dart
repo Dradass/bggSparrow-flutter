@@ -303,7 +303,6 @@ Future<bool> getPlaysFromPage(
         quantity: quantity,
         incomplete: incomplete,
         location: location,
-        winners: winnersNames.join(';'),
         players: currentPlayers
             .map((e) =>
                 '${e.username.toString()}|${e.userid.toString()}|${e.name}|${e.startposition.toString()}|${e.color.toString()}|${e.score.toString()}|${e.isNew.toString()}|${e.rating.toString()}|${e.win.toString()}')
@@ -617,12 +616,12 @@ Future<List<GameThing>?> searchGamesFromLocalDB(String searchString) async {
   return games;
 }
 
-Map<String, String> createBggPlayersInfo(
-    BggPlay bggPlay, List<Map<dynamic, dynamic>> players) {
-  var sourcePlayerInfo = bggPlay.players;
-  var bggPlayPlayersList =
-      sourcePlayerInfo?.split(';').map((e) => BggPlayPlayer.fromString(e));
+Map<String, String> createBggPlayersInfo(List<Map<dynamic, dynamic>> players) {
   Map<String, String> playersInfo = {};
+  if (players.isEmpty) {
+    return playersInfo;
+  }
+
   var playerIndex = 0;
   for (var player in players.where((e) => e['isChecked'] == true)) {
     // Structure of player:
@@ -630,66 +629,42 @@ Map<String, String> createBggPlayersInfo(
     //| (4) color="" | (5) score="42" | (6) new="0" | (7) rating="0" | (8) win="1"
     if (player['username'] != "") {
       // Bgg player
+      var bggPlayerInfo =
+          players.where((e) => e["username"] == player['username']).first;
+
       playersInfo['players[$playerIndex][username]'] =
           player['username'].toString();
       playersInfo['players[$playerIndex][name]'] = player['name'].toString();
       playersInfo['players[$playerIndex][win]'] =
           player['win'] == true ? "1" : "0";
-      playersInfo['players[$playerIndex][score]'] = bggPlayPlayersList!
-          .where((e) => e.username == player['username'])
-          .first
-          .score
-          .toString();
-      playersInfo['players[$playerIndex][new]'] = bggPlayPlayersList
-          .where((e) => e.username == player['username'])
-          .first
-          .isNew
-          .toString();
-      playersInfo['players[$playerIndex][color]'] = bggPlayPlayersList
-          .where((e) => e.username == player['username'])
-          .first
-          .color
-          .toString();
-      playersInfo['players[$playerIndex][rating]'] = bggPlayPlayersList
-          .where((e) => e.username == player['username'])
-          .first
-          .rating
-          .toString();
-      playersInfo['players[$playerIndex][startposition]'] = bggPlayPlayersList
-          .where((e) => e.username == player['username'])
-          .first
-          .startposition
-          .toString();
+      playersInfo['players[$playerIndex][score]'] =
+          bggPlayerInfo["score"].toString();
+      playersInfo['players[$playerIndex][new]'] =
+          bggPlayerInfo["new"].toString();
+      playersInfo['players[$playerIndex][color]'] =
+          bggPlayerInfo["color"].toString();
+      playersInfo['players[$playerIndex][rating]'] =
+          bggPlayerInfo["rating"].toString();
+      playersInfo['players[$playerIndex][startposition]'] =
+          bggPlayerInfo["startposition"].toString();
     } else {
       // Offline player
+      var bggPlayerInfo = players
+          .where((e) => e["name"] == player['name'] && player['username'] == "")
+          .first;
       playersInfo['players[$playerIndex][name]'] = player['name'].toString();
       playersInfo['players[$playerIndex][win]'] =
           player['win'] == true ? "1" : "0";
-      playersInfo['players[$playerIndex][score]'] = bggPlayPlayersList!
-          .where((e) => e.name == player['name'] && player['username'] == "")
-          .first
-          .score
-          .toString();
-      playersInfo['players[$playerIndex][new]'] = bggPlayPlayersList
-          .where((e) => e.name == player['name'] && player['username'] == "")
-          .first
-          .isNew
-          .toString();
-      playersInfo['players[$playerIndex][color]'] = bggPlayPlayersList
-          .where((e) => e.name == player['name'] && player['username'] == "")
-          .first
-          .color
-          .toString();
-      playersInfo['players[$playerIndex][rating]'] = bggPlayPlayersList
-          .where((e) => e.name == player['name'] && player['username'] == "")
-          .first
-          .rating
-          .toString();
-      playersInfo['players[$playerIndex][startposition]'] = bggPlayPlayersList
-          .where((e) => e.name == player['name'] && player['username'] == "")
-          .first
-          .startposition
-          .toString();
+      playersInfo['players[$playerIndex][score]'] =
+          bggPlayerInfo["score"].toString();
+      playersInfo['players[$playerIndex][new]'] =
+          bggPlayerInfo["new"].toString();
+      playersInfo['players[$playerIndex][color]'] =
+          bggPlayerInfo["color"].toString();
+      playersInfo['players[$playerIndex][rating]'] =
+          bggPlayerInfo["rating"].toString();
+      playersInfo['players[$playerIndex][startposition]'] =
+          bggPlayerInfo["startposition"].toString();
     }
     playerIndex++;
   }
