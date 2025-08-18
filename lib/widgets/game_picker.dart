@@ -436,6 +436,7 @@ class _GamePickerState extends State<GamePicker> {
             padding: const EdgeInsets.only(right: 0),
             width: MediaQuery.of(context).size.width * 0.15,
             child: ChoiceChip(
+              key: swapSearchModeKey,
               showCheckmark: false,
               materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
               label: SizedBox(

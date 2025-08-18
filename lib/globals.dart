@@ -11,6 +11,7 @@ const passwordParamName = "password";
 
 final GlobalKey selectGameButtonKey = GlobalKey();
 final GlobalKey recognizeGameButtonKey = GlobalKey();
+final GlobalKey swapSearchModeKey = GlobalKey();
 final GlobalKey progressBarKey = GlobalKey();
 
 Duration requestTimeout = const Duration(seconds: 10);

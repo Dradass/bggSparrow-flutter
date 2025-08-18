@@ -22,6 +22,7 @@ class TutorialHandler {
   Future<void> checkFirstLaunch() async {
     final prefs = await SharedPreferences.getInstance();
     bool isFirstLaunch = prefs.getBool('first_launch_nav') ?? true;
+    isFirstLaunch = true;
 
     if (isFirstLaunch) {
       await prefs.setBool('first_launch_nav', false);
@@ -60,20 +61,7 @@ class TutorialHandler {
           TargetContent(
             align: ContentAlign.top,
             builder: (context, controller) {
-              return Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    S.of(context).saveYourResults,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                      fontSize: 20,
-                    ),
-                  ),
-                ],
-              );
+              return _buildTutorialContent(S.of(context).saveYourResults, "");
             },
           ),
         ],
@@ -87,20 +75,8 @@ class TutorialHandler {
         TargetContent(
           align: ContentAlign.bottom,
           builder: (context, controller) {
-            return Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  S.of(context).initialLoadingCanBeLong,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                    fontSize: 20,
-                  ),
-                ),
-              ],
-            );
+            return _buildTutorialContent(
+                S.of(context).initialLoadingCanBeLong, "");
           },
         ),
       ],
@@ -113,20 +89,7 @@ class TutorialHandler {
         TargetContent(
           align: ContentAlign.top,
           builder: (context, controller) {
-            return Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  S.of(context).selectGameFromList,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                    fontSize: 20,
-                  ),
-                ),
-              ],
-            );
+            return _buildTutorialContent(S.of(context).selectGameFromList, "");
           },
         ),
       ],
@@ -139,26 +102,25 @@ class TutorialHandler {
         TargetContent(
           align: ContentAlign.top,
           builder: (context, controller) {
-            return Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  S.of(context).orRecognizeGame,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                    fontSize: 20,
-                  ),
-                ),
-              ],
-            );
+            return _buildTutorialContent(S.of(context).orRecognizeGame, "");
           },
         ),
       ],
     ));
-    //}
-    //}
+
+    targets.add(TargetFocus(
+      keyTarget: swapSearchModeKey,
+      identify: "swapSearchMode",
+      contents: [
+        TargetContent(
+          align: ContentAlign.top,
+          builder: (context, controller) {
+            return _buildTutorialContent(S.of(context).selectSearchMode, "");
+          },
+        ),
+      ],
+    ));
+
     return targets;
   }
 
@@ -194,7 +156,7 @@ class TutorialHandler {
             builder: (context, controller) {
               return _buildTutorialContent(
                 S.of(context).checkYourGameStats,
-                "",
+                S.of(context).playsCanBeEdited,
               );
             },
           ),
@@ -268,9 +230,7 @@ class TutorialHandler {
               align: ContentAlign.top,
               builder: (context, controller) {
                 return _buildTutorialContent(
-                  S.of(context).exportYourStatsToCsv,
-                  "",
-                );
+                    S.of(context).exportYourStatsToCsv, "");
               },
             ),
           ],
@@ -302,10 +262,7 @@ class TutorialHandler {
         TargetContent(
           align: ContentAlign.top,
           builder: (context, controller) {
-            return _buildTutorialContent(
-              S.of(context).chooseWhoGoesFirst,
-              "",
-            );
+            return _buildTutorialContent(S.of(context).chooseWhoGoesFirst, "");
           },
         ),
       ],
