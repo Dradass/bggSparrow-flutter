@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/models/bgg_play_player.dart';
 import '../bggApi/bgg_api.dart';
 import '../s.dart';
 import '../db/players_sql.dart';
@@ -342,6 +343,27 @@ class _PlayersPickerSimpleState extends State<PlayersPickerSimple> {
         onPressed: () async {
           if (widget.playersListWrapper.players.isEmpty) {
             widget.playersListWrapper.players = await getAllPlayers();
+          }
+
+          // Fill Checked and Win statused
+          if (widget.playersListWrapper.sourcePlayers != null) {
+            for (var sourcePlayerString
+                in widget.playersListWrapper.sourcePlayers!.split(";")) {
+              var bggPlayer = BggPlayPlayer.fromString(sourcePlayerString);
+              if (bggPlayer.userid == '0') {
+                var foundUser = widget.playersListWrapper.players
+                    .where((e) => e['name'] == bggPlayer.name)
+                    .first;
+                foundUser['isChecked'] = true;
+                foundUser['win'] = bggPlayer.win == '1' ? true : false;
+              } else {
+                var foundUser = widget.playersListWrapper.players
+                    .where((e) => e['userid'].toString() == bggPlayer.userid)
+                    .first;
+                foundUser['isChecked'] = true;
+                foundUser['win'] = bggPlayer.win == '1' ? true : false;
+              }
+            }
           }
           showDialog(
               context: context,
