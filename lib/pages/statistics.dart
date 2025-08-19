@@ -570,6 +570,11 @@ class _StatisticsState extends State<Statistics> {
                                                         player['excluded'] =
                                                             !player['excluded'];
                                                       });
+                                                      if (player['excluded'] ==
+                                                          true) {
+                                                        player['isChecked'] =
+                                                            false;
+                                                      }
                                                     },
                                                   ),
                                                   const SizedBox(width: 10),
@@ -603,6 +608,9 @@ class _StatisticsState extends State<Statistics> {
                                               setState(() {
                                                 player['isChecked'] = value;
                                               });
+                                              if (player['isChecked'] == true) {
+                                                player['excluded'] = false;
+                                              }
                                             },
                                           );
                                         }).toList())))
@@ -935,8 +943,8 @@ class _StatisticsState extends State<Statistics> {
                   .first;
               existingWinner.count = existingWinner.count! + 1;
             } else {
-              var winnerFromDb = allPlayers.where((e) => e['userid'] == '0'
-                  ? e['name'] == (winnerFullName)
+              var winnerFromDb = allPlayers.where((e) => e['userid'] == 0
+                  ? e['name'] == winnerFullName
                   : e['userId'] == winnerPlayer.userid);
               if (winnerFromDb.isEmpty) {
                 continue;
