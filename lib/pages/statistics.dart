@@ -760,6 +760,25 @@ class _StatisticsState extends State<Statistics> {
     ));
   }
 
+  bool gotMatchedPlayers(
+    List<BggPlayPlayer> allPlayers,
+    List<Map> players,
+  ) {
+    var haveMatch = false;
+    for (var player in players) {
+      for (var allPlayer in allPlayers) {
+        if (allPlayer.userid == "0") {
+          if (allPlayer.name == player['name']) haveMatch = true;
+          break;
+        } else {
+          if (allPlayer.username == player['username']) haveMatch = true;
+          break;
+        }
+      }
+    }
+    return haveMatch;
+  }
+
   Future<void> getPlays() async {
     // Get last plays
     // if (needUpdatePlaysFromBgg) {
@@ -774,56 +793,69 @@ class _StatisticsState extends State<Statistics> {
     plays.clear();
     allPlays = await PlaysSQL.getAllPlays(startDate, endDate);
 
-    var chosenPlayers =
-        playersListWrapper.players.where((element) => element['isChecked']);
+    var chosenPlayers = playersListWrapper.players
+        .where((element) => element['isChecked'])
+        .toList();
 
-    var excludedPlayers =
-        playersListWrapper.players.where((element) => element['excluded']);
+    var excludedPlayers = playersListWrapper.players
+        .where((element) => element['excluded'])
+        .toList();
 
     // Get plays with chosen players
     if (chosenPlayers.isEmpty) {
+      for (var allPlay in allPlays) {
+        if (allPlay.players == null) continue;
+
+        List<BggPlayPlayer> allPlayersBgg = allPlay.players!
+            .split(";")
+            .map((e) => BggPlayPlayer.fromString(e))
+            .toList();
+
+        var haveExcludedPlayer =
+            gotMatchedPlayers(allPlayersBgg, excludedPlayers);
+        if (haveExcludedPlayer) continue;
+
+        plays.add(allPlay);
+      }
+
       plays = allPlays;
     } else {
       for (var allPlay in allPlays) {
         if (allPlay.players == null) continue;
 
+        List<BggPlayPlayer> allPlayersBgg = allPlay.players!
+            .split(";")
+            .map((e) => BggPlayPlayer.fromString(e))
+            .toList();
+
         // Exclude players
-        // TODO use BGG user id
-        var haveExcludedPlayer = false;
-        for (var excludedPlayer in excludedPlayers) {
-          if (allPlay.players!
-              .split(";")
-              .join("|")
-              .contains(excludedPlayer['name'])) {
-            haveExcludedPlayer = true;
-            break;
-          }
-        }
+        var haveExcludedPlayer =
+            gotMatchedPlayers(allPlayersBgg, excludedPlayers);
         if (haveExcludedPlayer) continue;
-// TODO use BGG user id
+
         var chosenMatches = 0;
         var winnerAmongThisPlay = false;
         for (var chosenPlayer in chosenPlayers) {
-          if (allPlay.players!
-              .split(";")
-              .join("|")
-              .contains(chosenPlayer['name'])) {
-            chosenMatches++;
+          if (chosenPlayer['userid'] == 0) {
+            if (allPlayersBgg
+                .map((e) => e.name)
+                .contains(chosenPlayer['name'])) {
+              chosenMatches++;
+            }
+          } else {
+            if (allPlayersBgg
+                .map((e) => e.userid)
+                .contains(chosenPlayer['userid'].toString())) {
+              chosenMatches++;
+            }
           }
         }
 
         // Check winner among chosen players
-        // TODO use BGG user id
-        for (var chosenPlayer in chosenPlayers) {
-          if (allPlay.players!
-              .split(";")
-              .map((e) => e.split("|")[6])
-              .contains(chosenPlayer['name'])) {
-            //   if (allPlay.winners!.split(";").contains(chosenPlayer['name'])) {
-            winnerAmongThisPlay = true;
-            break;
-          }
-        }
+        winnerAmongThisPlay = allPlayersBgg.any((e) =>
+            e.win == '1' && e.userid == '0'
+                ? chosenPlayers.map((e) => e['name']).contains(e.name)
+                : chosenPlayers.map((e) => e['userid']).contains(e.userid));
 
         if (onlyChosenPlayers) {
           if (chosenMatches == allPlay.players!.split(";").length &&
@@ -1022,16 +1054,18 @@ Column getPlayersColumn(BggPlay bggPlay) {
     List<Widget> columnChildren = [];
     for (var playerInfo in players.split(';')) {
       var player = BggPlayPlayer.fromString(playerInfo);
-      //var playerName = playerInfo.split('|')[2];
+      var playerName = player.userid == "0"
+          ? player.name
+          : "${player.name} (${player.username})";
       if (bggPlay.players != null && player.win == '1') {
         columnChildren.add(Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const Icon(Icons.emoji_events, color: Colors.amber),
             Text(
-              player.name.length > maxColumnPlayerNameLength
-                  ? "${player.name.substring(0, maxColumnPlayerNameLength)}..."
-                  : player.name,
+              playerName.length > maxColumnPlayerNameLength
+                  ? "${playerName.substring(0, maxColumnPlayerNameLength)}..."
+                  : playerName,
               textAlign: TextAlign.left,
               overflow: TextOverflow.ellipsis,
             )
@@ -1041,9 +1075,9 @@ Column getPlayersColumn(BggPlay bggPlay) {
         columnChildren
             .add(Row(mainAxisAlignment: MainAxisAlignment.center, children: [
           Text(
-              player.name.length > maxColumnPlayerNameLength
-                  ? "${player.name.substring(0, maxColumnPlayerNameLength)}..."
-                  : player.name,
+              playerName.length > maxColumnPlayerNameLength
+                  ? "${playerName.substring(0, maxColumnPlayerNameLength)}..."
+                  : playerName,
               textAlign: TextAlign.left,
               overflow: TextOverflow.ellipsis)
         ]));
