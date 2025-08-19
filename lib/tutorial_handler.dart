@@ -22,7 +22,6 @@ class TutorialHandler {
   Future<void> checkFirstLaunch() async {
     final prefs = await SharedPreferences.getInstance();
     bool isFirstLaunch = prefs.getBool('first_launch_nav') ?? true;
-    isFirstLaunch = true;
 
     if (isFirstLaunch) {
       await prefs.setBool('first_launch_nav', false);

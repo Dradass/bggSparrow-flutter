@@ -47,34 +47,28 @@ class _StatisticsState extends State<Statistics> {
   var chosenGameId = 0;
   PlayersListWrapper playersListWrapper = PlayersListWrapper();
 
-  DataCell _buildDataCell(
-      int rowIndex, int colIndex, Widget child, double? width) {
+  DataCell _buildDataCell(int rowIndex, int colIndex, Widget child) {
     return DataCell(
       GestureDetector(
-          onLongPressStart: (details) {
-            log('long row press: ${plays[rowIndex].id}, playes = ${plays[rowIndex].players}');
-            final RenderBox overlay =
-                Overlay.of(context).context.findRenderObject()! as RenderBox;
-            final RelativeRect position = RelativeRect.fromRect(
-              Rect.fromPoints(
-                details.globalPosition,
-                details.globalPosition + const Offset(1, 1),
-              ),
-              overlay.localToGlobal(Offset.zero) & overlay.size,
-            );
-            _showContextMenu(context, position, plays[rowIndex].id);
-          },
-          child: SizedBox(
-            //color: rowIndex.isEven ? Colors.grey[300] : Colors.white,
-            width: width,
-            child: Builder(
-              builder: (cellContext) => Container(
-                constraints: const BoxConstraints(minHeight: 45),
-                padding: const EdgeInsets.all(3),
-                child: child,
-              ),
+        onLongPressStart: (details) {
+          log('long row press: ${plays[rowIndex].id}, playes = ${plays[rowIndex].players}');
+          final RenderBox overlay =
+              Overlay.of(context).context.findRenderObject()! as RenderBox;
+          final RelativeRect position = RelativeRect.fromRect(
+            Rect.fromPoints(
+              details.globalPosition,
+              details.globalPosition + const Offset(1, 1),
             ),
-          )),
+            overlay.localToGlobal(Offset.zero) & overlay.size,
+          );
+          _showContextMenu(context, position, plays[rowIndex].id);
+        },
+        child: Container(
+          constraints: const BoxConstraints(minHeight: 45),
+          padding: const EdgeInsets.symmetric(horizontal: 5),
+          child: child,
+        ),
+      ),
     );
   }
 
@@ -162,13 +156,23 @@ class _StatisticsState extends State<Statistics> {
                       dataRowMaxHeight: double.infinity,
                       columns: <DataColumn>[
                         DataColumn(
-                          label: Text(S.of(context).game),
+                          label: Container(
+                            width: MediaQuery.of(context).size.width *
+                                0.4, // Явная ширина
+                            child: Text(S.of(context).game),
+                          ),
                         ),
                         DataColumn(
-                          label: Text(S.of(context).date),
+                          label: Container(
+                            width: MediaQuery.of(context).size.width * 0.25,
+                            child: Text(S.of(context).date),
+                          ),
                         ),
                         DataColumn(
-                          label: Text(S.of(context).players),
+                          label: Container(
+                            width: MediaQuery.of(context).size.width * 0.35,
+                            child: Text(S.of(context).players),
+                          ),
                         ),
                       ],
                       rows: List<DataRow>.generate(
@@ -199,21 +203,16 @@ class _StatisticsState extends State<Statistics> {
                                   Text(plays[index].gameName,
                                       style: const TextStyle(
                                         fontWeight: FontWeight.bold,
-                                      )),
-                                  MediaQuery.of(context).size.width * 0.35),
+                                      ))),
                               _buildDataCell(
                                   index,
                                   1,
                                   Text(
                                     plays[index].date,
                                     textAlign: TextAlign.left,
-                                  ),
-                                  MediaQuery.of(context).size.width * 0.25),
-                              _buildDataCell(
-                                  index,
-                                  2,
-                                  getPlayersColumn(plays[index]),
-                                  MediaQuery.of(context).size.width * 0.4),
+                                  )),
+                              _buildDataCell(index, 2,
+                                  getPlayersColumn(plays[index], context)),
                             ]),
                       ),
                     )),
@@ -767,12 +766,16 @@ class _StatisticsState extends State<Statistics> {
     var haveMatch = false;
     for (var player in players) {
       for (var allPlayer in allPlayers) {
-        if (allPlayer.userid == "0") {
-          if (allPlayer.name == player['name']) haveMatch = true;
-          break;
+        if (player['userid'] == 0) {
+          if (allPlayer.name == player['name']) {
+            haveMatch = true;
+            break;
+          }
         } else {
-          if (allPlayer.username == player['username']) haveMatch = true;
-          break;
+          if (allPlayer.username == player['username']) {
+            haveMatch = true;
+            break;
+          }
         }
       }
     }
@@ -810,6 +813,9 @@ class _StatisticsState extends State<Statistics> {
             .split(";")
             .map((e) => BggPlayPlayer.fromString(e))
             .toList();
+        if (allPlay.id == 95702726) {
+          print('aaa');
+        }
 
         var haveExcludedPlayer =
             gotMatchedPlayers(allPlayersBgg, excludedPlayers);
@@ -817,8 +823,6 @@ class _StatisticsState extends State<Statistics> {
 
         plays.add(allPlay);
       }
-
-      plays = allPlays;
     } else {
       for (var allPlay in allPlays) {
         if (allPlay.players == null) continue;
@@ -1046,47 +1050,61 @@ class _StatisticsState extends State<Statistics> {
   }
 }
 
-Column getPlayersColumn(BggPlay bggPlay) {
-  var players = bggPlay.players;
+Column getPlayersColumn(BggPlay bggPlay, BuildContext context) {
+  final players = bggPlay.players;
   if (players == null || players.isEmpty) {
     return const Column(children: []);
-  } else {
-    List<Widget> columnChildren = [];
-    for (var playerInfo in players.split(';')) {
-      var player = BggPlayPlayer.fromString(playerInfo);
-      var playerName = player.userid == "0"
+  }
+
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: players.split(';').map((playerInfo) {
+      final player = BggPlayPlayer.fromString(playerInfo);
+      final playerName = player.userid == "0"
           ? player.name
           : "${player.name} (${player.username})";
-      if (bggPlay.players != null && player.win == '1') {
-        columnChildren.add(Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.emoji_events, color: Colors.amber),
-            Text(
-              playerName.length > maxColumnPlayerNameLength
-                  ? "${playerName.substring(0, maxColumnPlayerNameLength)}..."
-                  : playerName,
-              textAlign: TextAlign.left,
-              overflow: TextOverflow.ellipsis,
-            )
-          ],
-        ));
-      } else {
-        columnChildren
-            .add(Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-          Text(
-              playerName.length > maxColumnPlayerNameLength
-                  ? "${playerName.substring(0, maxColumnPlayerNameLength)}..."
-                  : playerName,
-              textAlign: TextAlign.left,
-              overflow: TextOverflow.ellipsis)
-        ]));
-      }
-    }
-    return Column(
-      children: columnChildren,
-    );
-  }
+
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 2),
+        child: player.win == '1'
+            ? _buildWinnerRow(playerName, context)
+            : _buildNormalRow(playerName),
+      );
+    }).toList(),
+  );
+}
+
+Widget _buildWinnerRow(String playerName, BuildContext context) {
+  return Container(
+    constraints:
+        BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.35),
+    child: Row(
+      mainAxisSize: MainAxisSize.max,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        const Icon(Icons.emoji_events, color: Colors.amber, size: 15),
+        const SizedBox(width: 2),
+        Expanded(
+          child: Text(
+            playerName,
+            overflow: TextOverflow.ellipsis,
+            maxLines: 1,
+            softWrap: false,
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+Widget _buildNormalRow(String playerName) {
+  return IntrinsicWidth(
+    child: Text(
+      playerName,
+      overflow: TextOverflow.ellipsis,
+      maxLines: 1,
+    ),
+  );
 }
 
 class _GamePlaysCount {
