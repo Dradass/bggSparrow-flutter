@@ -937,15 +937,16 @@ class _StatisticsState extends State<Statistics> {
             var winnerFullName = winnerPlayer.userid == '0'
                 ? winnerPlayer.name
                 : "${winnerPlayer.name} (${winnerPlayer.username})";
-            if (allWinners.map((e) => e.gameName).contains(winnerFullName)) {
-              var existingWinner = allWinners
-                  .where((element) => element.gameName == winnerFullName)
-                  .first;
+            var existingWinner = allWinners
+                .where((e) => e.gameName == winnerFullName)
+                .firstOrNull;
+
+            if (existingWinner != null) {
               existingWinner.count = existingWinner.count! + 1;
             } else {
               var winnerFromDb = allPlayers.where((e) => e['userid'] == 0
-                  ? e['name'] == winnerFullName
-                  : e['userId'] == winnerPlayer.userid);
+                  ? e['name'] == winnerPlayer.name
+                  : e['userid'].toString() == winnerPlayer.userid);
               if (winnerFromDb.isEmpty) {
                 continue;
               }
