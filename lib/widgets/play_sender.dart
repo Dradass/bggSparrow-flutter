@@ -221,6 +221,7 @@ class _PlaySenderState extends State<PlaySender> {
                   });
                 });
                 showSnackBar(context, S.of(context).playResultsWasSaved);
+                FocusManager.instance.primaryFocus?.unfocus();
               },
         style: ButtonStyle(
             backgroundColor: WidgetStateProperty.all(
