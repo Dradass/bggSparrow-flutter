@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+int loadTimeoutMs = 2500;
+
 // If false - show warning about not corrent game choice
 ValueNotifier<bool> isLoadedGamesPlayersCountInfoNotifier =
     ValueNotifier(false);

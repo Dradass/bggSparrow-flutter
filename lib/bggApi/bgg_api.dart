@@ -9,7 +9,6 @@ import 'package:http/http.dart' as http;
 import 'package:xml/xml.dart' as xml;
 import '../models/bgg_player_model.dart';
 import '../models/bgg_play_model.dart';
-import '../models/bgg_play_player.dart';
 import '../models/bgg_location.dart';
 import 'dart:convert';
 import 'package:requests/requests.dart';
@@ -101,7 +100,7 @@ Future<void> getGamesThumbnail(refreshProgress, dynamic context) async {
               "${S.of(context).updatingThumbnails} $gamesWithThumbCount / ${gettingAllGames.length - 1}");
           gamesWithThumbCount += 1;
           // Anti DDOS
-          await Future.delayed(const Duration(milliseconds: 2000));
+          await Future.delayed(Duration(milliseconds: loadTimeoutMs));
         }
       }
     }
@@ -189,7 +188,7 @@ Future<void> getGamesPlayersCount(refreshProgress, dynamic context) async {
           gamesWithPlayerInfo += 1;
           await GameThingSQL.updateGame(game);
           // Anti DDOS
-          await Future.delayed(const Duration(milliseconds: 2000));
+          await Future.delayed(Duration(milliseconds: loadTimeoutMs));
         } else {
           log("Error while getting info about game ${game.name} id = ${game.id}");
         }
@@ -446,7 +445,7 @@ Future<void> sendOfflinePlaysToBGG() async {
     await sendLogPlayToBGG(offlinePlay);
     await PlaysSQL.deletePlay(offlinePlay);
     // ANTI DDOS
-    await Future.delayed(const Duration(milliseconds: 2000));
+    await Future.delayed(Duration(milliseconds: loadTimeoutMs));
   }
 }
 
