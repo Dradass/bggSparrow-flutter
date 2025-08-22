@@ -160,6 +160,8 @@ class _LogPageState extends State<LogPage> {
   }
 
   Future<void> initDataFromServer() async {
+    TaskChecker().needCancel = false;
+
     try {
       final isConnected = await checkInternetConnection();
       if (!isConnected) {
@@ -345,10 +347,14 @@ class _LogPageState extends State<LogPage> {
                 title: Text(S.of(context).loadAllData,
                     style: TextStyle(
                         color: Theme.of(context).colorScheme.primary)),
-                onTap: () {
-                  GameThingSQL.initTables();
+                onTap: () async {
+                  await GameThingSQL.initTables();
                   if (!backgroundLoading) {
+                    showSnackBar(context, S.of(context).allDataStartedLoading);
                     initDataFromServer();
+                  } else {
+                    showSnackBar(
+                        context, S.of(context).allDataIsAlreadyStarted);
                   }
                 },
               ),
@@ -358,9 +364,10 @@ class _LogPageState extends State<LogPage> {
                 title: Text(S.of(context).wipeAllLocalData,
                     style: TextStyle(
                         color: Theme.of(context).colorScheme.primary)),
-                onTap: () {
+                onTap: () async {
                   TaskChecker().needCancel = true;
-                  GameThingSQL.deleteDB();
+                  await GameThingSQL.deleteDB();
+                  showSnackBar(context, S.of(context).allDataWasDeleted);
                 },
               ),
               Divider(),

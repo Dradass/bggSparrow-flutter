@@ -41,7 +41,7 @@ class GameThingSQL {
     await _getDB();
   }
 
-  static void deleteDB() async {
+  static Future<void> deleteDB() async {
     final path = join(await getDatabasesPath(), _dbName);
 
     await deleteDatabase(path);

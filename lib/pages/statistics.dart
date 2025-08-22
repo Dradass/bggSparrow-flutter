@@ -157,8 +157,7 @@ class _StatisticsState extends State<Statistics> {
                       columns: <DataColumn>[
                         DataColumn(
                           label: Container(
-                            width: MediaQuery.of(context).size.width *
-                                0.4, // Явная ширина
+                            width: MediaQuery.of(context).size.width * 0.4,
                             child: Text(S.of(context).game),
                           ),
                         ),
