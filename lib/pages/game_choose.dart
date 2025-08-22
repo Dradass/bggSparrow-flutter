@@ -152,7 +152,7 @@ class _GameHelperState extends State<GameHelper> {
         Flexible(
             flex: 1,
             child: SizedBox(
-                width: MediaQuery.of(context).size.width,
+                width: MediaQuery.of(context).size.width * 0.9,
                 height: MediaQuery.of(context).size.height,
                 child: Column(
                   children: [
@@ -175,7 +175,7 @@ class _GameHelperState extends State<GameHelper> {
         Flexible(
             flex: 1,
             child: SizedBox(
-                width: MediaQuery.of(context).size.width,
+                width: MediaQuery.of(context).size.width * 0.9,
                 height: MediaQuery.of(context).size.height,
                 child: Column(
                   children: [
