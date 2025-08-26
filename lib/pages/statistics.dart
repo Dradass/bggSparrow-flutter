@@ -402,220 +402,7 @@ class _StatisticsState extends State<Statistics> {
                                 playersListWrapper.players =
                                     await getAllPlayers();
                               }
-                              showDialog(
-                                  context: context,
-                                  builder: (buildContext) {
-                                    return StatefulBuilder(
-                                        builder: (context, setState) {
-                                      return AlertDialog(
-                                          content: Column(children: [
-                                        Column(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Text(
-                                              S.of(context).playersCount,
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
-                                            SizedBox(
-                                              child: RangeSlider(
-                                                values: maxRangeValues,
-                                                max: 10,
-                                                divisions: 10,
-                                                labels: RangeLabels(
-                                                    maxRangeValues.start
-                                                        .round()
-                                                        .toString(),
-                                                    maxRangeValues.end
-                                                        .round()
-                                                        .toString()),
-                                                onChanged:
-                                                    (RangeValues values) {
-                                                  setState(() {
-                                                    maxRangeValues = values;
-                                                  });
-                                                },
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        Column(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
-                                            children: [
-                                              DropdownButton(
-                                                value: chosenGames.isNotEmpty
-                                                    ? chosenGames[chosenGameId]
-                                                    : null,
-                                                onChanged: (String? value) {
-                                                  chosenGameId = chosenGames
-                                                      .entries
-                                                      .firstWhere((entry) =>
-                                                          entry.value == value)
-                                                      .key;
-                                                  setState(() {});
-                                                },
-                                                items: chosenGames.values.map<
-                                                        DropdownMenuItem<
-                                                            String>>(
-                                                    (String value) {
-                                                  return DropdownMenuItem<
-                                                          String>(
-                                                      value: value,
-                                                      child: Text(value));
-                                                }).toList(),
-                                              ),
-                                              ChoiceChip(
-                                                label: Text(
-                                                    S.of(context).winRate,
-                                                    style: TextStyle(
-                                                        color: Theme.of(context)
-                                                            .colorScheme
-                                                            .primary)),
-                                                selected: winRate,
-                                                onSelected: (bool value) {
-                                                  setState(() {
-                                                    winRate = value;
-                                                  });
-                                                },
-                                                shape:
-                                                    const RoundedRectangleBorder(
-                                                  side: BorderSide(
-                                                      color: Colors.black12),
-                                                  borderRadius:
-                                                      BorderRadius.zero,
-                                                ),
-                                              ),
-                                              ChoiceChip(
-                                                label: Text(
-                                                    S
-                                                        .of(context)
-                                                        .onlyChosenPlayers,
-                                                    style: TextStyle(
-                                                        color: Theme.of(context)
-                                                            .colorScheme
-                                                            .primary)),
-                                                selected: onlyChosenPlayers,
-                                                onSelected: (bool value) {
-                                                  setState(() {
-                                                    onlyChosenPlayers = value;
-                                                  });
-                                                },
-                                                shape:
-                                                    const RoundedRectangleBorder(
-                                                  side: BorderSide(
-                                                      color: Colors.black12),
-                                                  borderRadius:
-                                                      BorderRadius.zero,
-                                                ),
-                                              ),
-                                              ChoiceChip(
-                                                label: Text(
-                                                    S
-                                                        .of(context)
-                                                        .winnerAmongChosenPlayers,
-                                                    style: TextStyle(
-                                                        color: Theme.of(context)
-                                                            .colorScheme
-                                                            .primary)),
-                                                selected:
-                                                    winnerAmongChosenPlayers,
-                                                onSelected: (bool value) {
-                                                  setState(() {
-                                                    winnerAmongChosenPlayers =
-                                                        value;
-                                                  });
-                                                },
-                                                shape:
-                                                    const RoundedRectangleBorder(
-                                                  side: BorderSide(
-                                                      color: Colors.black12),
-                                                  borderRadius:
-                                                      BorderRadius.zero,
-                                                ),
-                                              ),
-                                            ]),
-                                        Row(
-                                          children: [
-                                            Text("${S.of(context).players}:"),
-                                            ChooseListDropdown(
-                                                playersListWrapper:
-                                                    playersListWrapper,
-                                                parentStateUpdate: () =>
-                                                    setState(() {})),
-                                          ],
-                                        ),
-                                        Expanded(
-                                            child: SingleChildScrollView(
-                                                child: Column(
-                                                    children: playersListWrapper
-                                                        .players
-                                                        .map((player) {
-                                          return CheckboxListTile(
-                                            contentPadding: EdgeInsets.zero,
-                                            title: Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment
-                                                        .spaceEvenly,
-                                                children: [
-                                                  ElevatedButton(
-                                                    child: player['excluded']
-                                                        ? const Icon(Icons
-                                                            .group_add_outlined)
-                                                        : const Icon(Icons
-                                                            .group_remove_outlined),
-                                                    onPressed: () {
-                                                      setState(() {
-                                                        player['excluded'] =
-                                                            !player['excluded'];
-                                                      });
-                                                      if (player['excluded'] ==
-                                                          true) {
-                                                        player['isChecked'] =
-                                                            false;
-                                                      }
-                                                    },
-                                                  ),
-                                                  const SizedBox(width: 10),
-                                                  Expanded(
-                                                    child: Text(player['name'],
-                                                        overflow: TextOverflow
-                                                            .ellipsis,
-                                                        style: player[
-                                                                'excluded']
-                                                            ? TextStyle(
-                                                                color: Theme.of(
-                                                                        context)
-                                                                    .colorScheme
-                                                                    .primary,
-                                                                decoration:
-                                                                    TextDecoration
-                                                                        .lineThrough,
-                                                                decorationStyle:
-                                                                    TextDecorationStyle
-                                                                        .solid)
-                                                            : TextStyle(
-                                                                color: Theme.of(
-                                                                        context)
-                                                                    .colorScheme
-                                                                    .primary,
-                                                              )),
-                                                  )
-                                                ]),
-                                            value: player['isChecked'],
-                                            onChanged: (bool? value) {
-                                              setState(() {
-                                                player['isChecked'] = value;
-                                              });
-                                              if (player['isChecked'] == true) {
-                                                player['excluded'] = false;
-                                              }
-                                            },
-                                          );
-                                        }).toList())))
-                                      ]));
-                                    });
-                                  });
+                              showFilterDialog();
                             },
                             label: Text(S.of(context).filters),
                             icon: const Icon(Icons.filter_alt),
@@ -764,6 +551,165 @@ class _StatisticsState extends State<Statistics> {
         ],
       ),
     ));
+  }
+
+  void showFilterDialog() async {
+    showDialog(
+        context: context,
+        builder: (buildContext) {
+          return StatefulBuilder(builder: (context, setState) {
+            return AlertDialog(
+                content: Column(children: [
+              Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    S.of(context).playersCount,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  SizedBox(
+                    child: RangeSlider(
+                      values: maxRangeValues,
+                      max: 10,
+                      divisions: 10,
+                      labels: RangeLabels(
+                          maxRangeValues.start.round().toString(),
+                          maxRangeValues.end.round().toString()),
+                      onChanged: (RangeValues values) {
+                        setState(() {
+                          maxRangeValues = values;
+                        });
+                      },
+                    ),
+                  ),
+                ],
+              ),
+              Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    DropdownButton(
+                      value: chosenGames.isNotEmpty
+                          ? chosenGames[chosenGameId]
+                          : null,
+                      onChanged: (String? value) {
+                        chosenGameId = chosenGames.entries
+                            .firstWhere((entry) => entry.value == value)
+                            .key;
+                        setState(() {});
+                      },
+                      items: chosenGames.values
+                          .map<DropdownMenuItem<String>>((String value) {
+                        return DropdownMenuItem<String>(
+                            value: value, child: Text(value));
+                      }).toList(),
+                    ),
+                    ChoiceChip(
+                      label: Text(S.of(context).winRate,
+                          style: TextStyle(
+                              color: Theme.of(context).colorScheme.primary)),
+                      selected: winRate,
+                      onSelected: (bool value) {
+                        setState(() {
+                          winRate = value;
+                        });
+                      },
+                      shape: const RoundedRectangleBorder(
+                        side: BorderSide(color: Colors.black12),
+                        borderRadius: BorderRadius.zero,
+                      ),
+                    ),
+                    ChoiceChip(
+                      label: Text(S.of(context).onlyChosenPlayers,
+                          style: TextStyle(
+                              color: Theme.of(context).colorScheme.primary)),
+                      selected: onlyChosenPlayers,
+                      onSelected: (bool value) {
+                        setState(() {
+                          onlyChosenPlayers = value;
+                        });
+                      },
+                      shape: const RoundedRectangleBorder(
+                        side: BorderSide(color: Colors.black12),
+                        borderRadius: BorderRadius.zero,
+                      ),
+                    ),
+                    ChoiceChip(
+                      label: Text(S.of(context).winnerAmongChosenPlayers,
+                          style: TextStyle(
+                              color: Theme.of(context).colorScheme.primary)),
+                      selected: winnerAmongChosenPlayers,
+                      onSelected: (bool value) {
+                        setState(() {
+                          winnerAmongChosenPlayers = value;
+                        });
+                      },
+                      shape: const RoundedRectangleBorder(
+                        side: BorderSide(color: Colors.black12),
+                        borderRadius: BorderRadius.zero,
+                      ),
+                    ),
+                  ]),
+              Row(
+                children: [
+                  Text("${S.of(context).players}:"),
+                  ChooseListDropdown(
+                      playersListWrapper: playersListWrapper,
+                      parentStateUpdate: () => setState(() {})),
+                ],
+              ),
+              Expanded(
+                  child: SingleChildScrollView(
+                      child: Column(
+                          children: playersListWrapper.players.map((player) {
+                return CheckboxListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        ElevatedButton(
+                          child: player['excluded']
+                              ? const Icon(Icons.group_add_outlined)
+                              : const Icon(Icons.group_remove_outlined),
+                          onPressed: () {
+                            setState(() {
+                              player['excluded'] = !player['excluded'];
+                            });
+                            if (player['excluded'] == true) {
+                              player['isChecked'] = false;
+                            }
+                          },
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(player['name'],
+                              overflow: TextOverflow.ellipsis,
+                              style: player['excluded']
+                                  ? TextStyle(
+                                      color:
+                                          Theme.of(context).colorScheme.primary,
+                                      decoration: TextDecoration.lineThrough,
+                                      decorationStyle:
+                                          TextDecorationStyle.solid)
+                                  : TextStyle(
+                                      color:
+                                          Theme.of(context).colorScheme.primary,
+                                    )),
+                        )
+                      ]),
+                  value: player['isChecked'],
+                  onChanged: (bool? value) {
+                    setState(() {
+                      player['isChecked'] = value;
+                    });
+                    if (player['isChecked'] == true) {
+                      player['excluded'] = false;
+                    }
+                  },
+                );
+              }).toList())))
+            ]));
+          });
+        });
   }
 
   bool gotMatchedPlayers(

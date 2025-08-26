@@ -122,33 +122,7 @@ class _GameHelperState extends State<GameHelper> {
         //         width: MediaQuery.of(context).size.width,
         //         height: MediaQuery.of(context).size.height,
         //         child: const Text(" "))),
-        SizedBox(
-            width: MediaQuery.of(context).size.width,
-            height: MediaQuery.of(context).size.height * 0.2,
-            child: FittedBox(
-                child: ValueListenableBuilder<bool>(
-              valueListenable: isLoadedGamesPlayersCountInfoNotifier,
-              builder: (context, value, _) {
-                return value
-                    ? Container()
-                    : Container(
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 4),
-                        child: Text(
-                          maxLines: 2,
-                          value
-                              ? ""
-                              : "*${S.of(context).gamePlayersInfoNotLoaded}",
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.secondary,
-                            backgroundColor: Colors.transparent,
-                          ),
-                        ));
-              },
-            ))),
+        const LoadingSuccessAlert(),
         Flexible(
             flex: 1,
             child: SizedBox(
@@ -227,380 +201,7 @@ class _GameHelperState extends State<GameHelper> {
                   onPressed: () async {
                     await updateGamesFromCustomList(chosenGameListId);
                     await updateCustomLists(context);
-                    showDialog(
-                        context: context,
-                        builder: (buildContext) {
-                          return StatefulBuilder(builder: (context, setState) {
-                            setState(() {});
-                            return AlertDialog(
-                                content: Column(children: [
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Container(
-                                      color: Colors.red,
-                                      width: MediaQuery.of(context).size.width *
-                                          0.4,
-                                      child: ElevatedButton(
-                                          onPressed: () {
-                                            for (var game in allGames!) {
-                                              if (!gamesFromFilter.any((x) =>
-                                                  x.keys.first == game)) {
-                                                gamesFromFilter.add({game: 0});
-                                              }
-                                            }
-                                            setState(() {});
-                                          },
-                                          style: ButtonStyle(
-                                              backgroundColor:
-                                                  WidgetStateProperty.all(
-                                                      Theme.of(context)
-                                                          .colorScheme
-                                                          .secondary)),
-                                          child: Text(
-                                              S.of(context).showAllGames))),
-                                  Row(children: [
-                                    Text(S.of(context).votes),
-                                    Checkbox(
-                                        value: gamesFilterNeedClear == 1,
-                                        onChanged: ((value) {
-                                          for (var gameFromFilter
-                                              in gamesFromFilter) {
-                                            gameFromFilter.update(
-                                                gameFromFilter.keys.first,
-                                                (value2) =>
-                                                    value2 = value! ? 1 : 0);
-                                          }
-                                          setState(
-                                            () {
-                                              gamesFilterNeedClear =
-                                                  value! ? 1 : 0;
-                                            },
-                                          );
-                                        }))
-                                  ]),
-                                ],
-                              ),
-                              Row(
-                                children: [
-                                  SizedBox(
-                                      width: MediaQuery.of(context).size.width *
-                                          0.68,
-                                      child: ExpansionTile(
-                                          shape: const Border(),
-                                          textColor: Theme.of(context)
-                                              .colorScheme
-                                              .primary,
-                                          iconColor: Theme.of(context)
-                                              .colorScheme
-                                              .primary,
-                                          collapsedIconColor: Theme.of(context)
-                                              .colorScheme
-                                              .primary,
-                                          collapsedTextColor: Theme.of(context)
-                                              .colorScheme
-                                              .primary,
-                                          title: Text(
-                                            S.of(context).gamesLists,
-                                          ),
-                                          children: [
-                                            Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment
-                                                        .spaceBetween,
-                                                children: [
-                                                  ElevatedButton(
-                                                      onPressed:
-                                                          isSystemDropDownItem
-                                                              ? null
-                                                              : () async {
-                                                                  setState(() {
-                                                                    createListErrorText =
-                                                                        null;
-                                                                    createListHelperText =
-                                                                        null;
-                                                                  });
-                                                                  var selectedGames =
-                                                                      getSelectedGames();
-                                                                  if (!await updateCustomList(
-                                                                      selectedGames,
-                                                                      chosenGameListId)) {
-                                                                    setState(
-                                                                        () {
-                                                                      createListErrorText = S
-                                                                          .of(context)
-                                                                          .cantUpdateThisListTryAgain;
-                                                                    });
-                                                                    return;
-                                                                  }
-                                                                  setState(
-                                                                      () {});
-                                                                  setState(() {
-                                                                    createListHelperText = S
-                                                                        .of(context)
-                                                                        .listWasUpdated;
-                                                                  });
-                                                                },
-                                                      style: ButtonStyle(
-                                                          backgroundColor:
-                                                              WidgetStateProperty
-                                                                  .all(Theme.of(
-                                                                          context)
-                                                                      .colorScheme
-                                                                      .secondary)),
-                                                      child: Text(S
-                                                          .of(context)
-                                                          .update)),
-                                                  Expanded(
-                                                      child: DropdownButton(
-                                                    padding:
-                                                        const EdgeInsets.all(
-                                                            10),
-                                                    value: gamesList.isNotEmpty
-                                                        ? gamesList[
-                                                            chosenGameListId]
-                                                        : null,
-                                                    onChanged:
-                                                        (String? value) async {
-                                                      chosenGameListId = gamesList
-                                                          .entries
-                                                          .firstWhere((entry) =>
-                                                              entry.value ==
-                                                              value)
-                                                          .key;
-                                                      isSystemDropDownItem =
-                                                          chosenGameListId == 0
-                                                              ? true
-                                                              : false;
-
-                                                      await updateGamesFromCustomList(
-                                                          chosenGameListId);
-                                                      setState(() {});
-                                                    },
-                                                    items: gamesList.values.map<
-                                                            DropdownMenuItem<
-                                                                String>>(
-                                                        (String value) {
-                                                      return DropdownMenuItem<
-                                                              String>(
-                                                          value: value,
-                                                          child: Text(value));
-                                                    }).toList(),
-                                                  )),
-                                                  ElevatedButton(
-                                                      onPressed:
-                                                          isSystemDropDownItem
-                                                              ? null
-                                                              : () async {
-                                                                  setState(() {
-                                                                    createListErrorText =
-                                                                        null;
-                                                                    createListHelperText =
-                                                                        null;
-                                                                  });
-
-                                                                  final customList =
-                                                                      await GameListSQL
-                                                                          .selectCustomListById(
-                                                                              chosenGameListId);
-                                                                  if (customList ==
-                                                                      null) {
-                                                                    return;
-                                                                  }
-                                                                  GameListSQL
-                                                                      .deleteCustomList(
-                                                                          customList);
-                                                                  gamesList.remove(
-                                                                      customList
-                                                                          .id);
-                                                                  setState(
-                                                                      () {});
-                                                                  setState(() {
-                                                                    createListHelperText = S
-                                                                        .of(context)
-                                                                        .listWasDeleted;
-                                                                  });
-                                                                },
-                                                      style: ButtonStyle(
-                                                          backgroundColor:
-                                                              WidgetStateProperty
-                                                                  .all(Theme.of(
-                                                                          context)
-                                                                      .colorScheme
-                                                                      .secondary)),
-                                                      child: Text(S
-                                                          .of(context)
-                                                          .delete)),
-                                                ]),
-                                            Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.start,
-                                              children: [
-                                                ElevatedButton(
-                                                    onPressed: () async {
-                                                      setState(() {
-                                                        createListErrorText =
-                                                            null;
-                                                        createListHelperText =
-                                                            null;
-                                                      });
-                                                      final listName =
-                                                          newCustimListNameController
-                                                              .text;
-                                                      if (listName.isEmpty) {
-                                                        setState(() {
-                                                          createListErrorText = S
-                                                              .of(context)
-                                                              .setTheListName;
-                                                        });
-                                                        return;
-                                                      }
-                                                      var listWithSameNameExists =
-                                                          await GameListSQL
-                                                              .selectLocationByName(
-                                                                  listName);
-                                                      if (listWithSameNameExists !=
-                                                          null) {
-                                                        setState(() {
-                                                          createListErrorText = S
-                                                              .of(context)
-                                                              .listIsAlreadyExistsWithSameName;
-                                                        });
-                                                        return;
-                                                      }
-                                                      List<GameThing>
-                                                          selectedGames =
-                                                          getSelectedGames();
-                                                      if (selectedGames
-                                                          .isEmpty) {
-                                                        setState(() {
-                                                          createListErrorText = S
-                                                              .of(context)
-                                                              .pickTheGamesToCreateList;
-                                                        });
-                                                        return;
-                                                      }
-                                                      selectedGames.sort((a,
-                                                              b) =>
-                                                          a.id.compareTo(b.id));
-                                                      final selectedGamesString =
-                                                          selectedGames
-                                                              .map((x) => x.id)
-                                                              .join(";");
-                                                      var someId = await GameListSQL
-                                                          .addCustomListByName(
-                                                              listName,
-                                                              selectedGamesString);
-                                                      setState(() {
-                                                        createListHelperText = S
-                                                            .of(context)
-                                                            .listWasCreated;
-                                                      });
-                                                      final customList =
-                                                          await GameListSQL
-                                                              .selectCustomListById(
-                                                                  someId);
-                                                      if (customList == null) {
-                                                        return;
-                                                      }
-                                                      gamesList[someId] =
-                                                          listName;
-                                                      chosenGameListId = someId;
-                                                      await updateGamesFromCustomList(
-                                                          chosenGameListId);
-                                                      newCustimListNameController
-                                                          .text = '';
-                                                      isSystemDropDownItem =
-                                                          chosenGameListId == 0
-                                                              ? true
-                                                              : false;
-                                                      setState(() {});
-                                                    },
-                                                    style: ButtonStyle(
-                                                        backgroundColor:
-                                                            WidgetStateProperty
-                                                                .all(Theme.of(
-                                                                        context)
-                                                                    .colorScheme
-                                                                    .secondary)),
-                                                    child: Text(
-                                                        S.of(context).create)),
-                                                SizedBox(
-                                                    width: MediaQuery.of(context).size.width *
-                                                        0.4,
-                                                    child: TextField(
-                                                        controller:
-                                                            newCustimListNameController,
-                                                        decoration: InputDecoration(
-                                                            border: InputBorder
-                                                                .none,
-                                                            contentPadding:
-                                                                const EdgeInsets.fromLTRB(
-                                                                    10, 0, 0, 0),
-                                                            helperText:
-                                                                createListHelperText,
-                                                            helperStyle: TextStyle(
-                                                                color: Theme.of(context)
-                                                                    .colorScheme
-                                                                    .primary),
-                                                            errorText:
-                                                                createListErrorText,
-                                                            labelText: S
-                                                                .of(context)
-                                                                .listName,
-                                                            labelStyle: TextStyle(
-                                                                color: Theme.of(context)
-                                                                    .colorScheme
-                                                                    .primary))))
-                                              ],
-                                            ),
-                                          ])),
-                                ],
-                              ),
-                              const Divider(),
-                              Expanded(
-                                  child: SingleChildScrollView(
-                                      child: Column(
-                                          children: gamesFromFilter.map((game) {
-                                return ListTile(
-                                  contentPadding: EdgeInsets.zero,
-                                  title: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Expanded(
-                                          child: Tooltip(
-                                            message: (game.keys.first).name,
-                                            child: InkWell(
-                                              onTap: () {
-                                                setState(() {
-                                                  gamesFromFilter[
-                                                              gamesFromFilter
-                                                                  .indexOf(
-                                                                      game)]
-                                                          [game.keys.first] =
-                                                      game.values.first + 1;
-                                                });
-                                              },
-                                              child: Text(
-                                                (game.keys.first).name,
-                                                style: TextStyle(
-                                                    color: Theme.of(context)
-                                                        .colorScheme
-                                                        .primary),
-                                                overflow: TextOverflow.ellipsis,
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                        CustomCounter(game, gamesFromFilter)
-                                      ]),
-                                );
-                              }).toList())))
-                            ]));
-                          });
-                        });
+                    showFilterDialog();
                   },
                   label: Text(S.of(context).filters),
                   icon: const Icon(Icons.filter_alt),
@@ -672,6 +273,302 @@ class _GameHelperState extends State<GameHelper> {
             ))),
       ])
     ]));
+  }
+
+  void showFilterDialog() async {
+    showDialog(
+        context: context,
+        builder: (buildContext) {
+          return StatefulBuilder(builder: (context, setState) {
+            setState(() {});
+            return AlertDialog(
+                content: Column(children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Container(
+                      color: Colors.red,
+                      width: MediaQuery.of(context).size.width * 0.4,
+                      child: ElevatedButton(
+                          onPressed: () {
+                            for (var game in allGames!) {
+                              if (!gamesFromFilter
+                                  .any((x) => x.keys.first == game)) {
+                                gamesFromFilter.add({game: 0});
+                              }
+                            }
+                            setState(() {});
+                          },
+                          style: ButtonStyle(
+                              backgroundColor: WidgetStateProperty.all(
+                                  Theme.of(context).colorScheme.secondary)),
+                          child: Text(S.of(context).showAllGames))),
+                  Row(children: [
+                    Text(S.of(context).votes),
+                    Checkbox(
+                        value: gamesFilterNeedClear == 1,
+                        onChanged: ((value) {
+                          for (var gameFromFilter in gamesFromFilter) {
+                            gameFromFilter.update(gameFromFilter.keys.first,
+                                (value2) => value2 = value! ? 1 : 0);
+                          }
+                          setState(
+                            () {
+                              gamesFilterNeedClear = value! ? 1 : 0;
+                            },
+                          );
+                        }))
+                  ]),
+                ],
+              ),
+              Row(
+                children: [
+                  SizedBox(
+                      width: MediaQuery.of(context).size.width * 0.68,
+                      child: ExpansionTile(
+                          shape: const Border(),
+                          textColor: Theme.of(context).colorScheme.primary,
+                          iconColor: Theme.of(context).colorScheme.primary,
+                          collapsedIconColor:
+                              Theme.of(context).colorScheme.primary,
+                          collapsedTextColor:
+                              Theme.of(context).colorScheme.primary,
+                          title: Text(
+                            S.of(context).gamesLists,
+                          ),
+                          children: [
+                            Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  ElevatedButton(
+                                      onPressed: isSystemDropDownItem
+                                          ? null
+                                          : () async {
+                                              setState(() {
+                                                createListErrorText = null;
+                                                createListHelperText = null;
+                                              });
+                                              var selectedGames =
+                                                  getSelectedGames();
+                                              if (!await updateCustomList(
+                                                  selectedGames,
+                                                  chosenGameListId)) {
+                                                setState(() {
+                                                  createListErrorText = S
+                                                      .of(context)
+                                                      .cantUpdateThisListTryAgain;
+                                                });
+                                                return;
+                                              }
+                                              setState(() {});
+                                              setState(() {
+                                                createListHelperText = S
+                                                    .of(context)
+                                                    .listWasUpdated;
+                                              });
+                                            },
+                                      style: ButtonStyle(
+                                          backgroundColor:
+                                              WidgetStateProperty.all(
+                                                  Theme.of(context)
+                                                      .colorScheme
+                                                      .secondary)),
+                                      child: Text(S.of(context).update)),
+                                  Expanded(
+                                      child: DropdownButton(
+                                    padding: const EdgeInsets.all(10),
+                                    value: gamesList.isNotEmpty
+                                        ? gamesList[chosenGameListId]
+                                        : null,
+                                    onChanged: (String? value) async {
+                                      chosenGameListId = gamesList.entries
+                                          .firstWhere(
+                                              (entry) => entry.value == value)
+                                          .key;
+                                      isSystemDropDownItem =
+                                          chosenGameListId == 0 ? true : false;
+
+                                      await updateGamesFromCustomList(
+                                          chosenGameListId);
+                                      setState(() {});
+                                    },
+                                    items: gamesList.values
+                                        .map<DropdownMenuItem<String>>(
+                                            (String value) {
+                                      return DropdownMenuItem<String>(
+                                          value: value, child: Text(value));
+                                    }).toList(),
+                                  )),
+                                  ElevatedButton(
+                                      onPressed: isSystemDropDownItem
+                                          ? null
+                                          : () async {
+                                              setState(() {
+                                                createListErrorText = null;
+                                                createListHelperText = null;
+                                              });
+
+                                              final customList =
+                                                  await GameListSQL
+                                                      .selectCustomListById(
+                                                          chosenGameListId);
+                                              if (customList == null) {
+                                                return;
+                                              }
+                                              GameListSQL.deleteCustomList(
+                                                  customList);
+                                              gamesList.remove(customList.id);
+                                              setState(() {});
+                                              setState(() {
+                                                createListHelperText = S
+                                                    .of(context)
+                                                    .listWasDeleted;
+                                              });
+                                            },
+                                      style: ButtonStyle(
+                                          backgroundColor:
+                                              WidgetStateProperty.all(
+                                                  Theme.of(context)
+                                                      .colorScheme
+                                                      .secondary)),
+                                      child: Text(S.of(context).delete)),
+                                ]),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                ElevatedButton(
+                                    onPressed: () async {
+                                      setState(() {
+                                        createListErrorText = null;
+                                        createListHelperText = null;
+                                      });
+                                      final listName =
+                                          newCustimListNameController.text;
+                                      if (listName.isEmpty) {
+                                        setState(() {
+                                          createListErrorText =
+                                              S.of(context).setTheListName;
+                                        });
+                                        return;
+                                      }
+                                      var listWithSameNameExists =
+                                          await GameListSQL
+                                              .selectLocationByName(listName);
+                                      if (listWithSameNameExists != null) {
+                                        setState(() {
+                                          createListErrorText = S
+                                              .of(context)
+                                              .listIsAlreadyExistsWithSameName;
+                                        });
+                                        return;
+                                      }
+                                      List<GameThing> selectedGames =
+                                          getSelectedGames();
+                                      if (selectedGames.isEmpty) {
+                                        setState(() {
+                                          createListErrorText = S
+                                              .of(context)
+                                              .pickTheGamesToCreateList;
+                                        });
+                                        return;
+                                      }
+                                      selectedGames
+                                          .sort((a, b) => a.id.compareTo(b.id));
+                                      final selectedGamesString = selectedGames
+                                          .map((x) => x.id)
+                                          .join(";");
+                                      var someId =
+                                          await GameListSQL.addCustomListByName(
+                                              listName, selectedGamesString);
+                                      setState(() {
+                                        createListHelperText =
+                                            S.of(context).listWasCreated;
+                                      });
+                                      final customList = await GameListSQL
+                                          .selectCustomListById(someId);
+                                      if (customList == null) {
+                                        return;
+                                      }
+                                      gamesList[someId] = listName;
+                                      chosenGameListId = someId;
+                                      await updateGamesFromCustomList(
+                                          chosenGameListId);
+                                      newCustimListNameController.text = '';
+                                      isSystemDropDownItem =
+                                          chosenGameListId == 0 ? true : false;
+                                      setState(() {});
+                                    },
+                                    style: ButtonStyle(
+                                        backgroundColor:
+                                            WidgetStateProperty.all(
+                                                Theme.of(context)
+                                                    .colorScheme
+                                                    .secondary)),
+                                    child: Text(S.of(context).create)),
+                                SizedBox(
+                                    width:
+                                        MediaQuery.of(context).size.width * 0.4,
+                                    child: TextField(
+                                        controller: newCustimListNameController,
+                                        decoration: InputDecoration(
+                                            border: InputBorder.none,
+                                            contentPadding:
+                                                const EdgeInsets.fromLTRB(
+                                                    10, 0, 0, 0),
+                                            helperText: createListHelperText,
+                                            helperStyle: TextStyle(
+                                                color: Theme.of(context)
+                                                    .colorScheme
+                                                    .primary),
+                                            errorText: createListErrorText,
+                                            labelText: S.of(context).listName,
+                                            labelStyle: TextStyle(
+                                                color: Theme.of(context)
+                                                    .colorScheme
+                                                    .primary))))
+                              ],
+                            ),
+                          ])),
+                ],
+              ),
+              const Divider(),
+              Expanded(
+                  child: SingleChildScrollView(
+                      child: Column(
+                          children: gamesFromFilter.map((game) {
+                return ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Tooltip(
+                            message: (game.keys.first).name,
+                            child: InkWell(
+                              onTap: () {
+                                setState(() {
+                                  gamesFromFilter[gamesFromFilter.indexOf(game)]
+                                      [game.keys.first] = game.values.first + 1;
+                                });
+                              },
+                              child: Text(
+                                (game.keys.first).name,
+                                style: TextStyle(
+                                    color:
+                                        Theme.of(context).colorScheme.primary),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ),
+                        ),
+                        CustomCounter(game, gamesFromFilter)
+                      ]),
+                );
+              }).toList())))
+            ]));
+          });
+        });
   }
 }
 
@@ -746,5 +643,43 @@ class _CustomCounterState extends State<CustomCounter> {
         ),
       ),
     ]);
+  }
+}
+
+class LoadingSuccessAlert extends StatefulWidget {
+  const LoadingSuccessAlert({super.key});
+
+  @override
+  State<LoadingSuccessAlert> createState() => _LoadingSuccessAlertState();
+}
+
+class _LoadingSuccessAlertState extends State<LoadingSuccessAlert> {
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+        width: MediaQuery.of(context).size.width,
+        height: MediaQuery.of(context).size.height * 0.2,
+        child: FittedBox(
+            child: ValueListenableBuilder<bool>(
+          valueListenable: isLoadedGamesPlayersCountInfoNotifier,
+          builder: (context, value, _) {
+            return value
+                ? Container()
+                : Container(
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    child: Text(
+                      maxLines: 2,
+                      value ? "" : "*${S.of(context).gamePlayersInfoNotLoaded}",
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.secondary,
+                        backgroundColor: Colors.transparent,
+                      ),
+                    ));
+          },
+        )));
   }
 }
