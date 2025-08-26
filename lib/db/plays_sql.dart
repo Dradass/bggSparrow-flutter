@@ -23,6 +23,11 @@ class PlaysSQL {
     await db.execute("DROP TABLE Plays;");
   }
 
+  static Future<void> clearTable() async {
+    final db = await _getDB();
+    await db.delete('Plays');
+  }
+
   static Future<int> addPlay(BggPlay bggPlay) async {
     final db = await _getDB();
     return await db.insert("Plays", bggPlay.toJson(),

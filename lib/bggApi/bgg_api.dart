@@ -19,7 +19,6 @@ import '../login_handler.dart';
 import '../globals.dart';
 import 'dart:developer';
 import '../s.dart';
-
 import 'package:html/parser.dart' as parser;
 
 const maxPagesCount = 1000;
@@ -90,7 +89,6 @@ Future<void> getGamesThumbnail(refreshProgress, dynamic context) async {
       isLoadedAllGamesImagesNotifier.value = false;
 
       for (var game in gettingAllGames) {
-        log("Task canceled = ${TaskChecker().needCancel}");
         if (TaskChecker().needCancel) {
           return;
         }
@@ -121,7 +119,7 @@ Future<String> getGameThumbFromBGG(int gameId) async {
     final gameThingServer = GameThing.fromXml(gameThingResponse.body);
     return gameThingServer.thumbnail;
   } else {
-    log("Error getting thumbnail");
+    log("Error getting thumbnail for game ${gameId}");
     return "";
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/db/plays_sql.dart';
 import 'package:flutter_application_1/main.dart';
 import 'package:flutter_application_1/models/bgg_location.dart';
 import 'package:flutter_application_1/widgets/players_list.dart';
@@ -187,6 +188,8 @@ class _LogPageState extends State<LogPage> {
         await getAllPlaysFromServer();
         locations = await getLocalLocationsObj();
         await SystemParameterSQL.addOrEditParameter(1, "firstLaunch", "0");
+      } else {
+        await PlaysSQL.clearTable();
       }
 
       final searchMode =
