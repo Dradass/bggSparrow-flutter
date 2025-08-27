@@ -20,7 +20,7 @@ class _GameHelperState extends State<GameHelper> {
   RangeValues maxRangeValues = const RangeValues(0, 0);
   bool onlyOwnedGames = true;
   int gamesFilterNeedClear = 0;
-  List<Map<GameThing, int>> gamesFromFilter = [];
+  List<Map<GameThing, int>> gamesFromFilterWithVotes = [];
   List<Map<GameThing, int>> allItems = [];
   List<GameThing>? allGames = [];
   final SearchController searchController = SearchController();
@@ -39,14 +39,21 @@ class _GameHelperState extends State<GameHelper> {
       return;
     }
     allGames!.sort((a, b) => a.name.compareTo(b.name));
-    gamesFromFilter.clear();
+    var chosenGames = gamesFromFilterWithVotes.toList();
+    gamesFromFilterWithVotes.clear();
     for (var game in allGames!) {
       if (onlyOwnedGames) {
         if (game.owned == 0) continue;
       }
       if (isGameMatchChosenPlayersCount(
           game, chosenPlayersCount, maxRangeValues)) {
-        gamesFromFilter.add({game: game.owned});
+        var chosenGame =
+            chosenGames.where((e) => e.keys.first.id == game.id).firstOrNull;
+        if (chosenGame == null) {
+          gamesFromFilterWithVotes.add({game: 1});
+        } else {
+          gamesFromFilterWithVotes.add({game: chosenGame.values.first});
+        }
       }
     }
   }
@@ -65,7 +72,7 @@ class _GameHelperState extends State<GameHelper> {
 
   List<GameThing> getSelectedGames() {
     List<GameThing> selectedGames = [];
-    for (var gameFromFilter in gamesFromFilter) {
+    for (var gameFromFilter in gamesFromFilterWithVotes) {
       if (gameFromFilter.values.first > 0) {
         selectedGames.add(gameFromFilter.keys.first);
       }
@@ -98,12 +105,21 @@ class _GameHelperState extends State<GameHelper> {
       var gamesString = customList.value;
       if (gamesString != null) {
         var gamesList = gamesString.split(';');
-        gamesFromFilter.clear();
+
+        var chosenGames = gamesFromFilterWithVotes.toList();
+        gamesFromFilterWithVotes.clear();
         for (var game in gamesList) {
           var gameThing = await GameThingSQL.selectGameByID(int.parse(game));
-          gamesFromFilter.add({gameThing!: 1});
+          var chosenGame = chosenGames
+              .where((e) => e.keys.first.id == gameThing!.id)
+              .firstOrNull;
+          if (chosenGame == null) {
+            gamesFromFilterWithVotes.add({gameThing!: 1});
+          } else {
+            gamesFromFilterWithVotes.add({gameThing!: chosenGame.values.first});
+          }
         }
-        gamesFromFilter
+        gamesFromFilterWithVotes
             .sort((a, b) => a.keys.first.name.compareTo(b.keys.first.name));
       }
     }
@@ -201,7 +217,7 @@ class _GameHelperState extends State<GameHelper> {
                   onPressed: () async {
                     await updateGamesFromCustomList(chosenGameListId);
                     await updateCustomLists(context);
-                    showFilterDialog();
+                    await showFilterDialog();
                   },
                   label: Text(S.of(context).filters),
                   icon: const Icon(Icons.filter_alt),
@@ -215,11 +231,12 @@ class _GameHelperState extends State<GameHelper> {
                 height: MediaQuery.of(context).size.height,
                 child: ElevatedButton(
                   onPressed: () async {
+                    // Update for case, when filters was not applied
                     await updateGamesFromCustomList(chosenGameListId);
                     List<GameThing>? chosenGames = [];
-                    if (gamesFromFilter
+                    if (gamesFromFilterWithVotes
                         .any((element) => element.values.first > 0)) {
-                      for (var gameFromFilter in gamesFromFilter) {
+                      for (var gameFromFilter in gamesFromFilterWithVotes) {
                         if (gameFromFilter.values.first > 0) {
                           for (var i = 0;
                               i < gameFromFilter.values.first;
@@ -275,7 +292,7 @@ class _GameHelperState extends State<GameHelper> {
     ]));
   }
 
-  void showFilterDialog() async {
+  Future<void> showFilterDialog() async {
     showDialog(
         context: context,
         builder: (buildContext) {
@@ -292,9 +309,9 @@ class _GameHelperState extends State<GameHelper> {
                       child: ElevatedButton(
                           onPressed: () {
                             for (var game in allGames!) {
-                              if (!gamesFromFilter
+                              if (!gamesFromFilterWithVotes
                                   .any((x) => x.keys.first == game)) {
-                                gamesFromFilter.add({game: 0});
+                                gamesFromFilterWithVotes.add({game: 0});
                               }
                             }
                             setState(() {});
@@ -308,7 +325,7 @@ class _GameHelperState extends State<GameHelper> {
                     Checkbox(
                         value: gamesFilterNeedClear == 1,
                         onChanged: ((value) {
-                          for (var gameFromFilter in gamesFromFilter) {
+                          for (var gameFromFilter in gamesFromFilterWithVotes) {
                             gameFromFilter.update(gameFromFilter.keys.first,
                                 (value2) => value2 = value! ? 1 : 0);
                           }
@@ -536,7 +553,7 @@ class _GameHelperState extends State<GameHelper> {
               Expanded(
                   child: SingleChildScrollView(
                       child: Column(
-                          children: gamesFromFilter.map((game) {
+                          children: gamesFromFilterWithVotes.map((game) {
                 return ListTile(
                   contentPadding: EdgeInsets.zero,
                   title: Row(
@@ -548,8 +565,10 @@ class _GameHelperState extends State<GameHelper> {
                             child: InkWell(
                               onTap: () {
                                 setState(() {
-                                  gamesFromFilter[gamesFromFilter.indexOf(game)]
-                                      [game.keys.first] = game.values.first + 1;
+                                  gamesFromFilterWithVotes[
+                                          gamesFromFilterWithVotes
+                                              .indexOf(game)][game.keys.first] =
+                                      game.values.first + 1;
                                 });
                               },
                               child: Text(
@@ -562,7 +581,7 @@ class _GameHelperState extends State<GameHelper> {
                             ),
                           ),
                         ),
-                        CustomCounter(game, gamesFromFilter)
+                        CustomCounter(game, gamesFromFilterWithVotes)
                       ]),
                 );
               }).toList())))
