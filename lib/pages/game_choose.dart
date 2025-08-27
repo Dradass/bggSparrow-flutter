@@ -94,7 +94,8 @@ class _GameHelperState extends State<GameHelper> {
     return true;
   }
 
-  Future<void> updateGamesFromCustomList(int listId) async {
+  Future<void> updateGamesFromCustomList(
+      int listId, bool needMarkAllGamesSelected) async {
     if (chosenGameListId == 0) {
       await updateGamesToAll();
       setState(() {});
@@ -116,7 +117,9 @@ class _GameHelperState extends State<GameHelper> {
           if (chosenGame == null) {
             gamesFromFilterWithVotes.add({gameThing!: 1});
           } else {
-            gamesFromFilterWithVotes.add({gameThing!: chosenGame.values.first});
+            gamesFromFilterWithVotes.add({
+              gameThing!: needMarkAllGamesSelected ? 1 : chosenGame.values.first
+            });
           }
         }
         gamesFromFilterWithVotes
@@ -215,7 +218,7 @@ class _GameHelperState extends State<GameHelper> {
                 height: double.maxFinite,
                 child: ElevatedButton.icon(
                   onPressed: () async {
-                    await updateGamesFromCustomList(chosenGameListId);
+                    await updateGamesFromCustomList(chosenGameListId, false);
                     await updateCustomLists(context);
                     await showFilterDialog();
                   },
@@ -232,7 +235,7 @@ class _GameHelperState extends State<GameHelper> {
                 child: ElevatedButton(
                   onPressed: () async {
                     // Update for case, when filters was not applied
-                    await updateGamesFromCustomList(chosenGameListId);
+                    await updateGamesFromCustomList(chosenGameListId, false);
                     List<GameThing>? chosenGames = [];
                     if (gamesFromFilterWithVotes
                         .any((element) => element.values.first > 0)) {
@@ -307,21 +310,23 @@ class _GameHelperState extends State<GameHelper> {
                       color: Colors.red,
                       width: MediaQuery.of(context).size.width * 0.4,
                       child: ElevatedButton(
-                          onPressed: () {
-                            for (var game in allGames!) {
-                              if (!gamesFromFilterWithVotes
-                                  .any((x) => x.keys.first == game)) {
-                                gamesFromFilterWithVotes.add({game: 0});
-                              }
-                            }
-                            setState(() {});
-                          },
+                          onPressed: chosenGameListId == 0
+                              ? null
+                              : () {
+                                  for (var game in allGames!) {
+                                    if (!gamesFromFilterWithVotes
+                                        .any((x) => x.keys.first == game)) {
+                                      gamesFromFilterWithVotes.add({game: 0});
+                                    }
+                                  }
+                                  setState(() {});
+                                },
                           style: ButtonStyle(
                               backgroundColor: WidgetStateProperty.all(
                                   Theme.of(context).colorScheme.secondary)),
                           child: Text(S.of(context).showAllGames))),
                   Row(children: [
-                    Text(S.of(context).votes),
+                    Text(S.of(context).allVotes),
                     Checkbox(
                         value: gamesFilterNeedClear == 1,
                         onChanged: ((value) {
@@ -407,7 +412,7 @@ class _GameHelperState extends State<GameHelper> {
                                           chosenGameListId == 0 ? true : false;
 
                                       await updateGamesFromCustomList(
-                                          chosenGameListId);
+                                          chosenGameListId, true);
                                       setState(() {});
                                     },
                                     items: gamesList.values
@@ -510,7 +515,7 @@ class _GameHelperState extends State<GameHelper> {
                                       gamesList[someId] = listName;
                                       chosenGameListId = someId;
                                       await updateGamesFromCustomList(
-                                          chosenGameListId);
+                                          chosenGameListId, false);
                                       newCustimListNameController.text = '';
                                       isSystemDropDownItem =
                                           chosenGameListId == 0 ? true : false;
