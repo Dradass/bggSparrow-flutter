@@ -401,6 +401,8 @@ class _StatisticsState extends State<Statistics> {
                                 playersListWrapper.players =
                                     await getAllPlayers();
                               }
+                              await playersListWrapper
+                                  .updateCustomLists(context);
                               showFilterDialog();
                             },
                             label: Text(S.of(context).filters),

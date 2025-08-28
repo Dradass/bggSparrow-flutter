@@ -54,6 +54,7 @@ class PlayersListWrapper {
           player['isChecked'] = true;
         }
       }
+      players.sort((a, b) => a['name'].compareTo(b['name']));
 
       return;
     }
@@ -85,7 +86,7 @@ class PlayersListWrapper {
             log('Cant find player with id $playerId');
           }
         }
-        players.sort((a, b) => a['id'].compareTo(b['id']));
+        players.sort((a, b) => a['name'].compareTo(b['name']));
       }
     }
   }
@@ -383,6 +384,8 @@ class ListNameField extends StatefulWidget {
 class _ListNameFieldState extends State<ListNameField> {
   @override
   Widget build(BuildContext context) {
+    widget.playersListWrapper.listManageErrorText = null;
+    widget.playersListWrapper.listManageHintText = null;
     return TextField(
         controller: widget.playersListWrapper.newListNameController,
         decoration: InputDecoration(
