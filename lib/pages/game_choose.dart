@@ -19,7 +19,7 @@ class _GameHelperState extends State<GameHelper> {
   String? chosenGame;
   RangeValues maxRangeValues = const RangeValues(0, 0);
   bool onlyOwnedGames = true;
-  int gamesFilterNeedClear = 0;
+  bool allGamesAreSelected = false;
   List<Map<GameThing, int>> gamesFromFilterWithVotes = [];
   List<Map<GameThing, int>> allItems = [];
   List<GameThing>? allGames = [];
@@ -326,9 +326,21 @@ class _GameHelperState extends State<GameHelper> {
                                   Theme.of(context).colorScheme.secondary)),
                           child: Text(S.of(context).showAllGames))),
                   Row(children: [
-                    Text(S.of(context).allVotes),
+                    InkWell(
+                        onTap: () {
+                          for (var gameFromFilter in gamesFromFilterWithVotes) {
+                            gameFromFilter.update(gameFromFilter.keys.first,
+                                (value2) => value2 = value2 == 0 ? 1 : 0);
+                          }
+                          setState(
+                            () {
+                              allGamesAreSelected = !allGamesAreSelected;
+                            },
+                          );
+                        },
+                        child: Text(S.of(context).allVotes)),
                     Checkbox(
-                        value: gamesFilterNeedClear == 1,
+                        value: allGamesAreSelected,
                         onChanged: ((value) {
                           for (var gameFromFilter in gamesFromFilterWithVotes) {
                             gameFromFilter.update(gameFromFilter.keys.first,
@@ -336,7 +348,7 @@ class _GameHelperState extends State<GameHelper> {
                           }
                           setState(
                             () {
-                              gamesFilterNeedClear = value! ? 1 : 0;
+                              allGamesAreSelected = !allGamesAreSelected;
                             },
                           );
                         }))
