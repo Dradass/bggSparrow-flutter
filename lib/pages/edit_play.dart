@@ -55,6 +55,12 @@ class _EditPageState extends State<EditPage> {
       child: SafeArea(
         child: Column(
           children: [
+            FlexButton(
+                Text(widget.bggPlay.gameName,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                        fontSize: 18, fontWeight: FontWeight.bold)),
+                1),
             FlexButton(playDatePickerSimple, 3),
             FlexButton(locationPickerSimple, 3),
             FlexButton(commentsSimple, 5),
