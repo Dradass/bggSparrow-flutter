@@ -29,20 +29,19 @@ class _CalendarPlaysState extends State<CalendarPlays> {
   List<Map<BggPlay, GameThing?>> playsOfDay = [];
   final Image imagewidget = Image.asset('assets/no_image.png');
   DateTime? selectedDate;
+  String? selectedYear;
 
   @override
   void initState() {
     super.initState();
-    // Регистрируем callback в родительском виджете
-    // при инициализации дочернего виджета
     WidgetsBinding.instance.addPostFrameCallback((_) {
       widget.onRefreshCallbackRegistered(_refresh);
     });
+
     updateAllPlays();
   }
 
   void _refresh() {
-    print("refresh");
     setState(() {});
   }
 
@@ -61,6 +60,32 @@ class _CalendarPlaysState extends State<CalendarPlays> {
     });
   }
 
+  List<String> getYearsList() {
+    Set<String> years = {};
+    for (var key in groupedDates.keys) {
+      DateTime date = DateTime.parse(key);
+      years.add(date.year.toString());
+    }
+    var list = years.toList()..sort((a, b) => b.compareTo(a));
+    list.insert(0, S.of(context).all);
+    return list;
+  }
+
+  Map<String, List<BggPlay>> getFilteredDates() {
+    if (selectedYear == S.of(context).all) {
+      return groupedDates;
+    }
+
+    Map<String, List<BggPlay>> filtered = {};
+    for (var entry in groupedDates.entries) {
+      DateTime date = DateTime.parse(entry.key);
+      if (date.year.toString() == selectedYear) {
+        filtered[entry.key] = entry.value;
+      }
+    }
+    return filtered;
+  }
+
   void _showContextMenu(
       BggPlay play, BuildContext context, Offset tapPosition) {
     final RenderBox overlay =
@@ -74,13 +99,12 @@ class _CalendarPlaysState extends State<CalendarPlays> {
       ),
       items: [
         PopupMenuItem<String>(
-          value: 'Edit',
-          child: Text('Edit'),
+          value: S.of(context).edit,
+          child: Text(S.of(context).edit),
         ),
       ],
     ).then((value) {
-      if (value == 'Edit') {
-        // Логируем значение gameName
+      if (value == S.of(context).edit) {
         print('Edit pressed for: ${play.gameName}');
         if (play == null) {
           showSnackBar(context, S.of(context).gamePlayWasNotFound);
@@ -91,10 +115,8 @@ class _CalendarPlaysState extends State<CalendarPlays> {
                 return StatefulBuilder(builder: (context, setState) {
                   return AlertDialog(
                       title: Text(S.of(context).editPlayData),
-                      content: // TODO callback to refresh
-                          EditPage(
-                              bggPlay: play,
-                              playsRefreshCallback: updateAllPlays));
+                      content: EditPage(
+                          bggPlay: play, playsRefreshCallback: updateAllPlays));
                 });
               });
         }
@@ -104,13 +126,15 @@ class _CalendarPlaysState extends State<CalendarPlays> {
 
   @override
   Widget build(BuildContext context) {
+    final filteredDates = getFilteredDates();
+    final yearsList = getYearsList();
+
     return Column(children: [
       SizedBox(
           height: MediaQuery.of(context).size.height * 0.45,
           child: SingleChildScrollView(
             child: Column(
-              children: groupedDates.entries.map((entry) {
-                // Получаем год и месяц из ключа
+              children: filteredDates.entries.map((entry) {
                 List<String> parts = entry.key.split('-');
                 int year = int.parse(parts[0]);
                 int month = int.parse(parts[1]);
@@ -126,20 +150,18 @@ class _CalendarPlaysState extends State<CalendarPlays> {
                         setState(() {
                           selectedDate = date;
                         });
-                        // Выводим все BggPlay для выбранной даты в лог
                         playsOfDay.clear();
 
-                        debugPrint('BggPlay для выбранной даты:');
                         for (var play in playsForDate) {
                           var game =
                               await GameThingSQL.selectGameByID(play.gameId);
                           playsOfDay.add({play: game});
-                          debugPrint('  - ${play.gameName}'); // и другие поля
+                          debugPrint('  - ${play.gameName}');
                         }
                         setState(() {});
                       },
                     ),
-                    const SizedBox(height: 20), // Отступ между календарями
+                    const SizedBox(height: 20),
                   ],
                 );
               }).toList(),
@@ -149,14 +171,32 @@ class _CalendarPlaysState extends State<CalendarPlays> {
       Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
+          DropdownButton<String>(
+            value: selectedYear,
+            items: yearsList.map((String value) {
+              return DropdownMenuItem<String>(
+                value: value,
+                child: Text(value),
+              );
+            }).toList(),
+            onChanged: (newValue) {
+              setState(() {
+                selectedYear = newValue;
+                selectedDate =
+                    null; // Сбрасываем выбранную дату при изменении года
+                playsOfDay.clear();
+              });
+            },
+          ),
+          SizedBox(width: 16),
           selectedDate == null
               ? Text(
-                  "Select the date",
+                  S.of(context).selectTheDate,
                   style: const TextStyle(
                       fontSize: 18, fontWeight: FontWeight.bold),
                 )
               : Text(
-                  "${DateFormat('dd MMMM', S.currentLocale.languageCode).format(selectedDate!)} results:",
+                  "${DateFormat('dd MMMM', S.currentLocale.languageCode).format(selectedDate!)}, ${S.of(context).results}:",
                   style: const TextStyle(
                       fontSize: 18, fontWeight: FontWeight.bold),
                 )
@@ -169,7 +209,6 @@ class _CalendarPlaysState extends State<CalendarPlays> {
         return Builder(builder: (context) {
           return GestureDetector(
               onTapDown: (TapDownDetails details) {
-                // Сохраняем позицию нажатия
                 _showContextMenu(
                   play.keys.first,
                   context,
