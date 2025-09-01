@@ -29,7 +29,6 @@ class _CalendarPlaysState extends State<CalendarPlays> {
   List<Map<BggPlay, GameThing?>> playsOfDay = [];
   final Image imagewidget = Image.asset('assets/no_image.png');
   DateTime? selectedDate;
-  String? selectedYear;
 
   @override
   void initState() {
@@ -37,7 +36,6 @@ class _CalendarPlaysState extends State<CalendarPlays> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       widget.onRefreshCallbackRegistered(_refresh);
     });
-
     updateAllPlays();
   }
 
@@ -71,8 +69,8 @@ class _CalendarPlaysState extends State<CalendarPlays> {
     return list;
   }
 
-  Map<String, List<BggPlay>> getFilteredDates() {
-    if (selectedYear == S.of(context).all) {
+  Map<String, List<BggPlay>> getFilteredDates(String? selectedYear) {
+    if (selectedYear == S.of(context).all || selectedYear == null) {
       return groupedDates;
     }
 
@@ -126,12 +124,14 @@ class _CalendarPlaysState extends State<CalendarPlays> {
 
   @override
   Widget build(BuildContext context) {
-    final filteredDates = getFilteredDates();
     final yearsList = getYearsList();
+    String? selectedYear = S.of(context).all;
+    final filteredDates = getFilteredDates(selectedYear);
 
     return Column(children: [
+      SizedBox(height: MediaQuery.of(context).size.height * 0.025),
       SizedBox(
-          height: MediaQuery.of(context).size.height * 0.45,
+          height: MediaQuery.of(context).size.height * 0.5,
           child: SingleChildScrollView(
             child: Column(
               children: filteredDates.entries.map((entry) {
@@ -188,7 +188,7 @@ class _CalendarPlaysState extends State<CalendarPlays> {
               });
             },
           ),
-          SizedBox(width: 16),
+          SizedBox(width: 10),
           selectedDate == null
               ? Text(
                   S.of(context).selectTheDate,
