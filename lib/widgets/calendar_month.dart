@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/bgg_play_model.dart';
+import 'package:intl/intl.dart';
+import '../s.dart';
 
 class CalendarWidget extends StatefulWidget {
   final int year;
@@ -41,6 +43,28 @@ class _CalendarWidgetState extends State<CalendarWidget> {
     }
   }
 
+  List<String> getLocalizedWeekdays(BuildContext context, {bool short = true}) {
+    final locale = S.currentLocale.languageCode;
+
+    // Создаем дату, которая является понедельником
+    final date = DateTime(2023, 1, 2); // 2 января 2023 - понедельник
+
+    return List.generate(7, (index) {
+      final currentDay = date.add(Duration(days: index));
+      final format =
+          short ? 'E' : 'EEEE'; // 'E' - короткое название, 'EEEE' - полное
+      return DateFormat(format, locale).format(currentDay);
+    });
+  }
+
+  List<String> getLocalizedMonths(BuildContext context) {
+    final locale = Localizations.localeOf(context).toString();
+    return List.generate(12, (index) {
+      final date = DateTime(2023, index + 1);
+      return DateFormat('MMMM', locale).format(date);
+    });
+  }
+
   void _generateCalendar() {
     final firstDay = DateTime(widget.year, widget.month, 1);
     final lastDay = DateTime(widget.year, widget.month + 1, 0);
@@ -74,20 +98,7 @@ class _CalendarWidgetState extends State<CalendarWidget> {
   }
 
   String get _monthTitle {
-    const months = [
-      'Январь',
-      'Февраль',
-      'Март',
-      'Апрель',
-      'Май',
-      'Июнь',
-      'Июль',
-      'Август',
-      'Сентябрь',
-      'Октябрь',
-      'Ноябрь',
-      'Декабрь'
-    ];
+    var months = getLocalizedMonths(context);
     return '${months[widget.month - 1]} ${widget.year}';
   }
 
@@ -126,16 +137,10 @@ class _CalendarWidgetState extends State<CalendarWidget> {
         ),
         Table(
           children: [
-            const TableRow(
-              children: [
-                _DayTitle('Пн'),
-                _DayTitle('Вт'),
-                _DayTitle('Ср'),
-                _DayTitle('Чт'),
-                _DayTitle('Пт'),
-                _DayTitle('Сб'),
-                _DayTitle('Вс'),
-              ],
+            TableRow(
+              children: getLocalizedWeekdays(context)
+                  .map((e) => _DayTitle(e))
+                  .toList(),
             ),
             ..._weeks.map((week) => TableRow(
                   children: week
