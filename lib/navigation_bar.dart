@@ -3,6 +3,7 @@ import 'package:flutter_application_1/pages/log_page.dart';
 import 'package:flutter_application_1/pages/game_choose.dart';
 import 'package:flutter_application_1/pages/first_player.dart';
 import 'package:flutter_application_1/pages/statistics.dart';
+import 'package:flutter_application_1/pages/calendar_plays.dart';
 import '../widgets/common.dart';
 import '../s.dart';
 import 'globals.dart';
@@ -17,15 +18,37 @@ class NavigationScreen extends StatefulWidget {
 
 class _NavigationScreenState extends State<NavigationScreen> {
   late TutorialHandler tutorialHandler;
+  VoidCallback? _refreshChildCallback;
+  late CalendarPlays calendarPlays;
+
+  void _registerRefreshCallback(VoidCallback callback) {
+    _refreshChildCallback = callback;
+  }
 
   @override
   void initState() {
     super.initState();
+    calendarPlays =
+        CalendarPlays(onRefreshCallbackRegistered: _registerRefreshCallback);
     tutorialHandler = TutorialHandler(
         parentContext: context, setPageMethod: () => setState(() {}));
     WidgetsBinding.instance.addPostFrameCallback((_) {
       tutorialHandler.checkFirstLaunch();
     });
+  }
+
+  void _onTabTapped(int index) {
+    final oldIndex = currentPageIndex;
+    setState(() => currentPageIndex = index);
+    print("tab ${index}");
+
+    // Проверяем переход именно на вкладку CalendarPlays (index = 2)
+    if (index == 2 && oldIndex != 2) {
+      print("nav callback");
+      if (_refreshChildCallback != null) {
+        _refreshChildCallback!();
+      }
+    }
   }
 
   // Переопределение метода для кастомного отображения
@@ -35,9 +58,10 @@ class _NavigationScreenState extends State<NavigationScreen> {
       bottomNavigationBar: _buildCustomNavigationBar(context),
       body: IndexedStack(
         index: currentPageIndex,
-        children: const <Widget>[
+        children: <Widget>[
           LogPage(),
           Statistics(),
+          calendarPlays,
           GameHelper(),
           FirstPlayerChoser(),
         ],
@@ -75,6 +99,14 @@ class _NavigationScreenState extends State<NavigationScreen> {
             _buildNavItem(
               context,
               index: 2,
+              icon: Icons.leaderboard_outlined,
+              activeIcon: Icons.leaderboard,
+              label: "Calendar",
+              key: tutorialHandler.calendarKey,
+            ),
+            _buildNavItem(
+              context,
+              index: 3,
               icon: Icons.casino_outlined,
               activeIcon: Icons.smart_toy,
               label: S.of(context).chooseAGame,
@@ -82,7 +114,7 @@ class _NavigationScreenState extends State<NavigationScreen> {
             ),
             _buildNavItem(
               context,
-              index: 3,
+              index: 4,
               icon: Icons.sentiment_satisfied_alt,
               activeIcon: Icons.insert_emoticon,
               label: S.of(context).firstPlayer,
@@ -109,7 +141,15 @@ class _NavigationScreenState extends State<NavigationScreen> {
 
     return Expanded(
       child: InkWell(
-        onTap: () => setState(() => currentPageIndex = index),
+        onTap: () => setState(() {
+          if (index == 2 && currentPageIndex != 2) {
+            print("nav callback");
+            if (_refreshChildCallback != null) {
+              _refreshChildCallback!();
+            }
+          }
+          currentPageIndex = index;
+        }),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [

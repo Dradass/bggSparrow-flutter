@@ -346,7 +346,8 @@ class _PlayersPickerSimpleState extends State<PlayersPickerSimple> {
           }
 
           // Fill Checked and Win statused
-          if (widget.playersListWrapper.sourcePlayers != null) {
+          if (widget.playersListWrapper.sourcePlayers != null &&
+              widget.playersListWrapper.sourcePlayers != "") {
             for (var sourcePlayerString
                 in widget.playersListWrapper.sourcePlayers!.split(";")) {
               var bggPlayer = BggPlayPlayer.fromString(sourcePlayerString);

@@ -148,139 +148,83 @@ class _StatisticsState extends State<Statistics> {
               height: MediaQuery.of(context).size.height * 0.50,
               child: TabBarView(children: [
                 SingleChildScrollView(
-                  child: Column(
-                    children: groupedDates.entries.map((entry) {
-                      // Получаем год и месяц из ключа
-                      List<String> parts = entry.key.split('-');
-                      int year = int.parse(parts[0]);
-                      int month = int.parse(parts[1]);
-
-                      return Column(
-                        children: [
-                          CalendarWidget(
-                            year: year,
-                            month: month,
-                            bggPlays: entry.value,
-                            onDateTap: (playsForDate) {
-                              // Выводим все BggPlay для выбранной даты в лог
-                              debugPrint('BggPlay для выбранной даты:');
-                              for (var play in playsForDate) {
-                                debugPrint(
-                                    '  - ${play.gameName}'); // и другие поля
+                    scrollDirection: Axis.vertical,
+                    child: DataTable(
+                      columnSpacing: 0,
+                      horizontalMargin: 0,
+                      headingRowHeight: 0,
+                      showCheckboxColumn: false,
+                      dataRowMaxHeight: double.infinity,
+                      columns: <DataColumn>[
+                        DataColumn(
+                          label: Container(
+                            width: MediaQuery.of(context).size.width * 0.4,
+                            child: Text(S.of(context).game),
+                          ),
+                        ),
+                        DataColumn(
+                          label: Container(
+                            width: MediaQuery.of(context).size.width * 0.25,
+                            child: Text(S.of(context).date),
+                          ),
+                        ),
+                        DataColumn(
+                          label: Container(
+                            width: MediaQuery.of(context).size.width * 0.35,
+                            child: Text(S.of(context).players),
+                          ),
+                        ),
+                      ],
+                      rows: List<DataRow>.generate(
+                        plays.length,
+                        (int index) => DataRow(
+                            color: WidgetStateProperty.resolveWith<Color?>(
+                                (Set<WidgetState> states) {
+                              if (states.contains(WidgetState.selected)) {
+                                return Theme.of(context)
+                                    .colorScheme
+                                    .primary
+                                    .withOpacity(0.08);
+                              }
+                              if (index.isEven) {
+                                return Colors.grey.withOpacity(0.3);
+                              }
+                              return null;
+                            }),
+                            onSelectChanged: (selected) {
+                              if (selected!) {
+                                log('row-selected: ${plays[index].id}, playes = ${plays[index].players}');
                               }
                             },
-                          ),
-                          const SizedBox(
-                              height: 20), // Отступ между календарями
-                        ],
-                      );
-                    }).toList(),
-                  ),
-                ),
-                // Expanded(
-                //     child: SingleChildScrollView(
-                //         scrollDirection: Axis.vertical,
-                //         child: FittedBox(
-                //             child: SingleChildScrollView(
-                //                 child: Column(
-                //                     children: groupedDates.entries.map((entry) {
-                //           List<String> parts = entry.key.split('-');
-                //           int year = int.parse(parts[0]);
-                //           int month = int.parse(parts[1]);
-
-                //           return Column(
-                //             children: [
-                //               CalendarWidget(
-                //                 year: year,
-                //                 month: month,
-                //                 dates: entry.value
-                //                     .map((e) => DateTime.parse(e.date))
-                //                     .toList(),
-                //               ),
-                //               const SizedBox(height: 20),
-                //             ],
-                //           );
-                //         }).toList()))))),
-
-                // SingleChildScrollView(
-                //     scrollDirection: Axis.vertical,
-                //     child: DataTable(
-                //       columnSpacing: 0,
-                //       horizontalMargin: 0,
-                //       headingRowHeight: 0,
-                //       showCheckboxColumn: false,
-                //       dataRowMaxHeight: double.infinity,
-                //       columns: <DataColumn>[
-                //         DataColumn(
-                //           label: Container(
-                //             width: MediaQuery.of(context).size.width * 0.4,
-                //             child: Text(S.of(context).game),
-                //           ),
-                //         ),
-                //         DataColumn(
-                //           label: Container(
-                //             width: MediaQuery.of(context).size.width * 0.25,
-                //             child: Text(S.of(context).date),
-                //           ),
-                //         ),
-                //         DataColumn(
-                //           label: Container(
-                //             width: MediaQuery.of(context).size.width * 0.35,
-                //             child: Text(S.of(context).players),
-                //           ),
-                //         ),
-                //       ],
-                //       rows: List<DataRow>.generate(
-                //         plays.length,
-                //         (int index) => DataRow(
-                //             color: WidgetStateProperty.resolveWith<Color?>(
-                //                 (Set<WidgetState> states) {
-                //               if (states.contains(WidgetState.selected)) {
-                //                 return Theme.of(context)
-                //                     .colorScheme
-                //                     .primary
-                //                     .withOpacity(0.08);
-                //               }
-                //               if (index.isEven) {
-                //                 return Colors.grey.withOpacity(0.3);
-                //               }
-                //               return null;
-                //             }),
-                //             onSelectChanged: (selected) {
-                //               if (selected!) {
-                //                 log('row-selected: ${plays[index].id}, playes = ${plays[index].players}');
-                //               }
-                //             },
-                //             cells: [
-                //               _buildDataCell(
-                //                   index,
-                //                   0,
-                //                   Text(plays[index].gameName,
-                //                       style: const TextStyle(
-                //                         fontWeight: FontWeight.bold,
-                //                       ))),
-                //               _buildDataCell(
-                //                   index,
-                //                   1,
-                //                   Column(children: [
-                //                     Text(
-                //                       getUserDateFormatYY(plays[index].date),
-                //                       textAlign: TextAlign.center,
-                //                     ),
-                //                     Text(
-                //                       style: const TextStyle(
-                //                           fontWeight: FontWeight.bold),
-                //                       getUserDateFormatMMMMdd(
-                //                           plays[index].date),
-                //                       textAlign: TextAlign.center,
-                //                     )
-                //                   ])),
-                //               _buildDataCell(index, 2,
-                //                   getPlayersColumn(plays[index], context)),
-                //             ]),
-                //       ),
-                //     )),
-
+                            cells: [
+                              _buildDataCell(
+                                  index,
+                                  0,
+                                  Text(plays[index].gameName,
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                      ))),
+                              _buildDataCell(
+                                  index,
+                                  1,
+                                  Column(children: [
+                                    Text(
+                                      getUserDateFormatYY(plays[index].date),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                    Text(
+                                      style: const TextStyle(
+                                          fontWeight: FontWeight.bold),
+                                      getUserDateFormatMMMMdd(
+                                          plays[index].date),
+                                      textAlign: TextAlign.center,
+                                    )
+                                  ])),
+                              _buildDataCell(index, 2,
+                                  getPlayersColumn(plays[index], context)),
+                            ]),
+                      ),
+                    )),
                 DataTable(
                   columnSpacing: 20,
                   headingRowHeight: 0,

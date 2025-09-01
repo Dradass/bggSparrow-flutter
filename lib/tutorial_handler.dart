@@ -16,6 +16,7 @@ class TutorialHandler {
   late TutorialCoachMark tutorialCoachMark;
   GlobalKey logKey = GlobalKey(debugLabel: 'logKey');
   GlobalKey statsKey = GlobalKey(debugLabel: 'statsKey');
+  GlobalKey calendarKey = GlobalKey(debugLabel: 'calendarKey');
   GlobalKey gameChoseKey = GlobalKey(debugLabel: 'gameChoseKey');
   GlobalKey firstPlayerKey = GlobalKey(debugLabel: 'firstPlayerKey');
 
