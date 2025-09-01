@@ -5,6 +5,7 @@ import '../models/bgg_play_model.dart';
 import '../models/bgg_play_player.dart';
 
 import '../s.dart';
+import 'package:intl/intl.dart';
 import '../widgets/common.dart';
 import '../pages/edit_play.dart';
 
@@ -27,6 +28,7 @@ class _CalendarPlaysState extends State<CalendarPlays> {
   late List<BggPlay> allPlays;
   List<Map<BggPlay, GameThing?>> playsOfDay = [];
   final Image imagewidget = Image.asset('assets/no_image.png');
+  DateTime? selectedDate;
 
   @override
   void initState() {
@@ -119,7 +121,11 @@ class _CalendarPlaysState extends State<CalendarPlays> {
                       year: year,
                       month: month,
                       bggPlays: entry.value,
-                      onDateTap: (playsForDate) async {
+                      selectedDate: selectedDate,
+                      onDateTap: (date, playsForDate) async {
+                        setState(() {
+                          selectedDate = date;
+                        });
                         // Выводим все BggPlay для выбранной даты в лог
                         playsOfDay.clear();
 
@@ -141,7 +147,20 @@ class _CalendarPlaysState extends State<CalendarPlays> {
           )),
       Divider(),
       Row(
-        children: [Text("Played games:")],
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          selectedDate == null
+              ? Text(
+                  "Select the date",
+                  style: const TextStyle(
+                      fontSize: 18, fontWeight: FontWeight.bold),
+                )
+              : Text(
+                  "${DateFormat('dd MMMM', S.currentLocale.languageCode).format(selectedDate!)} results:",
+                  style: const TextStyle(
+                      fontSize: 18, fontWeight: FontWeight.bold),
+                )
+        ],
       ),
       Expanded(
           child: SingleChildScrollView(

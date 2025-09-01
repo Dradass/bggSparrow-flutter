@@ -293,11 +293,6 @@ class _LogPageState extends State<LogPage> {
                                   })
                           ],
                         ))),
-                ElevatedButton(
-                    onPressed: () {
-                      TestFunction(context);
-                    },
-                    child: Text("Test")),
                 FlexButtonSettings(
                     PlayDatePicker(),
                     IconButton(

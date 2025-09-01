@@ -4,8 +4,10 @@ import '../models/bgg_play_model.dart';
 class CalendarWidget extends StatefulWidget {
   final int year;
   final int month;
-  final List<BggPlay> bggPlays; // Список объектов BggPlay
-  final Function(List<BggPlay>) onDateTap; // Колбек для передачи списка BggPlay
+  final List<BggPlay> bggPlays;
+  final Function(DateTime?, List<BggPlay>)
+      onDateTap; // Изменили тип на DateTime?
+  final DateTime? selectedDate;
 
   const CalendarWidget({
     super.key,
@@ -13,6 +15,7 @@ class CalendarWidget extends StatefulWidget {
     required this.month,
     required this.bggPlays,
     required this.onDateTap,
+    this.selectedDate,
   });
 
   @override
@@ -26,6 +29,16 @@ class _CalendarWidgetState extends State<CalendarWidget> {
   void initState() {
     super.initState();
     _generateCalendar();
+  }
+
+  @override
+  void didUpdateWidget(CalendarWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.selectedDate != widget.selectedDate ||
+        oldWidget.year != widget.year ||
+        oldWidget.month != widget.month) {
+      _generateCalendar();
+    }
   }
 
   void _generateCalendar() {
@@ -55,7 +68,9 @@ class _CalendarWidgetState extends State<CalendarWidget> {
       firstWeekday = (firstWeekday % 7) + 1;
     }
 
-    _weeks = weeks;
+    setState(() {
+      _weeks = weeks;
+    });
   }
 
   String get _monthTitle {
@@ -77,28 +92,31 @@ class _CalendarWidgetState extends State<CalendarWidget> {
   }
 
   int _getEventCount(DateTime date) {
-    // Форматируем дату для сравнения с PlayDate
     String formattedDate =
         "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
 
-    // Подсчитываем количество BggPlay с этой датой
     return widget.bggPlays.where((play) => play.date == formattedDate).length;
   }
 
   List<BggPlay> _getPlaysForDate(DateTime date) {
-    // Форматируем дату для сравнения с PlayDate
     String formattedDate =
         "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
 
-    // Возвращаем все BggPlay с этой датой
     return widget.bggPlays.where((play) => play.date == formattedDate).toList();
+  }
+
+  // Проверяем, является ли дата выбранной
+  bool _isDateSelected(DateTime date) {
+    return widget.selectedDate != null &&
+        widget.selectedDate!.year == date.year &&
+        widget.selectedDate!.month == date.month &&
+        widget.selectedDate!.day == date.day;
   }
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        // Заголовок с названием месяца и года
         Container(
           padding: const EdgeInsets.symmetric(vertical: 16),
           child: Text(
@@ -106,11 +124,8 @@ class _CalendarWidgetState extends State<CalendarWidget> {
             style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
         ),
-
-        // Сетка календаря
         Table(
           children: [
-            // Заголовок с днями недели
             const TableRow(
               children: [
                 _DayTitle('Пн'),
@@ -122,18 +137,23 @@ class _CalendarWidgetState extends State<CalendarWidget> {
                 _DayTitle('Вс'),
               ],
             ),
-            // Ячейки с днями месяца
             ..._weeks.map((week) => TableRow(
                   children: week
                       .map((date) => _DayCell(
                             date: date,
                             eventCount: date != null ? _getEventCount(date) : 0,
+                            isSelected: date != null && _isDateSelected(date),
                             onTap: date != null
                                 ? () {
-                                    // Получаем все BggPlay для этой даты и передаем через колбек
-                                    List<BggPlay> playsForDate =
-                                        _getPlaysForDate(date);
-                                    widget.onDateTap(playsForDate);
+                                    // Если дата уже выбрана, снимаем выделение
+                                    if (_isDateSelected(date)) {
+                                      widget.onDateTap(null, []);
+                                    } else {
+                                      // Иначе выделяем новую дату
+                                      List<BggPlay> playsForDate =
+                                          _getPlaysForDate(date);
+                                      widget.onDateTap(date, playsForDate);
+                                    }
                                   }
                                 : null,
                           ))
@@ -146,7 +166,6 @@ class _CalendarWidgetState extends State<CalendarWidget> {
   }
 }
 
-// Виджет для заголовка дня недели
 class _DayTitle extends StatelessWidget {
   final String title;
 
@@ -165,15 +184,16 @@ class _DayTitle extends StatelessWidget {
   }
 }
 
-// Виджет для ячейки дня (без изменений)
 class _DayCell extends StatelessWidget {
   final DateTime? date;
   final int eventCount;
+  final bool isSelected;
   final VoidCallback? onTap;
 
   const _DayCell({
     required this.date,
     required this.eventCount,
+    required this.isSelected,
     required this.onTap,
   });
 
@@ -184,7 +204,10 @@ class _DayCell extends StatelessWidget {
       child: Container(
         height: 40,
         decoration: BoxDecoration(
-          border: Border.all(color: Colors.grey.shade300),
+          border: Border.all(
+            color: Colors.grey.shade300,
+          ),
+          color: isSelected ? Colors.blue : Colors.transparent,
         ),
         child: Stack(
           children: [
@@ -196,7 +219,11 @@ class _DayCell extends StatelessWidget {
                 child: Text(
                   date != null ? date!.day.toString() : '',
                   style: TextStyle(
-                    color: date != null ? Colors.black : Colors.transparent,
+                    color: isSelected
+                        ? Colors.white
+                        : (date != null ? Colors.black : Colors.transparent),
+                    fontWeight:
+                        isSelected ? FontWeight.bold : FontWeight.normal,
                   ),
                 ),
               ),
@@ -211,15 +238,18 @@ class _DayCell extends StatelessWidget {
                   child: Container(
                     width: 16,
                     height: 16,
-                    decoration: const BoxDecoration(
-                      color: Colors.green,
+                    decoration: BoxDecoration(
+                      color: isSelected ? Colors.white : Colors.green,
                       shape: BoxShape.circle,
+                      border: isSelected
+                          ? Border.all(color: Colors.blue, width: 1)
+                          : null,
                     ),
                     child: Center(
                       child: Text(
                         eventCount.toString(),
-                        style: const TextStyle(
-                          color: Colors.white,
+                        style: TextStyle(
+                          color: isSelected ? Colors.blue : Colors.white,
                           fontSize: 10,
                           fontWeight: FontWeight.bold,
                         ),

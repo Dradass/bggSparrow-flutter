@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../globals.dart';
+import '../s.dart';
+import 'package:intl/intl.dart';
 
 // Создать текст с автоподбором размера
 Widget buildScaledText(BuildContext context, String text, bool isSelected) {
@@ -72,4 +74,20 @@ void showSnackBar(BuildContext context, String message) {
       content: Text(message),
     ),
   );
+}
+
+String getUserDateFormatYY(String dateString) {
+  DateTime date = DateTime.parse(dateString);
+
+  final formatter = DateFormat('yyyy', S.currentLocale.languageCode);
+
+  return formatter.format(date);
+}
+
+String getUserDateFormatMMMMdd(String dateString) {
+  DateTime date = DateTime.parse(dateString);
+
+  final formatter = DateFormat('dd MMMM', S.currentLocale.languageCode);
+
+  return formatter.format(date);
 }

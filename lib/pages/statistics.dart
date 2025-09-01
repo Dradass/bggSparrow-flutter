@@ -9,7 +9,6 @@ import '../bggApi/bgg_api.dart';
 import '../db/game_things_sql.dart';
 import '../s.dart';
 import '../widgets/common.dart';
-import '../widgets/calendar_month.dart';
 
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
@@ -138,93 +137,15 @@ class _StatisticsState extends State<Statistics> {
                   Theme.of(context).colorScheme.secondary, // Активная вкладка
               unselectedLabelColor: Theme.of(context).colorScheme.primary,
               tabs: [
-                Tab(text: S.of(context).plays),
                 Tab(text: S.of(context).table),
                 Tab(text: S.of(context).histogram),
                 Tab(text: S.of(context).pieChart),
+                Tab(text: S.of(context).plays),
               ]),
           LayoutBuilder(builder: ((context, constraints) {
             return SizedBox(
               height: MediaQuery.of(context).size.height * 0.50,
               child: TabBarView(children: [
-                SingleChildScrollView(
-                    scrollDirection: Axis.vertical,
-                    child: DataTable(
-                      columnSpacing: 0,
-                      horizontalMargin: 0,
-                      headingRowHeight: 0,
-                      showCheckboxColumn: false,
-                      dataRowMaxHeight: double.infinity,
-                      columns: <DataColumn>[
-                        DataColumn(
-                          label: Container(
-                            width: MediaQuery.of(context).size.width * 0.4,
-                            child: Text(S.of(context).game),
-                          ),
-                        ),
-                        DataColumn(
-                          label: Container(
-                            width: MediaQuery.of(context).size.width * 0.25,
-                            child: Text(S.of(context).date),
-                          ),
-                        ),
-                        DataColumn(
-                          label: Container(
-                            width: MediaQuery.of(context).size.width * 0.35,
-                            child: Text(S.of(context).players),
-                          ),
-                        ),
-                      ],
-                      rows: List<DataRow>.generate(
-                        plays.length,
-                        (int index) => DataRow(
-                            color: WidgetStateProperty.resolveWith<Color?>(
-                                (Set<WidgetState> states) {
-                              if (states.contains(WidgetState.selected)) {
-                                return Theme.of(context)
-                                    .colorScheme
-                                    .primary
-                                    .withOpacity(0.08);
-                              }
-                              if (index.isEven) {
-                                return Colors.grey.withOpacity(0.3);
-                              }
-                              return null;
-                            }),
-                            onSelectChanged: (selected) {
-                              if (selected!) {
-                                log('row-selected: ${plays[index].id}, playes = ${plays[index].players}');
-                              }
-                            },
-                            cells: [
-                              _buildDataCell(
-                                  index,
-                                  0,
-                                  Text(plays[index].gameName,
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                      ))),
-                              _buildDataCell(
-                                  index,
-                                  1,
-                                  Column(children: [
-                                    Text(
-                                      getUserDateFormatYY(plays[index].date),
-                                      textAlign: TextAlign.center,
-                                    ),
-                                    Text(
-                                      style: const TextStyle(
-                                          fontWeight: FontWeight.bold),
-                                      getUserDateFormatMMMMdd(
-                                          plays[index].date),
-                                      textAlign: TextAlign.center,
-                                    )
-                                  ])),
-                              _buildDataCell(index, 2,
-                                  getPlayersColumn(plays[index], context)),
-                            ]),
-                      ),
-                    )),
                 DataTable(
                   columnSpacing: 20,
                   headingRowHeight: 0,
@@ -360,6 +281,84 @@ class _StatisticsState extends State<Statistics> {
                     ],
                   ),
                 ),
+                SingleChildScrollView(
+                    scrollDirection: Axis.vertical,
+                    child: DataTable(
+                      columnSpacing: 0,
+                      horizontalMargin: 0,
+                      headingRowHeight: 0,
+                      showCheckboxColumn: false,
+                      dataRowMaxHeight: double.infinity,
+                      columns: <DataColumn>[
+                        DataColumn(
+                          label: Container(
+                            width: MediaQuery.of(context).size.width * 0.4,
+                            child: Text(S.of(context).game),
+                          ),
+                        ),
+                        DataColumn(
+                          label: Container(
+                            width: MediaQuery.of(context).size.width * 0.25,
+                            child: Text(S.of(context).date),
+                          ),
+                        ),
+                        DataColumn(
+                          label: Container(
+                            width: MediaQuery.of(context).size.width * 0.35,
+                            child: Text(S.of(context).players),
+                          ),
+                        ),
+                      ],
+                      rows: List<DataRow>.generate(
+                        plays.length,
+                        (int index) => DataRow(
+                            color: WidgetStateProperty.resolveWith<Color?>(
+                                (Set<WidgetState> states) {
+                              if (states.contains(WidgetState.selected)) {
+                                return Theme.of(context)
+                                    .colorScheme
+                                    .primary
+                                    .withOpacity(0.08);
+                              }
+                              if (index.isEven) {
+                                return Colors.grey.withOpacity(0.3);
+                              }
+                              return null;
+                            }),
+                            onSelectChanged: (selected) {
+                              if (selected!) {
+                                log('row-selected: ${plays[index].id}, playes = ${plays[index].players}');
+                              }
+                            },
+                            cells: [
+                              _buildDataCell(
+                                  index,
+                                  0,
+                                  Text(plays[index].gameName,
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                      ))),
+                              _buildDataCell(
+                                  index,
+                                  1,
+                                  Column(children: [
+                                    Text(
+                                      getUserDateFormatYY(plays[index].date),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                    Text(
+                                      style: const TextStyle(
+                                          fontWeight: FontWeight.bold),
+                                      getUserDateFormatMMMMdd(
+                                          plays[index].date),
+                                      textAlign: TextAlign.center,
+                                    )
+                                  ])),
+                              _buildDataCell(index, 2,
+                                  getPlayersColumn(plays[index], context)),
+                            ]),
+                      ),
+                    )),
               ]),
             );
           })),
@@ -1090,20 +1089,4 @@ class _GamePlaysCount {
   String gameNameShort;
   int? count;
   int gameId;
-}
-
-String getUserDateFormatYY(String dateString) {
-  DateTime date = DateTime.parse(dateString);
-
-  final formatter = DateFormat('yyyy', S.currentLocale.languageCode);
-
-  return formatter.format(date);
-}
-
-String getUserDateFormatMMMMdd(String dateString) {
-  DateTime date = DateTime.parse(dateString);
-
-  final formatter = DateFormat('dd MMMM', S.currentLocale.languageCode);
-
-  return formatter.format(date);
 }
