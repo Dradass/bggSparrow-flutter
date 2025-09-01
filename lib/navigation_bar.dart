@@ -99,8 +99,8 @@ class _NavigationScreenState extends State<NavigationScreen> {
             _buildNavItem(
               context,
               index: 2,
-              icon: Icons.leaderboard_outlined,
-              activeIcon: Icons.leaderboard,
+              icon: Icons.calendar_month_outlined,
+              activeIcon: Icons.calendar_month,
               label: "Calendar",
               key: tutorialHandler.calendarKey,
             ),

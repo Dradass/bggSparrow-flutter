@@ -48,7 +48,7 @@ class _CalendarPlaysState extends State<CalendarPlays> {
 
   Future<void> updateAllPlays() async {
     PlaysSQL.getAllPlays(startDate, endDate).then((allPlays) {
-      for (var play in allPlays) {
+      for (var play in allPlays.reversed) {
         var playDate = DateTime.parse(play.date);
         var keyDate = DateTime(playDate.year, playDate.month, 1);
         var keyDateString = keyDate.toString();

@@ -499,7 +499,8 @@ Future<void> initializeBggData(
   refreshProgress(true, S.of(context).updatingPlaysInfo);
   int maxPlayerId = await PlayersSQL.getMaxID();
   int maxLocationId = await LocationSQL.getMaxID();
-  await getPlaysFromPage(1, maxPlayerId, maxLocationId);
+  //await getPlaysFromPage(1, maxPlayerId, maxLocationId);
+  await getAllPlaysFromServer();
 
   await getGamesThumbnail(refreshProgress, context);
   await getGamesPlayersCount(refreshProgress, context);
