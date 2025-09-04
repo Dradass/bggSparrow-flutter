@@ -29,6 +29,15 @@ class _CalendarPlaysState extends State<CalendarPlays> {
   List<Map<BggPlay, GameThing?>> playsOfDay = [];
   final Image imagewidget = Image.asset('assets/no_image.png');
   DateTime? selectedDate;
+  String? selectedYear;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (selectedYear == null) {
+      selectedYear = S.of(context).all;
+    }
+  }
 
   @override
   void initState() {
@@ -55,6 +64,11 @@ class _CalendarPlaysState extends State<CalendarPlays> {
         }
         groupedDates[keyDateString]!.add(play);
       }
+
+      var sortedKeys = groupedDates.keys.toList()
+        ..sort((a, b) => DateTime.parse(b).compareTo(DateTime.parse(a)));
+      var sortedMap = {for (var key in sortedKeys) key: groupedDates[key]!};
+      groupedDates = sortedMap;
     });
   }
 
@@ -69,7 +83,7 @@ class _CalendarPlaysState extends State<CalendarPlays> {
     return list;
   }
 
-  Map<String, List<BggPlay>> getFilteredDates(String? selectedYear) {
+  Map<String, List<BggPlay>> getFilteredDates() {
     if (selectedYear == S.of(context).all || selectedYear == null) {
       return groupedDates;
     }
@@ -125,8 +139,7 @@ class _CalendarPlaysState extends State<CalendarPlays> {
   @override
   Widget build(BuildContext context) {
     final yearsList = getYearsList();
-    String? selectedYear = S.of(context).all;
-    final filteredDates = getFilteredDates(selectedYear);
+    final filteredDates = getFilteredDates();
 
     return Column(children: [
       SizedBox(height: MediaQuery.of(context).size.height * 0.025),

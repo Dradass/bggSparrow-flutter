@@ -56,4 +56,23 @@ class BggPlay {
         incomplete: json['incomplete'],
         nowinstats: json['nowinstats']);
   }
+
+  static bool areEqual(BggPlay firstPlay, BggPlay secondPlay) {
+    if (firstPlay.comments == secondPlay.comments &&
+        firstPlay.date == secondPlay.date &&
+        firstPlay.duration == secondPlay.duration &&
+        firstPlay.gameId == secondPlay.gameId &&
+        firstPlay.gameName == secondPlay.gameName &&
+        firstPlay.id == secondPlay.id &&
+        firstPlay.incomplete == secondPlay.incomplete &&
+        firstPlay.location == secondPlay.location &&
+        firstPlay.nowinstats == secondPlay.nowinstats &&
+        firstPlay.offline == secondPlay.offline &&
+        firstPlay.players == secondPlay.players &&
+        firstPlay.quantity == secondPlay.quantity) {
+      return true;
+    } else {
+      return false;
+    }
+  }
 }

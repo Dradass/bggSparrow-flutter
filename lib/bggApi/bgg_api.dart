@@ -304,8 +304,13 @@ Future<bool> getPlaysFromPage(
             .map((e) =>
                 '${e.username.toString()}|${e.userid.toString()}|${e.name}|${e.startposition.toString()}|${e.color.toString()}|${e.score.toString()}|${e.isNew.toString()}|${e.rating.toString()}|${e.win.toString()}')
             .join(';'));
-    if (await PlaysSQL.selectPlayByID(bggPlay.id) == null) {
+    var existedPlay = await PlaysSQL.selectPlayByID(bggPlay.id);
+    if (existedPlay == null) {
       bggPlays.add(bggPlay);
+    } else {
+      if (!BggPlay.areEqual(existedPlay, bggPlay)) {
+        existedPlay = bggPlay;
+      }
     }
   }
   await fillLocalPlayers(uniquePlayers, maxPlayerId);
@@ -497,8 +502,8 @@ Future<void> initializeBggData(
   await importGameCollectionFromBGG(refreshProgress);
 
   refreshProgress(true, S.of(context).updatingPlaysInfo);
-  int maxPlayerId = await PlayersSQL.getMaxID();
-  int maxLocationId = await LocationSQL.getMaxID();
+  // int maxPlayerId = await PlayersSQL.getMaxID();
+  // int maxLocationId = await LocationSQL.getMaxID();
   //await getPlaysFromPage(1, maxPlayerId, maxLocationId);
   await getAllPlaysFromServer();
 

@@ -16,7 +16,6 @@ import '../widgets/play_date_picker.dart';
 import '../widgets/players_picker.dart';
 import '../widgets/play_sender.dart';
 import '../widgets/common.dart';
-import '../widgets/calendar_month.dart';
 import '../task_checker.dart';
 import 'dart:developer';
 import '../globals.dart';
@@ -190,9 +189,10 @@ class _LogPageState extends State<LogPage> {
         await getAllPlaysFromServer();
         locations = await getLocalLocationsObj();
         await SystemParameterSQL.addOrEditParameter(1, "firstLaunch", "0");
-      } else {
-        await PlaysSQL.clearTable();
       }
+      // else {
+      //   await PlaysSQL.clearTable();
+      // }
 
       final searchMode =
           await getOrCreateSystemParameter(2, "isSearchModeOnline", "1");
