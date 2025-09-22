@@ -68,7 +68,7 @@ class _DurationSliderSimpleState extends State<DurationSliderSimple> {
           },
         ),
         Text(
-          S.of(context).duration,
+          "${S.of(context).duration}: ${widget.durationCurrentValue.round()}",
         )
       ],
     );
