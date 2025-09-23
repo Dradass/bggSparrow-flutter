@@ -30,6 +30,7 @@ class _CalendarPlaysState extends State<CalendarPlays> {
   final Image imagewidget = Image.asset('assets/no_image.png');
   DateTime? selectedDate;
   String? selectedYear;
+  int currentPlaysCount = 0;
 
   @override
   void didChangeDependencies() {
@@ -48,12 +49,19 @@ class _CalendarPlaysState extends State<CalendarPlays> {
     updateAllPlays();
   }
 
-  void _refresh() {
+  void _refresh() async {
+    // TODO возможно, стоит всегда обновлять игры
+    var plays = await PlaysSQL.getAllPlays(startDate, endDate);
+    if (currentPlaysCount != plays.length) {
+      groupedDates.clear();
+      await updateAllPlays();
+    }
     setState(() {});
   }
 
   Future<void> updateAllPlays() async {
     PlaysSQL.getAllPlays(startDate, endDate).then((allPlays) {
+      currentPlaysCount = allPlays.length;
       for (var play in allPlays.reversed) {
         var playDate = DateTime.parse(play.date);
         var keyDate = DateTime(playDate.year, playDate.month, 1);

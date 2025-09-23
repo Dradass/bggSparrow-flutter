@@ -6,6 +6,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../widgets/common.dart';
 import '../s.dart';
 import '../globals.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 String? errorLoginText;
 String? errorPasswordText;
@@ -70,34 +71,54 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-        Text(S.of(context).loginWithYourBGGAccount,
-            style: Theme.of(context).textTheme.headlineMedium),
-        const Divider(),
-        TextField(
-          controller: loginTextController,
-          decoration: InputDecoration(
-            labelText: S.of(context).login,
-            errorText: errorLoginText,
+      body: Column(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
+        Column(children: [
+          Text(
+            S.of(context).disclaimerStart,
+            textAlign: TextAlign.center,
           ),
-        ),
-        TextField(
-            controller: passwordTextController,
-            obscureText: true,
-            decoration: InputDecoration(
-              labelText: S.of(context).password,
-              errorText: errorPasswordText,
-            )),
-        SizedBox(
-            width: MediaQuery.of(context).size.width,
-            height: MediaQuery.of(context).size.height * 0.1,
-            child: ElevatedButton(
-                onPressed: checkLoginAndPassword,
-                style: ButtonStyle(
-                  backgroundColor: WidgetStateProperty.all(
-                      Theme.of(context).colorScheme.secondary),
+          InkWell(
+              child: const Text(
+                bggUri,
+                style: TextStyle(
+                  decoration: TextDecoration.underline,
+                  decorationStyle: TextDecorationStyle.solid,
+                  decorationThickness: 2.0,
                 ),
-                child: Text(S.of(context).tologIn)))
+              ),
+              onTap: () {
+                launchUrl(Uri.parse(bggUri));
+              })
+        ]),
+        Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+          Text(S.of(context).loginWithYourBGGAccount,
+              style: Theme.of(context).textTheme.headlineMedium),
+          const Divider(),
+          TextField(
+            controller: loginTextController,
+            decoration: InputDecoration(
+              labelText: S.of(context).login,
+              errorText: errorLoginText,
+            ),
+          ),
+          TextField(
+              controller: passwordTextController,
+              obscureText: true,
+              decoration: InputDecoration(
+                labelText: S.of(context).password,
+                errorText: errorPasswordText,
+              )),
+          SizedBox(
+              width: MediaQuery.of(context).size.width,
+              height: MediaQuery.of(context).size.height * 0.1,
+              child: ElevatedButton(
+                  onPressed: checkLoginAndPassword,
+                  style: ButtonStyle(
+                    backgroundColor: WidgetStateProperty.all(
+                        Theme.of(context).colorScheme.secondary),
+                  ),
+                  child: Text(S.of(context).tologIn)))
+        ])
       ]),
     );
   }

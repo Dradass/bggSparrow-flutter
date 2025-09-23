@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 int loadTimeoutMs = 2500;
+const String bggUri = "https://boardgamegeek.com";
 
 // If false - show warning about not corrent game choice
 ValueNotifier<bool> isLoadedGamesPlayersCountInfoNotifier =

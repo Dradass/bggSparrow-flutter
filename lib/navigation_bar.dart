@@ -59,11 +59,11 @@ class _NavigationScreenState extends State<NavigationScreen> {
       body: IndexedStack(
         index: currentPageIndex,
         children: <Widget>[
-          LogPage(),
-          Statistics(),
+          const LogPage(),
+          const Statistics(),
           calendarPlays,
-          GameHelper(),
-          FirstPlayerChoser(),
+          const GameHelper(),
+          const FirstPlayerChoser(),
         ],
       ),
     );
@@ -101,7 +101,7 @@ class _NavigationScreenState extends State<NavigationScreen> {
               index: 2,
               icon: Icons.calendar_month_outlined,
               activeIcon: Icons.calendar_month,
-              label: "Calendar",
+              label: S.of(context).calendar,
               key: tutorialHandler.calendarKey,
             ),
             _buildNavItem(

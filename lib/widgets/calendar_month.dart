@@ -7,8 +7,7 @@ class CalendarWidget extends StatefulWidget {
   final int year;
   final int month;
   final List<BggPlay> bggPlays;
-  final Function(DateTime?, List<BggPlay>)
-      onDateTap; // Изменили тип на DateTime?
+  final Function(DateTime?, List<BggPlay>) onDateTap;
   final DateTime? selectedDate;
 
   const CalendarWidget({
@@ -212,7 +211,9 @@ class _DayCell extends StatelessWidget {
           border: Border.all(
             color: Colors.grey.shade300,
           ),
-          color: isSelected ? Colors.blue : Colors.transparent,
+          color: isSelected
+              ? Theme.of(context).colorScheme.secondary
+              : Colors.transparent,
         ),
         child: Stack(
           children: [
@@ -225,7 +226,7 @@ class _DayCell extends StatelessWidget {
                   date != null ? date!.day.toString() : '',
                   style: TextStyle(
                     color: isSelected
-                        ? Colors.white
+                        ? Theme.of(context).colorScheme.onPrimary
                         : (date != null ? Colors.black : Colors.transparent),
                     fontWeight:
                         isSelected ? FontWeight.bold : FontWeight.normal,
@@ -244,17 +245,23 @@ class _DayCell extends StatelessWidget {
                     width: 16,
                     height: 16,
                     decoration: BoxDecoration(
-                      color: isSelected ? Colors.white : Colors.green,
+                      color: isSelected
+                          ? Theme.of(context).colorScheme.onPrimary
+                          : Theme.of(context).colorScheme.secondary,
                       shape: BoxShape.circle,
                       border: isSelected
-                          ? Border.all(color: Colors.blue, width: 1)
+                          ? Border.all(
+                              color: Theme.of(context).colorScheme.secondary,
+                              width: 1)
                           : null,
                     ),
                     child: Center(
                       child: Text(
                         eventCount.toString(),
                         style: TextStyle(
-                          color: isSelected ? Colors.blue : Colors.white,
+                          color: isSelected
+                              ? Theme.of(context).colorScheme.secondary
+                              : Theme.of(context).colorScheme.primary,
                           fontSize: 10,
                           fontWeight: FontWeight.bold,
                         ),
