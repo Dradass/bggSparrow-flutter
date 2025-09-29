@@ -21,6 +21,25 @@ Widget buildScaledText(BuildContext context, String text, bool isSelected) {
   );
 }
 
+// Обновленная функция с передачей вычисленного размера шрифта
+Widget buildScaledTextWithFont(
+    BuildContext context, String text, bool isSelected, double fontSize) {
+  return FittedBox(
+    fit: BoxFit.scaleDown,
+    child: Text(
+      text,
+      maxLines: 1,
+      style: Theme.of(context).textTheme.labelMedium?.copyWith(
+            color: isSelected
+                ? Theme.of(context).colorScheme.secondary
+                : Theme.of(context).colorScheme.primary,
+            fontSize: fontSize, // Используем вычисленный размер
+            fontWeight: isSelected ? FontWeight.w500 : FontWeight.normal,
+          ),
+    ),
+  );
+}
+
 class FlexButton extends StatelessWidget {
   final Widget childWidget;
   final int flexValue;
