@@ -8,8 +8,10 @@ import 'bggApi/bgg_api.dart';
 import '../db/game_things_sql.dart';
 import '../login_handler.dart';
 import '../s.dart';
+import '../globals.dart';
 import 'theme_manager.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 late List<CameraDescription> cameras;
 
@@ -20,6 +22,8 @@ const primaryTextColor = Color.fromARGB(255, 85, 92, 89);
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await ThemeManager.initialize();
+  PackageInfo packageInfo = await PackageInfo.fromPlatform();
+  appVersion = '${packageInfo.version}+${packageInfo.buildNumber}';
 
   final prefs = await SharedPreferences.getInstance();
   String? defaultLanguage = prefs.getString('default_language');

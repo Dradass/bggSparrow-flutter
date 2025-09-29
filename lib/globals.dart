@@ -12,6 +12,8 @@ ValueNotifier<bool> isLoadedAllGamesImagesNotifier = ValueNotifier(false);
 const userNameParamName = "username";
 const passwordParamName = "password";
 
+String appVersion = "Loading";
+
 final GlobalKey selectGameButtonKey = GlobalKey();
 final GlobalKey recognizeGameButtonKey = GlobalKey();
 final GlobalKey swapSearchModeKey = GlobalKey();

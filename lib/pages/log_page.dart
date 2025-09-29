@@ -579,6 +579,8 @@ class _LogPageState extends State<LogPage> {
                   );
                 },
               ),
+              const Divider(),
+              ListTile(title: Text('Version: $appVersion')),
             ],
           ),
         ),
