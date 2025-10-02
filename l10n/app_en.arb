@@ -63,6 +63,7 @@
   "listWasCreated": "List was created",
   "listWasDeleted": "List was deleted",
   "listWasUpdated": "List was updated",
+  "loading": "Loading",
   "loadAllData": "Load all data",
   "locationName": "Location name",
   "locationNameCantBeEmpty": "Location name can't be empty",

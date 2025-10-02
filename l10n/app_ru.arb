@@ -64,6 +64,7 @@
   "listWasDeleted": "Список был удален",
   "listWasUpdated": "Список был обновлен",
   "loadAllData": "Загрузить все данные",
+  "loading": "Загрузка",
   "locationName": "Имя локации",
   "locationNameCantBeEmpty": "Имя локации не может быть пустым",
   "logPlay": "Сохранить результаты",

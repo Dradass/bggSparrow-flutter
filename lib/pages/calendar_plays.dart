@@ -31,6 +31,7 @@ class _CalendarPlaysState extends State<CalendarPlays> {
   DateTime? selectedDate;
   String? selectedYear;
   int currentPlaysCount = 0;
+  bool _isRefreshing = false;
 
   @override
   void didChangeDependencies() {
@@ -50,34 +51,63 @@ class _CalendarPlaysState extends State<CalendarPlays> {
   }
 
   void _refresh() async {
-    // TODO возможно, стоит всегда обновлять игры
-    var plays = await PlaysSQL.getAllPlays(startDate, endDate);
-    if (currentPlaysCount != plays.length) {
-      groupedDates.clear();
-      await updateAllPlays();
+    if (_isRefreshing) return;
+
+    setState(() {
+      _isRefreshing = true;
+    });
+    // Сохраняем текущую выбранную дату
+    DateTime? previousSelectedDate = selectedDate;
+
+    groupedDates.clear();
+    await updateAllPlays();
+
+    // Если была выбрана дата, восстанавливаем ее и обновляем список игр
+    if (previousSelectedDate != null) {
+      // Находим игры для выбранной даты
+      String formattedDate =
+          "${previousSelectedDate.year}-${previousSelectedDate.month.toString().padLeft(2, '0')}-${previousSelectedDate.day.toString().padLeft(2, '0')}";
+
+      // Получаем все игры из обновленных данных
+      var allPlays = await PlaysSQL.getAllPlays(startDate, endDate);
+      List<BggPlay> playsForSelectedDate =
+          allPlays.where((play) => play.date == formattedDate).toList();
+
+      // Обновляем список игр для выбранной даты
+      playsOfDay.clear();
+      for (var play in playsForSelectedDate) {
+        var game = await GameThingSQL.selectGameByID(play.gameId);
+        playsOfDay.add({play: game});
+      }
+
+      // Восстанавливаем выбранную дату
+      selectedDate = previousSelectedDate;
     }
+
     setState(() {});
+    setState(() {
+      _isRefreshing = false;
+    });
   }
 
   Future<void> updateAllPlays() async {
-    PlaysSQL.getAllPlays(startDate, endDate).then((allPlays) {
-      currentPlaysCount = allPlays.length;
-      for (var play in allPlays.reversed) {
-        var playDate = DateTime.parse(play.date);
-        var keyDate = DateTime(playDate.year, playDate.month, 1);
-        var keyDateString = keyDate.toString();
+    var allPlays = await PlaysSQL.getAllPlays(startDate, endDate);
+    currentPlaysCount = allPlays.length;
+    for (var play in allPlays.reversed) {
+      var playDate = DateTime.parse(play.date);
+      var keyDate = DateTime(playDate.year, playDate.month, 1);
+      var keyDateString = keyDate.toString();
 
-        if (!groupedDates.containsKey(keyDateString)) {
-          groupedDates[keyDateString] = [];
-        }
-        groupedDates[keyDateString]!.add(play);
+      if (!groupedDates.containsKey(keyDateString)) {
+        groupedDates[keyDateString] = [];
       }
+      groupedDates[keyDateString]!.add(play);
+    }
 
-      var sortedKeys = groupedDates.keys.toList()
-        ..sort((a, b) => DateTime.parse(b).compareTo(DateTime.parse(a)));
-      var sortedMap = {for (var key in sortedKeys) key: groupedDates[key]!};
-      groupedDates = sortedMap;
-    });
+    var sortedKeys = groupedDates.keys.toList()
+      ..sort((a, b) => DateTime.parse(b).compareTo(DateTime.parse(a)));
+    var sortedMap = {for (var key in sortedKeys) key: groupedDates[key]!};
+    groupedDates = sortedMap;
   }
 
   List<String> getYearsList() {
@@ -136,7 +166,7 @@ class _CalendarPlaysState extends State<CalendarPlays> {
                   return AlertDialog(
                       title: Text(S.of(context).editPlayData),
                       content: EditPage(
-                          bggPlay: play, playsRefreshCallback: updateAllPlays));
+                          bggPlay: play, playsRefreshCallback: _refresh));
                 });
               });
         }
@@ -188,7 +218,7 @@ class _CalendarPlaysState extends State<CalendarPlays> {
               }).toList(),
             ),
           )),
-      Divider(),
+      const Divider(),
       Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -224,44 +254,50 @@ class _CalendarPlaysState extends State<CalendarPlays> {
         ],
       ),
       Expanded(
-          child: SingleChildScrollView(
-              child: Column(
-                  children: playsOfDay.map((play) {
-        return Builder(builder: (context) {
-          return GestureDetector(
-              onTapDown: (TapDownDetails details) {
-                _showContextMenu(
-                  play.keys.first,
-                  context,
-                  details.globalPosition,
-                );
-              },
-              child: Column(children: [
-                Divider(),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    SizedBox(
-                        width: MediaQuery.of(context).size.width * 0.25,
-                        child: play.values.first != null &&
-                                play.values.first!.thumbBinary != null
-                            ? Image.memory(
-                                base64Decode(play.values.first!.thumbBinary!))
-                            : Image.asset('assets/no_image.png')),
-                    SizedBox(
-                        width: MediaQuery.of(context).size.width * 0.4,
-                        child: Text(
-                          play.keys.first.gameName,
-                          textAlign: TextAlign.center,
-                        )),
-                    SizedBox(
-                        width: MediaQuery.of(context).size.width * 0.35,
-                        child: getPlayersColumn(play.keys.first, context))
-                  ],
-                )
-              ]));
-        });
-      }).toList())))
+          child: _isRefreshing
+              ? Center(child: Text("${S.of(context).loading}..."))
+              : SingleChildScrollView(
+                  child: Column(
+                      children: playsOfDay.map((play) {
+                  return Builder(builder: (context) {
+                    return GestureDetector(
+                        onTapDown: (TapDownDetails details) {
+                          _showContextMenu(
+                            play.keys.first,
+                            context,
+                            details.globalPosition,
+                          );
+                        },
+                        child: Column(children: [
+                          Divider(),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              SizedBox(
+                                  width:
+                                      MediaQuery.of(context).size.width * 0.25,
+                                  child: play.values.first != null &&
+                                          play.values.first!.thumbBinary != null
+                                      ? Image.memory(base64Decode(
+                                          play.values.first!.thumbBinary!))
+                                      : Image.asset('assets/no_image.png')),
+                              SizedBox(
+                                  width:
+                                      MediaQuery.of(context).size.width * 0.4,
+                                  child: Text(
+                                    play.keys.first.gameName,
+                                    textAlign: TextAlign.center,
+                                  )),
+                              SizedBox(
+                                  width:
+                                      MediaQuery.of(context).size.width * 0.35,
+                                  child: getPlayersColumn(
+                                      play.keys.first, context))
+                            ],
+                          )
+                        ]));
+                  });
+                }).toList())))
     ]);
   }
 }
