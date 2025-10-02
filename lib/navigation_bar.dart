@@ -206,30 +206,32 @@ class _NavigationScreenState extends State<NavigationScreen> {
         : Theme.of(context).colorScheme.primary;
 
     return Expanded(
-      child: InkWell(
-        onTap: () => setState(() {
-          if (index == 2 && currentPageIndex != 2) {
-            print("nav callback");
-            if (_refreshChildCallback != null) {
-              _refreshChildCallback!();
-            }
-          }
-          currentPageIndex = index;
-        }),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              isSelected ? activeIcon : icon,
-              key: key,
-              color: color,
-              size: 24,
+      child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 2),
+          child: InkWell(
+            onTap: () => setState(() {
+              if (index == 2 && currentPageIndex != 2) {
+                print("nav callback");
+                if (_refreshChildCallback != null) {
+                  _refreshChildCallback!();
+                }
+              }
+              currentPageIndex = index;
+            }),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  isSelected ? activeIcon : icon,
+                  key: key,
+                  color: color,
+                  size: 24,
+                ),
+                const SizedBox(height: 4),
+                buildScaledTextWithFont(context, label, isSelected, fontSize),
+              ],
             ),
-            const SizedBox(height: 4),
-            buildScaledTextWithFont(context, label, isSelected, fontSize),
-          ],
-        ),
-      ),
+          )),
     );
   }
 }

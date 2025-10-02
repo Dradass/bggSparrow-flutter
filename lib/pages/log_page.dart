@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/db/plays_sql.dart';
 import 'package:flutter_application_1/main.dart';
 import 'package:flutter_application_1/models/bgg_location.dart';
-import 'package:flutter_application_1/models/bgg_play_model.dart';
 import 'package:flutter_application_1/widgets/players_list.dart';
 import '../db/game_things_sql.dart';
 import '../db/system_table.dart';
@@ -580,58 +578,11 @@ class _LogPageState extends State<LogPage> {
                 },
               ),
               const Divider(),
-              ListTile(title: Text('Version: $appVersion')),
+              ListTile(title: Text('${S.of(context).version}: $appVersion')),
             ],
           ),
         ),
       ),
     );
   }
-}
-
-void TestFunction(dynamic context) async {
-  // Group
-  DateTime? startDate = DateTime(2000);
-  DateTime? endDate = DateTime(3000);
-  var allPlays = await PlaysSQL.getAllPlays(startDate, endDate);
-
-  Map<String, List<BggPlay>> groupedDates = {};
-  for (var play in allPlays) {
-    var playDate = DateTime.parse(play.date);
-    var keyDate = DateTime(playDate.year, playDate.month, 1);
-    var keyDateString = keyDate.toString();
-
-    if (!groupedDates.containsKey(keyDateString)) {
-      groupedDates[keyDateString] = [];
-    }
-    groupedDates[keyDateString]!.add(play);
-  }
-
-  // showDialog(
-  //     context: context,
-  //     builder: (BuildContext context) {
-  //       return AlertDialog(
-  //           content: SingleChildScrollView(
-  //         child: Column(
-  //           children: groupedDates.entries.map((entry) {
-  //             // Получаем год и месяц из ключа
-  //             List<String> parts = entry.key.split('-');
-  //             int year = int.parse(parts[0]);
-  //             int month = int.parse(parts[1]);
-
-  //             return Column(
-  //               children: [
-  //                 CalendarWidget(
-  //                   year: year,
-  //                   month: month,
-  //                   dates:
-  //                       entry.value.map((e) => DateTime.parse(e.date)).toList(),
-  //                 ),
-  //                 const SizedBox(height: 20), // Отступ между календарями
-  //               ],
-  //             );
-  //           }).toList(),
-  //         ),
-  //       ));
-  //     });
 }
