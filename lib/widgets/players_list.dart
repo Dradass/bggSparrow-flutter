@@ -1,4 +1,3 @@
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/bgg_play_player.dart';
 
@@ -10,7 +9,6 @@ import 'dart:developer';
 import '../s.dart';
 
 class PlayersListWrapper {
-  String? sourceWinners;
   String? sourcePlayers;
   String? listManageErrorText;
   String? listManageHintText;
@@ -36,22 +34,33 @@ class PlayersListWrapper {
     if (chosenPlayersListId == 0) {
       players = await PlayersSQL.getAllPlayers();
 
-      for (var player in players) {
-        if (sourceWinners == null) {
-          break;
-        }
-        if (sourcePlayers == null) {
-          break;
-        }
-        if (sourceWinners!.split(';').contains(player['name'])) {
-          player['win'] = true;
-        }
-        // TODO Если пользователь - BGG - сравниваем по ИД, если нет - по имени
-        if (sourcePlayers!
-            .split(';')
-            .map((e) => e.split('|')[2])
-            .contains(player['name'])) {
-          player['isChecked'] = true;
+// Fill players marks
+      if (sourcePlayers != null && sourcePlayers != "") {
+        var sourceBggPlayers =
+            sourcePlayers!.split(";").map((e) => BggPlayPlayer.fromString(e));
+        for (var player in players) {
+          if (player['userid'] != 0) {
+            var matchedPlayer = sourceBggPlayers
+                .where(
+                    (element) => element.userid == player['userid'].toString())
+                .firstOrNull;
+            if (matchedPlayer != null) {
+              player['isChecked'] = true;
+              if (matchedPlayer.win == "1") {
+                player['win'] = true;
+              }
+            }
+          } else {
+            var matchedPlayer = sourceBggPlayers
+                .where((element) => element.name == player['name'])
+                .firstOrNull;
+            if (matchedPlayer != null) {
+              player['isChecked'] = true;
+              if (matchedPlayer.win == "1") {
+                player['win'] = true;
+              }
+            }
+          }
         }
       }
       players.sort((a, b) => a['name'].compareTo(b['name']));
@@ -84,6 +93,35 @@ class PlayersListWrapper {
             });
           } else {
             log('Cant find player with id $playerId');
+          }
+        }
+        // Fill players marks
+        if (sourcePlayers != null && sourcePlayers != "") {
+          var sourceBggPlayers =
+              sourcePlayers!.split(";").map((e) => BggPlayPlayer.fromString(e));
+          for (var player in players) {
+            if (player['userid'] != 0) {
+              var matchedPlayer = sourceBggPlayers
+                  .where((element) =>
+                      element.userid == player['userid'].toString())
+                  .firstOrNull;
+              if (matchedPlayer != null) {
+                player['isChecked'] = true;
+                if (matchedPlayer.win == "1") {
+                  player['win'] = true;
+                }
+              }
+            } else {
+              var matchedPlayer = sourceBggPlayers
+                  .where((element) => element.name == player['name'])
+                  .firstOrNull;
+              if (matchedPlayer != null) {
+                player['isChecked'] = true;
+                if (matchedPlayer.win == "1") {
+                  player['win'] = true;
+                }
+              }
+            }
           }
         }
         players.sort((a, b) => a['name'].compareTo(b['name']));
