@@ -1035,7 +1035,7 @@ Column getPlayersColumn(BggPlay bggPlay, BuildContext context) {
     crossAxisAlignment: CrossAxisAlignment.start,
     children: players.split(';').map((playerInfo) {
       final player = BggPlayPlayer.fromString(playerInfo);
-      final playerName = player.userid == "0"
+      final playerName = player.userid == "0" || player.userid == ""
           ? player.name
           : "${player.name} (${player.username})";
 

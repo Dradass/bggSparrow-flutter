@@ -26,6 +26,7 @@ class PlayersPicker extends StatefulWidget {
 class _PlayersPickerState extends State<PlayersPicker> {
   final playerNameController = TextEditingController();
   String? _errorText;
+  String? createListHelperText;
 
   Future<String?> addBggPlayer(String userName, context) async {
     final playerNameInfo = await getBggPlayerName(userName);
@@ -72,7 +73,7 @@ class _PlayersPickerState extends State<PlayersPicker> {
       'win': false,
       'excluded': false,
     });
-    final newPlayer = Player(id: maxId + 1, name: playerName, userid: 0);
+    final newPlayer = Player(id: maxId + 1, name: playerName, userid: null);
     PlayersSQL.addPlayer(newPlayer);
     widget.playersListWrapper.players
         .sort(((a, b) => a['name'].toString().compareTo(b['name'].toString())));
@@ -107,8 +108,14 @@ class _PlayersPickerState extends State<PlayersPicker> {
                                   Expanded(
                                     child: ElevatedButton(
                                       onPressed: () async {
+                                        createListHelperText = null;
                                         _errorText = await addNotBggPlayer(
                                             playerNameController.text, context);
+                                        if (_errorText == null) {
+                                          createListHelperText =
+                                              S.of(context).playerWasAdded;
+                                          playerNameController.text = "";
+                                        }
                                         setState(() {});
                                       },
                                       style: ButtonStyle(
@@ -127,9 +134,12 @@ class _PlayersPickerState extends State<PlayersPicker> {
                                   Expanded(
                                     child: ElevatedButton(
                                       onPressed: () async {
+                                        createListHelperText = null;
                                         _errorText = await addBggPlayer(
                                             playerNameController.text, context);
                                         if (_errorText == null) {
+                                          createListHelperText =
+                                              S.of(context).playerWasAdded;
                                           playerNameController.text = '';
                                         }
                                         setState(() {});
@@ -151,6 +161,11 @@ class _PlayersPickerState extends State<PlayersPicker> {
                               TextField(
                                   controller: playerNameController,
                                   decoration: InputDecoration(
+                                      helperText: createListHelperText,
+                                      helperStyle: TextStyle(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .primary),
                                       labelText: S.of(context).newPlayerName,
                                       errorText: _errorText,
                                       hintText: S
@@ -329,7 +344,7 @@ class _PlayersPickerSimpleState extends State<PlayersPickerSimple> {
       'win': false,
       'excluded': false,
     });
-    final newPlayer = Player(id: maxId + 1, name: playerName, userid: 0);
+    final newPlayer = Player(id: maxId + 1, name: playerName, userid: null);
     PlayersSQL.addPlayer(newPlayer);
     widget.playersListWrapper.players
         .sort(((a, b) => a['name'].toString().compareTo(b['name'].toString())));
@@ -345,7 +360,7 @@ class _PlayersPickerSimpleState extends State<PlayersPickerSimple> {
             widget.playersListWrapper.players = await getAllPlayers();
           }
 
-          // Fill Checked and Win statused
+          // Fill Checked and Win statuses
           if (widget.playersListWrapper.sourcePlayers != null &&
               widget.playersListWrapper.sourcePlayers != "") {
             for (var sourcePlayerString
@@ -389,6 +404,8 @@ class _PlayersPickerSimpleState extends State<PlayersPickerSimple> {
                                     onPressed: () async => {
                                       _errorText = await addNotBggPlayer(
                                           playerNameController.text, context),
+                                      if (_errorText == null)
+                                        {playerNameController.text = ""},
                                       setState(() {})
                                     },
                                     style: ButtonStyle(

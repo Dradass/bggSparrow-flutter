@@ -97,6 +97,7 @@
   "playersCount": "Players count",
   "playerWithThisNicknameNotFound": "Player with this nickname not found",
   "playerIsAlreadyInFriendsList": "This player is already in your firends list",
+  "playerWasAdded": "The player was successfully added",
   "plays": "Plays",
   "playsCanBeEdited": "Plays can be edited by long pressing on a row",
   "playResultsWasSaved": "Play results are saved",

@@ -97,6 +97,7 @@
   "playersCount": "Количество игроков",
   "playerWithThisNicknameNotFound": "Игрок с таким ником не найден",
   "playerIsAlreadyInFriendsList": "Игрок с таким именем уже есть в списке друзей",
+  "playerWasAdded": "Игрок успешно добавлен",
   "plays": "Партии",
   "playsCanBeEdited": "Партии можно редактировать, удерживая нажатие на строке",
   "playResultsWasSaved": "Результаты игры успешно сохранены",

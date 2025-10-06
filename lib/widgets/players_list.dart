@@ -39,10 +39,9 @@ class PlayersListWrapper {
         var sourceBggPlayers =
             sourcePlayers!.split(";").map((e) => BggPlayPlayer.fromString(e));
         for (var player in players) {
-          if (player['userid'] != 0) {
+          if (player['userid'] == 0 || player['userid'] == null) {
             var matchedPlayer = sourceBggPlayers
-                .where(
-                    (element) => element.userid == player['userid'].toString())
+                .where((element) => element.name == player['name'])
                 .firstOrNull;
             if (matchedPlayer != null) {
               player['isChecked'] = true;
@@ -52,7 +51,8 @@ class PlayersListWrapper {
             }
           } else {
             var matchedPlayer = sourceBggPlayers
-                .where((element) => element.name == player['name'])
+                .where(
+                    (element) => element.userid == player['userid'].toString())
                 .firstOrNull;
             if (matchedPlayer != null) {
               player['isChecked'] = true;
@@ -100,10 +100,9 @@ class PlayersListWrapper {
           var sourceBggPlayers =
               sourcePlayers!.split(";").map((e) => BggPlayPlayer.fromString(e));
           for (var player in players) {
-            if (player['userid'] != 0) {
+            if (player['userid'] == 0 || player['userid'] == null) {
               var matchedPlayer = sourceBggPlayers
-                  .where((element) =>
-                      element.userid == player['userid'].toString())
+                  .where((element) => element.name == player['name'])
                   .firstOrNull;
               if (matchedPlayer != null) {
                 player['isChecked'] = true;
@@ -113,7 +112,8 @@ class PlayersListWrapper {
               }
             } else {
               var matchedPlayer = sourceBggPlayers
-                  .where((element) => element.name == player['name'])
+                  .where((element) =>
+                      element.userid == player['userid'].toString())
                   .firstOrNull;
               if (matchedPlayer != null) {
                 player['isChecked'] = true;

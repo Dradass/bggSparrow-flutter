@@ -55,8 +55,9 @@ class PlayersSQL {
   static Future<Player?> selectPlayerByName(String name) async {
     final db = await _getDB();
 
-    List<Map<String, dynamic>> result = await db
-        .rawQuery("SELECT * FROM Players WHERE name=? AND userid=0", [name]);
+    List<Map<String, dynamic>> result = await db.rawQuery(
+        "SELECT * FROM Players WHERE name=? AND (userid = 0 OR userid IS NULL)",
+        [name]);
     if (result.isEmpty) return null;
     return Player.fromJson(result.first);
   }
