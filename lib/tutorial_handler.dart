@@ -239,6 +239,23 @@ class TutorialHandler {
     }
 
     targets.add(TargetFocus(
+      color: const Color.fromARGB(255, 66, 201, 149),
+      identify: "calendar_key",
+      keyTarget: calendarKey,
+      contents: [
+        TargetContent(
+          align: ContentAlign.top,
+          builder: (context, controller) {
+            return _buildTutorialContent(
+              S.of(context).viewTheGameTimeline,
+              S.of(context).andEditGamePlays,
+            );
+          },
+        ),
+      ],
+    ));
+
+    targets.add(TargetFocus(
       color: Colors.orange,
       identify: "game_choose",
       keyTarget: gameChoseKey,
