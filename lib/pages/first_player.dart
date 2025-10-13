@@ -18,7 +18,7 @@ class _FirstPlayerChoserState extends State<FirstPlayerChoser>
     with TickerProviderStateMixin {
   Map<int, Offset> touchPositions = <int, Offset>{};
   List<Widget> children = [];
-  int? randomPlayer;
+  List<int?> randomPlayers = [];
   var indicator;
   bool forceInReleaseMode = true;
   bool enabled = true;
@@ -92,7 +92,7 @@ class _FirstPlayerChoserState extends State<FirstPlayerChoser>
       for (var entry in touchPositions.entries) {
         final index = entry.key;
         final touchPosition = entry.value;
-        final isRandomPlayer = index == randomPlayer;
+        final isRandomPlayer = randomPlayers.contains(index);
         final newSize = indicatorSize;
 
         if (simpleIndicatorMode) {
@@ -232,7 +232,7 @@ class _FirstPlayerChoserState extends State<FirstPlayerChoser>
 
   void checkTouchPositions(int firstPositionsCount) async {
     if (touchPositions.length == firstPositionsCount) {
-      if (touchPositions.length > 1) {
+      if (touchPositions.length > firstPlayerWinnersCount) {
         setState(() {
           counter = "3";
           countInProgress = true;
@@ -254,7 +254,7 @@ class _FirstPlayerChoserState extends State<FirstPlayerChoser>
     }
 
     if (touchPositions.length == firstPositionsCount) {
-      if (touchPositions.length > 1) {
+      if (touchPositions.length > firstPlayerWinnersCount) {
         setState(() {
           counter = "2";
         });
@@ -275,7 +275,7 @@ class _FirstPlayerChoserState extends State<FirstPlayerChoser>
     }
 
     if (touchPositions.length == firstPositionsCount &&
-        touchPositions.length > 1) {
+        touchPositions.length > firstPlayerWinnersCount) {
       setState(() {
         counter = "1";
       });
@@ -291,8 +291,10 @@ class _FirstPlayerChoserState extends State<FirstPlayerChoser>
     }
 
     if (touchPositions.length == firstPositionsCount) {
-      if (touchPositions.length > 1) {
-        randomPlayer = ((touchPositions.keys).toList()..shuffle()).first;
+      if (touchPositions.length > firstPlayerWinnersCount) {
+        randomPlayers = ((touchPositions.keys).toList()..shuffle())
+            .take(firstPlayerWinnersCount)
+            .toList();
         setState(() {
           counter = "";
           fingerPrintsOpacity = 0.0;

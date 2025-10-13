@@ -142,6 +142,7 @@
   "waitingForYourFriends": "Ждем друзей",
   "warningNotAllImagesLoaded": "Не все изображения игр загружены. Распознавание может быть некорректным",
   "winnerAmongChosenPlayers": "Победитель среди выбранных",
+  "winnersCountForFirstPlayer": "Первый игрок. Количество",
   "winQuestion": "Победа?",
   "winRate": "Процент побед",
   "wipeAllLocalData": "Очистить все локальные данные",

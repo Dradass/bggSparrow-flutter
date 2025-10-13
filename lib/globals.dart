@@ -25,6 +25,8 @@ dynamic selectedGame;
 //bool needUpdatePlaysFromBgg = false;
 bool simpleIndicatorMode = false;
 
+int firstPlayerWinnersCount = 1;
+
 int defaultPlayersListId = 0;
 int currentPageIndex = 0;
 
