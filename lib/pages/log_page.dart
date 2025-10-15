@@ -579,24 +579,24 @@ class _LogPageState extends State<LogPage> {
               ),
               const Divider(),
               ListTile(
-                title: Row(
+                title: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text("${S.of(context).winnersCountForFirstPlayer}: ",
                         style: TextStyle(
                             color: Theme.of(context).colorScheme.primary)),
-                    Expanded(
-                        child: Slider(
+                    Slider(
                       value: firstPlayerWinnersCount.toDouble(),
                       min: 1,
-                      max: 5,
-                      divisions: 5,
+                      max: 10,
+                      divisions: 10,
                       label: firstPlayerWinnersCount.round().toString(),
                       onChanged: (double value) {
                         setState(() {
                           firstPlayerWinnersCount = value.round();
                         });
                       },
-                    )),
+                    ),
                   ],
                 ),
                 onTap: null,
