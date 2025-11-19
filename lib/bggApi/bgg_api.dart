@@ -20,13 +20,20 @@ import '../globals.dart';
 import 'dart:developer';
 import '../s.dart';
 import 'package:html/parser.dart' as parser;
+import '../bggApi/xml_api_key.dart';
 
 const maxPagesCount = 1000;
+var bearerToken = api_key;
 
 Future<void> importGameCollectionFromBGG(refreshProgress) async {
   await GameThingSQL.createTable();
-  final collectionResponse = await http.get(Uri.parse(
-      'https://boardgamegeek.com/xmlapi2/collection?username=${LoginHandler().login}'));
+  final collectionResponse = await http.get(
+      Uri.parse(
+          'https://boardgamegeek.com/xmlapi2/collection?username=${LoginHandler().login}'),
+      headers: {
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Authorization': 'Bearer $bearerToken',
+      });
 
   if (collectionResponse.statusCode == 200) {
     final rootNode = xml.XmlDocument.parse(collectionResponse.body);
@@ -59,8 +66,12 @@ Future<void> importGameCollectionFromBGG(refreshProgress) async {
 }
 
 Future<Map<String, dynamic>> getBggPlayerName(String username) async {
-  final getPlayerResponse = await http
-      .get(Uri.parse('https://boardgamegeek.com//xmlapi2/user?name=$username'));
+  final getPlayerResponse = await http.get(
+      Uri.parse('https://boardgamegeek.com//xmlapi2/user?name=$username'),
+      headers: {
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Authorization': 'Bearer $bearerToken',
+      });
 
   if (getPlayerResponse.statusCode == 200) {
     final rootNode = xml.XmlDocument.parse(getPlayerResponse.body);
@@ -111,8 +122,12 @@ Future<void> getGamesThumbnail(refreshProgress, dynamic context) async {
 
 Future<String> getGameThumbFromBGG(int gameId) async {
   var client = RetryClient(http.Client(), retries: 5);
-  var gameThingResponse = await client
-      .get(Uri.parse('https://boardgamegeek.com//xmlapi2/things?id=$gameId'));
+  var gameThingResponse = await client.get(
+      Uri.parse('https://boardgamegeek.com//xmlapi2/things?id=$gameId'),
+      headers: {
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Authorization': 'Bearer $bearerToken',
+      });
   client.close();
 
   if (gameThingResponse.statusCode == 200) {
@@ -172,8 +187,13 @@ Future<void> getGamesPlayersCount(refreshProgress, dynamic context) async {
         if (game.minPlayers != 0 && game.maxPlayers != 0) continue;
 
         var client = RetryClient(http.Client(), retries: 5);
-        var gameThingResponse = await client.get(Uri.parse(
-            'https://boardgamegeek.com//xmlapi2/things?id=${game.id}'));
+        var gameThingResponse = await client.get(
+            Uri.parse(
+                'https://boardgamegeek.com//xmlapi2/things?id=${game.id}'),
+            headers: {
+              'Content-Type': 'application/json; charset=UTF-8',
+              'Authorization': 'Bearer $bearerToken',
+            });
         client.close();
 
         if (gameThingResponse.statusCode == 200) {
@@ -215,9 +235,15 @@ Future<bool> getPlaysFromPage(
   List<Location> uniqueLocations = [];
   List<BggPlay> bggPlays = [];
 
+  String sessionCookie = await _getSessionCookie();
   log("getPlaysFromPage. create players, iteration = $pageNumber");
-  final collectionResponse = await http.get(Uri.parse(
-      'https://boardgamegeek.com/xmlapi2/plays?username=${LoginHandler().login}&page=$pageNumber'));
+  final collectionResponse = await http.get(
+      Uri.parse(
+          'https://boardgamegeek.com/xmlapi2/plays?username=${LoginHandler().login}&page=$pageNumber'),
+      headers: {
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Authorization': 'Bearer $bearerToken',
+      });
   final rootNode = xml.XmlDocument.parse(collectionResponse.body);
   if (rootNode.findElements('plays').isEmpty) return false;
   final playsRoot = rootNode.findElements('plays').first;
@@ -811,6 +837,7 @@ Future<List<GameThing>?> searchGamesFromBGG(String searchString) async {
           "https://boardgamegeek.com/xmlapi2/search?query=$searchString&type=boardgame"),
       headers: {
         'Content-Type': 'application/json; charset=UTF-8',
+        'Authorization': 'Bearer $bearerToken',
       });
 
   final rootNode = xml.XmlDocument.parse(response.body);
@@ -847,6 +874,50 @@ Future<List<GameThing>?> searchGamesFromBGG(String searchString) async {
   }
 
   return games;
+}
+
+Future<String> _getSessionCookie() async {
+  dynamic bodyLogin = json.encode({
+    'credentials': {
+      'username': LoginHandler().login,
+      'password': LoginHandler().getDecryptedPassword()
+    }
+  });
+
+  var loginResponse = await http.post(
+    Uri.parse("https://boardgamegeek.com/login/api/v1"),
+    headers: {
+      'Content-Type': 'application/json; charset=UTF-8',
+    },
+    body: bodyLogin,
+  );
+
+  String sessionCookie = '';
+  String cookieValue = '';
+  for (final cookie in loginResponse.headers['set-cookie']!.split(';')) {
+    if (cookie.startsWith('bggusername')) {
+      sessionCookie += '${cookie.isNotEmpty ? ' ' : ''}$cookie;';
+      continue;
+    }
+    var idx = cookie.indexOf('bggpassword=');
+    if (idx != -1) {
+      cookieValue = cookie.substring(idx + 12);
+      if (cookieValue != 'deleted')
+        sessionCookie +=
+            '${cookie.isNotEmpty ? ' ' : ''}bggpassword=$cookieValue;';
+      continue;
+    }
+    idx = cookie.indexOf('SessionID=');
+    if (idx != -1) {
+      cookieValue = cookie.substring(idx + 10);
+      if (cookieValue != 'deleted')
+        sessionCookie +=
+            '${cookie.isNotEmpty ? ' ' : ''}SessionID=$cookieValue;';
+      continue;
+    }
+  }
+
+  return sessionCookie;
 }
 
 Future<bool> checkInternetConnection() async {
