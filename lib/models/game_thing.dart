@@ -119,6 +119,16 @@ class GameThing {
     }
   }
 
+  static bool areEquals(GameThing firstGame, GameThing secondGame) {
+    if (firstGame.id == secondGame.id &&
+        firstGame.name == secondGame.name &&
+        firstGame.thumbnail == secondGame.thumbnail &&
+        firstGame.image == secondGame.image &&
+        firstGame.owned == secondGame.owned &&
+        firstGame.yearpublished == secondGame.yearpublished) return true;
+    return false;
+  }
+
   Map<String, dynamic> toJson() => {
         'id': id,
         'name': name,

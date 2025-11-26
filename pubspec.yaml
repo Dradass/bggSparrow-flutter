@@ -97,6 +97,7 @@ flutter:
     - assets/Splash.png
     - assets/icon.png
     - assets/icon2.png
+    - assets/powered_by_bgg.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

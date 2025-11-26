@@ -41,7 +41,8 @@ Future<void> importGameCollectionFromBGG(refreshProgress) async {
     final items = itemsNode.findElements('item');
     for (final item in items) {
       final objectId = int.parse(item.getAttribute('objectid').toString());
-      if (await GameThingSQL.selectGameByID(objectId) != null) continue;
+      var existedGame = await GameThingSQL.selectGameByID(objectId);
+
       final objectName = item.findElements('name').first.innerText;
       final thumbnail = item.findElements('thumbnail').first.innerText;
       final image = item.findElements('image').first.innerText;
@@ -49,8 +50,6 @@ Future<void> importGameCollectionFromBGG(refreshProgress) async {
           item.findElements('status').first.getAttribute('own').toString());
       var minPlayers = 0;
       var maxPlayers = 0;
-      log("Importing game $objectName");
-      refreshProgress(true, "Importing game $objectName");
 
       GameThing gameThing = GameThing(
           name: objectName,
@@ -60,7 +59,16 @@ Future<void> importGameCollectionFromBGG(refreshProgress) async {
           minPlayers: minPlayers,
           maxPlayers: maxPlayers,
           owned: owned);
-      await GameThingSQL.addGame(gameThing);
+
+      if (existedGame == null) {
+        log("Importing game $objectName");
+        refreshProgress(true, "Importing game $objectName");
+        await GameThingSQL.addGame(gameThing);
+      } else {
+        if (!GameThing.areEquals(existedGame, gameThing)) {
+          // TODO Update game
+        }
+      }
     }
   }
 }

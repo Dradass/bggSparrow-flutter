@@ -73,6 +73,16 @@ class _LoginScreenState extends State<LoginScreen> {
     return Scaffold(
       body: Column(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
         Column(children: [
+          TextButton(
+              onPressed: () {
+                launchUrl(Uri.parse(bggUri));
+              },
+              child: Image.asset(
+                'assets/powered_by_bgg.png',
+                width: 200,
+                height: 100,
+                fit: BoxFit.contain,
+              )),
           Text(
             S.of(context).disclaimerStart,
             textAlign: TextAlign.center,
