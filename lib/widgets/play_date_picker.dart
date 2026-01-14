@@ -10,7 +10,7 @@ class PlayDatePicker extends StatefulWidget {
   }
 
   PlayDatePicker._internal();
-  final playDate = DateTime.now();
+  var playDate = DateTime.now();
 
   @override
   State<PlayDatePicker> createState() => _PlayDatePickerState();
@@ -27,7 +27,7 @@ class _PlayDatePickerState extends State<PlayDatePicker> {
               lastDate: DateTime(3000));
           if (pickedDate != null) {
             setState(() {
-              PlayDatePicker();
+              widget.playDate = pickedDate;
             });
           }
         },
