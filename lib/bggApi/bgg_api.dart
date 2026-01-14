@@ -39,8 +39,11 @@ Future<void> importGameCollectionFromBGG(refreshProgress) async {
     final rootNode = xml.XmlDocument.parse(collectionResponse.body);
     final itemsNode = rootNode.findElements('items').first;
     final items = itemsNode.findElements('item');
+    var localGames = await GameThingSQL.getAllGames();
+    List<int> bggGamesIds = [];
     for (final item in items) {
       final objectId = int.parse(item.getAttribute('objectid').toString());
+      bggGamesIds.add(objectId);
       var existedGame = await GameThingSQL.selectGameByID(objectId);
 
       final objectName = item.findElements('name').first.innerText;
@@ -66,7 +69,18 @@ Future<void> importGameCollectionFromBGG(refreshProgress) async {
         await GameThingSQL.addGame(gameThing);
       } else {
         if (!GameThing.areEquals(existedGame, gameThing)) {
-          // TODO Update game
+          GameThingSQL.updateGame(gameThing);
+        }
+      }
+    }
+    // Deleting games that are not in BGG anymore.
+    if (localGames != null) {
+      var deletedGamesIds =
+          localGames.where((e) => !bggGamesIds.contains(e.id)).toList();
+      if (deletedGamesIds.isNotEmpty) {
+        for (var deletedGameId in deletedGamesIds) {
+          log("Deleting game ${deletedGameId.name}");
+          GameThingSQL.deleteGame(deletedGameId);
         }
       }
     }
