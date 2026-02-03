@@ -563,7 +563,7 @@ Future<void> initializeBggData(
 Future<String> sendLogPlayToBGG(BggPlay bggPlay) async {
   var logData = {
     "playdate": "2024-03-15",
-    "comments": "#bggSparrow",
+    "comments": "#$appName",
     "length": 60,
     "twitter": "false",
     "minutes": 60,

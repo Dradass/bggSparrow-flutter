@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../s.dart';
 import 'package:flutter/services.dart';
+import '../globals.dart';
 
 class Comments extends StatefulWidget {
   static final Comments _singleton = Comments._internal();
@@ -13,7 +14,7 @@ class Comments extends StatefulWidget {
 
   final _focusNode = FocusNode();
   final TextEditingController commentsController =
-      TextEditingController(text: "#bggSparrow");
+      TextEditingController(text: "#$appName");
 
   @override
   State<Comments> createState() => _CommentsState();

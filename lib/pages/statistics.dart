@@ -9,6 +9,7 @@ import '../bggApi/bgg_api.dart';
 import '../db/game_things_sql.dart';
 import '../s.dart';
 import '../widgets/common.dart';
+import '../globals.dart';
 
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
@@ -989,7 +990,7 @@ class _StatisticsState extends State<Statistics> {
       throw Exception("Unsupported platform");
     }
     String baseFileName =
-        "bggSparrow_stats_${dateFormat.format(startDate!)}_${dateFormat.format(endDate!)}";
+        "${appName}_stats_${dateFormat.format(startDate!)}_${dateFormat.format(endDate!)}";
     String fileExtension = ".csv";
 
     int fileIndex = 1;

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+String appName = "bgSparrow";
+
 int loadTimeoutMs = 2500;
 const String bggUri = "https://boardgamegeek.com";
 
