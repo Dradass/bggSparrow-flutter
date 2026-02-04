@@ -36,9 +36,8 @@ class _CalendarPlaysState extends State<CalendarPlays> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (selectedYear == null) {
-      selectedYear = S.of(context).all;
-    }
+
+    selectedYear ??= S.of(context).all;
   }
 
   @override
@@ -239,7 +238,7 @@ class _CalendarPlaysState extends State<CalendarPlays> {
               });
             },
           ),
-          SizedBox(width: 10),
+          const SizedBox(width: 10),
           selectedDate == null
               ? Text(
                   S.of(context).selectTheDate,
@@ -269,7 +268,7 @@ class _CalendarPlaysState extends State<CalendarPlays> {
                           );
                         },
                         child: Column(children: [
-                          Divider(),
+                          const Divider(),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceAround,
                             children: [

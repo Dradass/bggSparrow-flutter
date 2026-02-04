@@ -156,7 +156,7 @@ Future<String> getGameThumbFromBGG(int gameId) async {
     final gameThingServer = GameThing.fromXml(gameThingResponse.body);
     return gameThingServer.thumbnail;
   } else {
-    log("Error getting thumbnail for game ${gameId}");
+    log("Error getting thumbnail for game $gameId");
     return "";
   }
 }
@@ -634,7 +634,6 @@ Future<String> sendLogRequest(String logData) async {
             'cookie': sessionCookie,
           },
           body: logData);
-  print(resp2.body);
   if (resp2.statusCode == 200) {
     try {
       Map<String, dynamic> jsonData = jsonDecode(resp2.body);
