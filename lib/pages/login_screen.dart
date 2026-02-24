@@ -7,6 +7,7 @@ import '../widgets/common.dart';
 import '../s.dart';
 import '../globals.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../db/game_things_sql.dart';
 
 String? errorLoginText;
 String? errorPasswordText;
@@ -29,7 +30,7 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  void checkLoginAndPassword() {
+  void checkLoginAndPassword() async {
     if (loginTextController.text.isEmpty) {
       setState(() {
         errorLoginText = S.of(context).enterYourLogin;
@@ -44,28 +45,31 @@ class _LoginScreenState extends State<LoginScreen> {
       });
       return;
     }
-    checkLoginByRequest(loginTextController.text, passwordTextController.text)
-        .then((isLoginCorrent) => {
-              if (isLoginCorrent)
-                {
-                  setState(() {
-                    errorLoginText = null;
-                    errorPasswordText = null;
-                  }),
-                  TaskChecker().needCancel = false,
-                  Navigator.pushNamed(context, '/navigation'),
-                  showSnackBar(context, S.of(context).welcome),
-                  updateLoginPassword(loginTextController.text,
-                      passwordTextController.text, context)
-                }
-              else
-                {
-                  setState(() {
-                    errorPasswordText =
-                        S.of(context).loginOrPasswordIsIncorrect;
-                  })
-                }
-            });
+
+    var isLoginCorrect = await checkLoginByRequest(
+        loginTextController.text, passwordTextController.text);
+
+    if (isLoginCorrect) {
+      setState(() {
+        errorLoginText = null;
+        errorPasswordText = null;
+      });
+      TaskChecker().needCancel = false;
+      // Clear data for other user.
+      if (LoginHandler().login != loginTextController.text) {
+        TaskChecker().needCancel = true;
+        await GameThingSQL.deleteDB();
+        await GameThingSQL.initTables();
+      }
+      Navigator.pushNamed(context, '/navigation');
+      showSnackBar(context, S.of(context).welcome);
+      updateLoginPassword(
+          loginTextController.text, passwordTextController.text, context);
+    } else {
+      setState(() {
+        errorPasswordText = S.of(context).loginOrPasswordIsIncorrect;
+      });
+    }
   }
 
   @override
