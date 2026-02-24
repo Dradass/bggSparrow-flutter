@@ -23,6 +23,10 @@ class _FirstPlayerChoserState extends State<FirstPlayerChoser>
   bool forceInReleaseMode = true;
   bool enabled = true;
   String? counter;
+
+  final GlobalKey _rowKey = GlobalKey();
+  double? _rowTopPosition;
+
   double baseIndicatorSize = 130; // Базовый размер для пульсации
   bool countInProgress = false;
   bool needToStopCount = false;
@@ -352,17 +356,48 @@ class _FirstPlayerChoserState extends State<FirstPlayerChoser>
 
   @override
   Widget build(BuildContext context) {
-    // Scaffold to get screen touch events
     var child = Scaffold(
       body: SizedBox(
-          width: MediaQuery.of(context).size.width,
-          height: MediaQuery.of(context).size.height,
-          child: FittedBox(
-              child: Text(
-            selectionColor: Colors.tealAccent,
-            counter ?? S.of(context).touchTheScreen,
-            textAlign: TextAlign.center,
-          ))),
+        width: MediaQuery.of(context).size.width,
+        height: MediaQuery.of(context).size.height,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            Expanded(
+              child: FittedBox(
+                fit: BoxFit.contain,
+                child: Text(
+                  selectionColor: Colors.tealAccent,
+                  counter ?? S.of(context).touchTheScreen,
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
+            Row(
+              key: _rowKey,
+              children: [
+                Text("${S.of(context).winnersCountForFirstPlayer}: ",
+                    style: TextStyle(
+                        color: Theme.of(context).colorScheme.primary)),
+                Expanded(
+                  child: Slider(
+                    value: firstPlayerWinnersCount.toDouble(),
+                    min: 1,
+                    max: 10,
+                    divisions: 10,
+                    label: firstPlayerWinnersCount.round().toString(),
+                    onChanged: (double value) {
+                      setState(() {
+                        firstPlayerWinnersCount = value.round();
+                      });
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
     );
 
     if ((kReleaseMode && !forceInReleaseMode) || !enabled) {
@@ -376,6 +411,11 @@ class _FirstPlayerChoserState extends State<FirstPlayerChoser>
 
     return Listener(
       onPointerDown: (opm) {
+        _ensureRowPosition();
+        if (_rowTopPosition != null && opm.position.dy > _rowTopPosition!) {
+          return;
+        }
+
         if (countInProgress) {
           needToStopCount = true;
         }
@@ -396,6 +436,23 @@ class _FirstPlayerChoserState extends State<FirstPlayerChoser>
       },
       child: Stack(children: children),
     );
+  }
+
+  void _ensureRowPosition() {
+    if (_rowTopPosition == null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final RenderBox? renderBox =
+            _rowKey.currentContext?.findRenderObject() as RenderBox?;
+
+        if (renderBox != null) {
+          final Offset position = renderBox.localToGlobal(Offset.zero);
+          setState(() {
+            // Немного сдвигаем позицию, чтобы круг не перекрывал slider.
+            _rowTopPosition = position.dy - (position.dy * 0.03);
+          });
+        }
+      });
+    }
   }
 
   void checkTouchPositions(int firstPositionsCount) async {
