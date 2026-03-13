@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/login_handler.dart';
 import 'package:flutter_application_1/main.dart';
 import 'package:flutter_application_1/models/bgg_location.dart';
 import 'package:flutter_application_1/widgets/players_list.dart';
@@ -323,7 +324,8 @@ class _LogPageState extends State<LogPage> {
             children: [
               const ListTile(title: Text('')),
               ListTile(
-                  title: Text(S.of(context).settings,
+                  title: Text(
+                      "${S.of(context).settings} (${LoginHandler().login})",
                       style: TextStyle(
                           color: Theme.of(context).colorScheme.primary))),
               const Divider(),
