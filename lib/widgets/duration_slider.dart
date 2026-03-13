@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import '../s.dart';
 
 class DurationSliderWidget extends StatefulWidget {
-  static final DurationSliderWidget _singleton =
-      DurationSliderWidget._internal();
+  static DurationSliderWidget? _singleton;
 
   factory DurationSliderWidget() {
-    return _singleton;
+    _singleton ??= DurationSliderWidget._internal();
+    return _singleton!;
   }
 
   DurationSliderWidget._internal();
@@ -18,6 +18,12 @@ class DurationSliderWidget extends StatefulWidget {
 }
 
 class _DurationSliderWidgetState extends State<DurationSliderWidget> {
+  @override
+  void dispose() {
+    DurationSliderWidget._singleton = null;
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(

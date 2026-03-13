@@ -15,7 +15,6 @@ import 'package:package_info_plus/package_info_plus.dart';
 
 late List<CameraDescription> cameras;
 
-bool backgroundLoading = false;
 bool needLogin = true;
 const primaryTextColor = Color.fromARGB(255, 85, 92, 89);
 
@@ -60,6 +59,7 @@ class _MyAppState extends State<MyApp> {
           return Consumer<ThemeManager>(
             builder: (context, themeManager, child) {
               return MaterialApp(
+                navigatorKey: navigatorKey,
                 routes: {
                   '/login': (context) => const LoginScreen(),
                   '/navigation': (context) => const NavigationScreen(),

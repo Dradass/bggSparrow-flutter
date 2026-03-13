@@ -215,10 +215,10 @@ class _LogPageState extends State<LogPage> {
     } catch (e) {
       log('Initialization error: $e');
     } finally {
+      backgroundLoading = false;
       if (mounted) {
         setState(() {
           isProgressBarVisible = false;
-          backgroundLoading = false;
         });
       }
     }
@@ -341,7 +341,8 @@ class _LogPageState extends State<LogPage> {
                   storage.write(key: userNameParamName, value: null);
                   storage.write(key: passwordParamName, value: null);
 
-                  Navigator.pushNamed(context, '/login');
+                  Navigator.pushNamedAndRemoveUntil(
+                      context, '/login', (route) => false);
                 },
               ),
               ListTile(

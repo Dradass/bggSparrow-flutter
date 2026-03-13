@@ -4,10 +4,11 @@ import 'package:flutter/services.dart';
 import '../globals.dart';
 
 class Comments extends StatefulWidget {
-  static final Comments _singleton = Comments._internal();
+  static Comments? _singleton;
 
   factory Comments() {
-    return _singleton;
+    _singleton ??= Comments._internal();
+    return _singleton!;
   }
 
   Comments._internal();
@@ -23,8 +24,9 @@ class Comments extends StatefulWidget {
 class _CommentsState extends State<Comments> {
   @override
   void dispose() {
-    // Clean up the controller when the widget is disposed.
     widget.commentsController.dispose();
+    widget._focusNode.dispose();
+    Comments._singleton = null;
     super.dispose();
   }
 

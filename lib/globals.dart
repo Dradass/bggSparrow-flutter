@@ -16,6 +16,10 @@ const passwordParamName = "password";
 
 String appVersion = "Loading";
 
+bool backgroundLoading = false;
+
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
 final GlobalKey selectGameButtonKey = GlobalKey();
 final GlobalKey recognizeGameButtonKey = GlobalKey();
 final GlobalKey swapSearchModeKey = GlobalKey();

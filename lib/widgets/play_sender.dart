@@ -78,6 +78,13 @@ class PlaySender extends StatefulWidget {
 
 class _PlaySenderState extends State<PlaySender> {
   bool isRequestSending = false;
+
+  @override
+  void dispose() {
+    PlaySender._singleton = null;
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return ElevatedButton.icon(

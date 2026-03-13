@@ -6,10 +6,11 @@ import '../s.dart';
 import '../models/bgg_location.dart';
 
 class LocationPicker extends StatefulWidget {
-  static final LocationPicker _singleton = LocationPicker._internal();
+  static LocationPicker? _singleton;
 
   factory LocationPicker() {
-    return _singleton;
+    _singleton ??= LocationPicker._internal();
+    return _singleton!;
   }
 
   LocationPicker._internal();
@@ -25,6 +26,14 @@ class _LocationPickerState extends State<LocationPicker> {
   Map locationToEdit = {};
   final locationNameController = TextEditingController();
   String? listManageErrorText;
+
+  @override
+  void dispose() {
+    locationNameController.dispose();
+    LocationPicker._singleton = null;
+    super.dispose();
+  }
+
   @override
   void initState() {
     super.initState();

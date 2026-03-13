@@ -28,6 +28,13 @@ class _PlayersPickerState extends State<PlayersPicker> {
   String? _errorText;
   String? createListHelperText;
 
+  @override
+  void dispose() {
+    playerNameController.dispose();
+    PlayersPicker._singleton = null;
+    super.dispose();
+  }
+
   Future<String?> addBggPlayer(String userName, context) async {
     final playerNameInfo = await getBggPlayerName(userName);
     if (playerNameInfo.isNotEmpty) {

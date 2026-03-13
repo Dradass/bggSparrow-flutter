@@ -61,10 +61,19 @@ class _LoginScreenState extends State<LoginScreen> {
         await GameThingSQL.deleteDB();
         await GameThingSQL.initTables();
       }
-      Navigator.pushNamed(context, '/navigation');
-      showSnackBar(context, S.of(context).welcome);
-      updateLoginPassword(
-          loginTextController.text, passwordTextController.text, context);
+      backgroundLoading = false;
+      final username = loginTextController.text;
+      final password = passwordTextController.text;
+      final welcomeMessage = S.of(context).welcome;
+      Navigator.pushNamedAndRemoveUntil(
+          context, '/navigation', (route) => false);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final ctx = navigatorKey.currentContext;
+        if (ctx != null && ctx.mounted) {
+          showSnackBar(ctx, welcomeMessage);
+        }
+      });
+      updateLoginPassword(username, password, context);
     } else {
       setState(() {
         errorPasswordText = S.of(context).loginOrPasswordIsIncorrect;

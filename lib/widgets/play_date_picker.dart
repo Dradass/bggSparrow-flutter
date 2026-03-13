@@ -3,10 +3,11 @@ import 'package:intl/intl.dart';
 import '../s.dart';
 
 class PlayDatePicker extends StatefulWidget {
-  static final PlayDatePicker _singleton = PlayDatePicker._internal();
+  static PlayDatePicker? _singleton;
 
   factory PlayDatePicker() {
-    return _singleton;
+    _singleton ??= PlayDatePicker._internal();
+    return _singleton!;
   }
 
   PlayDatePicker._internal();
@@ -17,6 +18,12 @@ class PlayDatePicker extends StatefulWidget {
 }
 
 class _PlayDatePickerState extends State<PlayDatePicker> {
+  @override
+  void dispose() {
+    PlayDatePicker._singleton = null;
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return ElevatedButton.icon(
