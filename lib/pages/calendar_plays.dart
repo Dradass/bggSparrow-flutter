@@ -287,10 +287,13 @@ class _CalendarPlaysState extends State<CalendarPlays> {
                               SizedBox(
                                   width:
                                       MediaQuery.of(context).size.width * 0.4,
-                                  child: Text(
-                                    play.keys.first.gameName,
-                                    textAlign: TextAlign.center,
-                                  )),
+                                  child: Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 8, vertical: 4),
+                                      child: Text(
+                                        play.keys.first.gameName,
+                                        textAlign: TextAlign.center,
+                                      ))),
                               SizedBox(
                                   width:
                                       MediaQuery.of(context).size.width * 0.35,
