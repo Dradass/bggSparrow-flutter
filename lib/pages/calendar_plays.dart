@@ -177,6 +177,10 @@ class _CalendarPlaysState extends State<CalendarPlays> {
   Widget build(BuildContext context) {
     final yearsList = getYearsList();
     final filteredDates = getFilteredDates();
+    final safeSelectedYear =
+        (selectedYear != null && yearsList.contains(selectedYear))
+            ? selectedYear
+            : (yearsList.isNotEmpty ? yearsList.first : null);
 
     return Column(children: [
       SizedBox(height: MediaQuery.of(context).size.height * 0.025),
@@ -222,7 +226,7 @@ class _CalendarPlaysState extends State<CalendarPlays> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           DropdownButton<String>(
-            value: selectedYear,
+            value: safeSelectedYear,
             items: yearsList.map((String value) {
               return DropdownMenuItem<String>(
                 value: value,
