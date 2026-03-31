@@ -68,14 +68,16 @@ class _LogPageState extends State<LogPage> {
   @override
   void initState() {
     super.initState();
-    getLocalLocationsObj().then((locationsResult) {
-      if (locationsResult.isNotEmpty) {
-        locations = locationsResult;
-      }
-    });
+    _initOnce();
+  }
 
+  Future<void> _initOnce() async {
+    final locationsResult = await getLocalLocationsObj();
+    if (mounted && locationsResult.isNotEmpty) {
+      setState(() => locations = locationsResult);
+    }
     if (!backgroundLoading) {
-      initDataFromServer();
+      await initDataFromServer();
     }
   }
 
