@@ -217,6 +217,7 @@ class _LogPageState extends State<LogPage> {
       locations = await getLocalLocationsObj();
     } catch (e) {
       log('Initialization error: $e');
+      showSnackBar(context, S.of(context).errorWhileLoadingBggData);
     } finally {
       backgroundLoading = false;
       if (mounted) {

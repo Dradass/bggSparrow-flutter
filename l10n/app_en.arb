@@ -39,6 +39,7 @@
   "enterYourLogin": "Enter your login",
   "enterYourPassword": "Enter your password",
   "enterYourComments": "Enter your comments",
+  "errorWhileLoadingBggData": "Error loading data, please restart the app or press 'Load all data' button",
   "enterFriendNameOrNickname": "Enter friend name or nickname",
   "exclude": "Exclude",
   "exportTable": "Export table",
