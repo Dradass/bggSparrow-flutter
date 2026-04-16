@@ -263,15 +263,18 @@ class _GamePickerState extends State<GamePicker> {
                                 if (isSearchOnline) {
                                   var thumbnail =
                                       await getGameThumbFromBGG(gameItem.id);
-                                  GameThing.getBinaryThumb(thumbnail)
-                                      .then((value) {
-                                    if (value != null) {
-                                      setState(() {
-                                        widget.imageWidget =
-                                            Image.memory(base64Decode(value));
-                                      });
-                                    }
-                                  });
+                                  var binaryThumb =
+                                      await GameThing.getBinaryThumb(thumbnail);
+
+                                  if (binaryThumb != null) {
+                                    setState(() {
+                                      widget.imageWidget = Image.memory(
+                                          base64Decode(binaryThumb));
+                                    });
+                                  } else {
+                                    widget.imageWidget =
+                                        Image.asset('assets/no_image.png');
+                                  }
                                 } else {
                                   if (gameItem.thumbBinary != null) {
                                     setState(() {
