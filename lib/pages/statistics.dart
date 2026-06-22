@@ -721,6 +721,29 @@ class _StatisticsState extends State<Statistics> {
         });
   }
 
+  bool isPlayPlayerInList(BggPlayPlayer playPlayer, Map listPlayer) {
+    final listUserId = listPlayer['userid'];
+    if (listUserId == 0 || listUserId == null) {
+      return playPlayer.userid == '0' && playPlayer.name == listPlayer['name'];
+    }
+    return playPlayer.userid == listUserId.toString();
+  }
+
+  bool areAllPlayPlayersInList(
+      List<BggPlayPlayer> playPlayers, List<Map> listPlayers) {
+    if (listPlayers.isEmpty) {
+      return false;
+    }
+    for (final playPlayer in playPlayers) {
+      final inList = listPlayers
+          .any((listPlayer) => isPlayPlayerInList(playPlayer, listPlayer));
+      if (!inList) {
+        return false;
+      }
+    }
+    return true;
+  }
+
   bool gotMatchedPlayers(
     List<BggPlayPlayer> allPlayers,
     List<Map> players,
@@ -779,6 +802,12 @@ class _StatisticsState extends State<Statistics> {
         .where((element) => element['excluded'])
         .toList();
 
+    var currentListPlayers = playersListWrapper.players;
+    if (currentListPlayers.isEmpty) {
+      await playersListWrapper.updatePlayersFromCustomList();
+      currentListPlayers = playersListWrapper.players;
+    }
+
     // Get plays with chosen players
     if (chosenPlayers.isEmpty) {
       for (var allPlay in allPlays) {
@@ -796,6 +825,10 @@ class _StatisticsState extends State<Statistics> {
             gotMatchedPlayers(allPlayersBgg, excludedPlayers);
         if (haveExcludedPlayer) continue;
 
+        if (!areAllPlayPlayersInList(allPlayersBgg, currentListPlayers)) {
+          continue;
+        }
+
         plays.add(allPlay);
       }
     } else {
@@ -811,6 +844,10 @@ class _StatisticsState extends State<Statistics> {
         var haveExcludedPlayer =
             gotMatchedPlayers(allPlayersBgg, excludedPlayers);
         if (haveExcludedPlayer) continue;
+
+        if (!areAllPlayPlayersInList(allPlayersBgg, currentListPlayers)) {
+          continue;
+        }
 
         var chosenMatches = 0;
         var winnerAmongThisPlay = false;
