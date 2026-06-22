@@ -449,7 +449,9 @@ class _StatisticsState extends State<Statistics> {
                           return ElevatedButton.icon(
                             onPressed: () async {
                               plays = await getNewPlays();
+                              if (!mounted) return;
                               setState(() {});
+                              DefaultTabController.of(context2).animateTo(3);
                             },
                             label: Text(
                               S.of(context).firstPlays,
@@ -1006,7 +1008,15 @@ class _StatisticsState extends State<Statistics> {
             !oldPlays.map((e) => e.gameId).contains(element.gameId))
         .toList();
 
-    return (newPlays);
+    newPlays.sort((a, b) {
+      final dateCompare = b.date.compareTo(a.date);
+      if (dateCompare != 0) {
+        return dateCompare;
+      }
+      return b.id.compareTo(a.id);
+    });
+
+    return newPlays;
   }
 
   void exportCSV() async {
