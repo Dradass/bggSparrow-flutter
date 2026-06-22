@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/models/game_thing.dart';
 
 String appName = "bgSparrow";
 
@@ -27,7 +28,7 @@ final GlobalKey progressBarKey = GlobalKey();
 
 Duration requestTimeout = const Duration(seconds: 10);
 int selectedGameId = 0;
-dynamic selectedGame;
+GameThing? selectedGame;
 //bool needUpdatePlaysFromBgg = false;
 bool simpleIndicatorMode = false;
 

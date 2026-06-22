@@ -176,6 +176,43 @@ class _GamePickerState extends State<GamePicker> {
     return bestSimilarGameID;
   }
 
+  Future<GameThing> _persistSelectedGame(
+      GameThing gameItem, String thumbnail, String? binaryThumb) async {
+    final gameToSave = GameThing(
+      name: gameItem.name,
+      id: gameItem.id,
+      thumbnail: thumbnail,
+      image: gameItem.image.isNotEmpty ? gameItem.image : thumbnail,
+      thumbBinary: binaryThumb,
+      minPlayers: gameItem.minPlayers,
+      maxPlayers: gameItem.maxPlayers,
+      owned: gameItem.owned,
+      yearpublished: gameItem.yearpublished,
+    );
+    final existedGame = await GameThingSQL.selectGameByID(gameItem.id);
+    if (existedGame == null) {
+      await GameThingSQL.addGame(gameToSave);
+      return gameToSave;
+    }
+    if (binaryThumb != null &&
+        (existedGame.thumbBinary == null || existedGame.thumbBinary!.isEmpty)) {
+      final updated = GameThing(
+        name: existedGame.name,
+        id: existedGame.id,
+        thumbnail: thumbnail.isNotEmpty ? thumbnail : existedGame.thumbnail,
+        image: existedGame.image.isNotEmpty ? existedGame.image : thumbnail,
+        thumbBinary: binaryThumb,
+        minPlayers: existedGame.minPlayers,
+        maxPlayers: existedGame.maxPlayers,
+        owned: existedGame.owned,
+        yearpublished: existedGame.yearpublished,
+      );
+      await GameThingSQL.updateGame(updated);
+      return updated;
+    }
+    return existedGame;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -258,13 +295,16 @@ class _GamePickerState extends State<GamePicker> {
                                           base64Decode(gameItem.thumbBinary!))
                                       : null),
                               onTap: () async {
-                                var isSearchOnline =
+                                var hasConnection =
                                     await checkInternetConnection();
-                                if (isSearchOnline) {
+                                GameThing selectedGameThing = gameItem;
+                                if (hasConnection) {
                                   var thumbnail =
                                       await getGameThumbFromBGG(gameItem.id);
                                   var binaryThumb =
                                       await GameThing.getBinaryThumb(thumbnail);
+                                  selectedGameThing = await _persistSelectedGame(
+                                      gameItem, thumbnail, binaryThumb);
 
                                   if (binaryThumb != null) {
                                     setState(() {
@@ -287,9 +327,10 @@ class _GamePickerState extends State<GamePicker> {
                                   }
                                 }
                                 setState(() {
-                                  selectedGameId = gameItem.id;
-                                  selectedGame = gameItem;
-                                  searchController.closeView(gameItem.name);
+                                  selectedGameId = selectedGameThing.id;
+                                  selectedGame = selectedGameThing;
+                                  searchController.closeView(
+                                      selectedGameThing.name);
                                   FocusScope.of(context).unfocus();
                                 });
                               }),

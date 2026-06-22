@@ -29,6 +29,18 @@ const fieldOrder = [
   'win'
 ];
 
+Future<String> resolveGameName(int gameId) async {
+  final gameThing = await GameThingSQL.selectGameByID(gameId);
+  if (gameThing != null && gameThing.name.isNotEmpty) {
+    return gameThing.name;
+  }
+  final game = selectedGame;
+  if (game != null && game.id == gameId && game.name.isNotEmpty) {
+    return game.name;
+  }
+  return '';
+}
+
 class PlaySender extends StatefulWidget {
   static PlaySender? _singleton;
 
@@ -147,7 +159,7 @@ class _PlaySenderState extends State<PlaySender> {
                 if (!hasInternetConnection) {
                   showSnackBar(context,
                       S.of(context).resultsAreSavedLocallyAndWillBeSent);
-                  final gameThing = await GameThingSQL.selectGameByID(gameId);
+                  final gameName = await resolveGameName(gameId);
                   final minFreeId = await PlaysSQL.getMinFreeOfflinePlayId();
                   if (minFreeId == null) {
                     return;
@@ -157,7 +169,7 @@ class _PlaySenderState extends State<PlaySender> {
                       id: minFreeId,
                       offline: 1,
                       gameId: gameId,
-                      gameName: gameThing?.name ?? "",
+                      gameName: gameName,
                       date: dateShort,
                       comments: Comments().commentsController.text,
                       location:
@@ -197,13 +209,13 @@ class _PlaySenderState extends State<PlaySender> {
                   }
                 }
 
-                final gameThing = await GameThingSQL.selectGameByID(gameId);
+                final gameName = await resolveGameName(gameId);
 
                 var play = BggPlay(
                     id: playId,
                     offline: isOffline,
                     gameId: gameId,
-                    gameName: gameThing?.name ?? "",
+                    gameName: gameName,
                     date: dateShort,
                     comments: Comments().commentsController.text,
                     location: chosenLocation != null ? chosenLocation.name : "",
